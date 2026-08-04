@@ -1,0 +1,161 @@
+@media (max-width: 1024px) {
+  .workspace {
+    grid-template-columns: 210px minmax(0, 1fr);
+  }
+
+  .workspace-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .workspace {
+    display: block;
+    padding-bottom: 4.75rem;
+  }
+
+  .workspace-sidebar {
+    display: none;
+  }
+
+  .workspace-main {
+    padding-inline: 1rem;
+  }
+
+  .demo-banner {
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+  }
+
+  .page-header,
+  .section-page-heading,
+  .workspace-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .page-header-action {
+    width: 100%;
+  }
+
+  .page-header-action .button,
+  .section-page-heading .secondary-button {
+    width: 100%;
+  }
+
+  .workspace-grid {
+    gap: 0.6rem;
+  }
+
+  .stat-card {
+    min-height: 7rem;
+    padding: 0.8rem;
+  }
+
+  .stat-card > strong {
+    font-size: 1.25rem;
+  }
+
+  .search-filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filter-controls {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 0.6rem 0 0;
+  }
+
+  .filter-controls select {
+    flex: 1;
+  }
+
+  .responsive-table-wrap {
+    display: none;
+  }
+
+  .mobile-record-list {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.6rem;
+  }
+
+  .mobile-record-card {
+    border: 1px solid var(--line);
+    border-radius: 0.55rem;
+    padding: 0.85rem;
+  }
+
+  .mobile-record-card.is-clickable:hover,
+  .mobile-record-card.is-clickable:focus-visible {
+    background: #f8fafc;
+  }
+
+  .mobile-record-heading {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+
+  .mobile-record-heading strong {
+    font-size: 0.8rem;
+  }
+
+  .mobile-record-card dl {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+  }
+
+  .mobile-record-card dl div {
+    min-width: 0;
+  }
+
+  .mobile-record-card dt {
+    color: var(--muted);
+    font-size: 0.62rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .mobile-record-card dd {
+    font-size: 0.72rem;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-workspace-nav {
+    bottom: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    left: 0;
+    min-height: 4.25rem;
+    padding-bottom: env(safe-area-inset-bottom);
+    position: fixed;
+    right: 0;
+    z-index: 30;
+  }
+
+  .mobile-workspace-nav a {
+    align-items: center;
+    color: var(--muted);
+    display: flex;
+    font-size: 0.67rem;
+    font-weight: 700;
+    justify-content: center;
+    min-height: 3rem;
+  }
+
+  .mobile-workspace-nav .mobile-nav-active {
+    color: var(--success);
+  }
+}
