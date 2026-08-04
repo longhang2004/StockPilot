@@ -80,8 +80,11 @@ webhook writes require a deployment signing secret.
 
 For a portfolio deployment, run the Next.js web app on Vercel, the API/job
 runner on Railway, and PostgreSQL on Neon. Set `DATABASE_URL` to the runtime
-role and `MIGRATION_DATABASE_URL` to a migration role, run `prisma migrate
-deploy` during release, then verify `/v1/health/ready` before serving traffic.
+role, `MIGRATION_DATABASE_URL` to a migration role, and `QUEUE_DATABASE_URL` to
+a dedicated pg-boss database role. The queue worker retries integration jobs
+with exponential backoff and routes exhausted jobs to a dead-letter queue. Run
+`prisma migrate deploy` during release, then verify `/v1/health/ready` before
+serving traffic.
 
 ## Demo identities
 

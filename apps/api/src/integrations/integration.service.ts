@@ -16,6 +16,10 @@ import { PrismaService } from '../database/prisma.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { executeIdempotent } from '../idempotency/idempotency.js';
 import { recordAudit } from '../audit/audit-record.js';
+import {
+  JobRunnerService,
+  type IntegrationRetryJob,
+} from '../jobs/job-runner.service.js';
 
 export const MockStorefrontOrderSchema = z.object({
   customer: z.object({
@@ -57,7 +61,12 @@ export class IntegrationService {
     @Inject(ENVIRONMENT) private readonly environment: Environment,
     @Inject(TenantDatabase) private readonly database: TenantDatabase,
     @Inject(PrismaService) private readonly prisma: PrismaService,
-  ) {}
+    @Inject(JobRunnerService) private readonly jobs: JobRunnerService,
+  ) {
+    this.jobs.registerIntegrationRetryHandler((job) =>
+      this.retryQueuedDelivery(job),
+    );
+  }
 
   receiveMockStorefrontOrder(
     headers: WebhookHeaders,
@@ -85,7 +94,16 @@ export class IntegrationService {
           owner.userId,
           headers.deliveryId,
           payload,
-        );
+        ).then((result) => {
+          if (result.status === 'FAILED') {
+            void this.jobs.enqueueIntegrationRetry({
+              actorUserId: owner.userId,
+              deliveryId: headers.deliveryId,
+              organizationId: organization.id,
+            });
+          }
+          return result;
+        });
       });
   }
 
@@ -130,76 +148,105 @@ export class IntegrationService {
             payload: { id },
             responseStatus: 200,
             scope: 'integration:retry',
-            work: async () => {
-              const delivery = await transaction.integrationDelivery.findFirst({
-                where: { id, organizationId },
-              });
-              if (!delivery)
-                throw new NotFoundException('Integration delivery not found.');
-              if (delivery.status === 'SUCCEEDED') {
-                return {
-                  duplicate: true,
-                  orderId: delivery.salesOrderId,
-                  status: delivery.status,
-                };
-              }
-              const payload = MockStorefrontOrderSchema.parse(delivery.payload);
-              await transaction.integrationDelivery.update({
-                data: {
-                  attempts: { increment: 1 },
-                  status: 'PROCESSING',
-                  lastError: null,
-                },
-                where: { id },
-              });
-              try {
-                const order = await this.createDraftOrder(
-                  transaction,
-                  organizationId,
-                  auth.user.id,
-                  payload,
-                );
-                const updated = await transaction.integrationDelivery.update({
-                  data: {
-                    lastError: null,
-                    processedAt: new Date(),
-                    salesOrderId: order.id,
-                    status: 'SUCCEEDED',
-                  },
-                  where: { id },
-                });
-                await recordAudit(transaction, {
-                  action: 'INTEGRATION_RETRIED',
-                  actorUserId: auth.user.id,
-                  after: { orderId: order.id },
-                  entityId: id,
-                  entityType: 'IntegrationDelivery',
-                  organizationId,
-                });
-                return {
-                  duplicate: false,
-                  orderId: order.id,
-                  status: updated.status,
-                };
-              } catch (error) {
-                const message =
-                  error instanceof Error
-                    ? error.message
-                    : 'Integration processing failed.';
-                const updated = await transaction.integrationDelivery.update({
-                  data: { lastError: message.slice(0, 1000), status: 'FAILED' },
-                  where: { id },
-                });
-                return {
-                  duplicate: false,
-                  error: updated.lastError,
-                  status: updated.status,
-                };
-              }
-            },
+            work: () =>
+              this.retryDeliveryTransaction(
+                transaction,
+                organizationId,
+                auth.user.id,
+                id,
+              ),
           }),
       )
       .then((result) => result.body);
+  }
+
+  private async retryQueuedDelivery(job: IntegrationRetryJob): Promise<void> {
+    const result = await this.database.withTenant(
+      { actorId: job.actorUserId, organizationId: job.organizationId },
+      (transaction) =>
+        this.retryDeliveryTransaction(
+          transaction,
+          job.organizationId,
+          job.actorUserId,
+          job.deliveryId,
+        ),
+    );
+    if (result.status === 'FAILED') {
+      throw new Error(result.error ?? 'Integration retry failed.');
+    }
+  }
+
+  private async retryDeliveryTransaction(
+    transaction: Prisma.TransactionClient,
+    organizationId: string,
+    actorUserId: string,
+    id: string,
+  ) {
+    const delivery = await transaction.integrationDelivery.findFirst({
+      where: { id, organizationId },
+    });
+    if (!delivery)
+      throw new NotFoundException('Integration delivery not found.');
+    if (delivery.status === 'SUCCEEDED') {
+      return {
+        duplicate: true,
+        orderId: delivery.salesOrderId,
+        status: delivery.status,
+      } as const;
+    }
+    const payload = MockStorefrontOrderSchema.parse(delivery.payload);
+    await transaction.integrationDelivery.update({
+      data: {
+        attempts: { increment: 1 },
+        lastError: null,
+        status: 'PROCESSING',
+      },
+      where: { id },
+    });
+    try {
+      const order = await this.createDraftOrder(
+        transaction,
+        organizationId,
+        actorUserId,
+        payload,
+      );
+      const updated = await transaction.integrationDelivery.update({
+        data: {
+          lastError: null,
+          processedAt: new Date(),
+          salesOrderId: order.id,
+          status: 'SUCCEEDED',
+        },
+        where: { id },
+      });
+      await recordAudit(transaction, {
+        action: 'INTEGRATION_RETRIED',
+        actorUserId,
+        after: { orderId: order.id },
+        entityId: id,
+        entityType: 'IntegrationDelivery',
+        organizationId,
+      });
+      return {
+        duplicate: false,
+        orderId: order.id,
+        status: updated.status,
+      } as const;
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Integration processing failed.';
+      const updated = await transaction.integrationDelivery.update({
+        data: { lastError: message.slice(0, 1000), status: 'FAILED' },
+        where: { id },
+      });
+      return {
+        duplicate: false,
+        error: updated.lastError,
+        status: updated.status,
+      } as const;
+    }
   }
 
   private processExternalDelivery(

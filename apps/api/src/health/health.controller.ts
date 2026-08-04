@@ -3,12 +3,16 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '../auth/public.decorator.js';
 import { PrismaService } from '../database/prisma.service.js';
+import { JobRunnerService } from '../jobs/job-runner.service.js';
 
 @ApiTags('health')
 @Public()
 @Controller('health')
 export class HealthController {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(JobRunnerService) private readonly jobs: JobRunnerService,
+  ) {}
 
   @Get('live')
   @ApiOkResponse({ description: 'The API process is running.' })
@@ -27,7 +31,7 @@ export class HealthController {
       return {
         checks: {
           database: 'ok' as const,
-          queue: 'not_configured' as const,
+          queue: this.jobs.queueStatus(),
         },
         status: 'ready' as const,
       };
@@ -35,7 +39,7 @@ export class HealthController {
       return {
         checks: {
           database: 'unavailable' as const,
-          queue: 'not_configured' as const,
+          queue: this.jobs.queueStatus(),
         },
         status: 'degraded' as const,
       };

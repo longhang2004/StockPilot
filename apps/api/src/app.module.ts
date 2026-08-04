@@ -9,6 +9,7 @@ import { HealthController } from './health/health.controller.js';
 import { InventoryModule } from './inventory/inventory.module.js';
 import { IntegrationModule } from './integrations/integration.module.js';
 import { DatabaseModule } from './database/database.module.js';
+import { JobsModule } from './jobs/jobs.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 
 @Module({
@@ -22,6 +23,7 @@ import { OrdersModule } from './orders/orders.module.js';
     DemoModule,
     InventoryModule,
     IntegrationModule,
+    JobsModule,
     OrdersModule,
   ],
 })

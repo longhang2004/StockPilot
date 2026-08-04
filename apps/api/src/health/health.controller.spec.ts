@@ -12,6 +12,11 @@ describe('HealthController', () => {
             .PrismaService,
           useValue: { $queryRaw: vi.fn() },
         },
+        {
+          provide: (await import('../jobs/job-runner.service.js'))
+            .JobRunnerService,
+          useValue: { queueStatus: vi.fn().mockReturnValue('not_configured') },
+        },
       ],
     }).compile();
 
@@ -33,6 +38,11 @@ describe('HealthController', () => {
           provide: (await import('../database/prisma.service.js'))
             .PrismaService,
           useValue: prisma,
+        },
+        {
+          provide: (await import('../jobs/job-runner.service.js'))
+            .JobRunnerService,
+          useValue: { queueStatus: vi.fn().mockReturnValue('not_configured') },
         },
       ],
     }).compile();
