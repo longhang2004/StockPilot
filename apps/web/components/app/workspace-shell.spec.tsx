@@ -1,8 +1,13 @@
-import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('WorkspaceShell', () => {
   beforeEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  afterEach(() => {
+    cleanup();
     vi.unstubAllGlobals();
   });
 
@@ -27,13 +32,14 @@ describe('WorkspaceShell', () => {
     );
     const { WorkspaceShell } = await import('./workspace-shell');
 
-    render(<WorkspaceShell />);
+    const view = render(<WorkspaceShell />);
 
     expect(await screen.findByText('Morgan Manager')).toBeVisible();
     expect(screen.getByText('Manager')).toBeVisible();
     expect(
       screen.getByRole('heading', { name: /operations overview/i }),
     ).toBeVisible();
+    view.unmount();
   });
 
   it('offers a clear return path when the session has expired', async () => {
@@ -43,7 +49,7 @@ describe('WorkspaceShell', () => {
     );
     const { WorkspaceShell } = await import('./workspace-shell');
 
-    render(<WorkspaceShell />);
+    const view = render(<WorkspaceShell />);
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       /session has expired/i,
@@ -51,5 +57,6 @@ describe('WorkspaceShell', () => {
     expect(
       screen.getByRole('link', { name: /return to demo login/i }),
     ).toHaveAttribute('href', '/login');
+    view.unmount();
   });
 });

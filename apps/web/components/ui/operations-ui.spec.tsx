@@ -1,7 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 describe('operations UI primitives', () => {
+  afterEach(() => cleanup());
+
   it('returns focus to the trigger after closing a drawer with Escape', async () => {
     const { Drawer } = await import('./operations-ui');
     function Fixture() {
