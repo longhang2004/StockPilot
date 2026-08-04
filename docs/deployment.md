@@ -39,15 +39,19 @@ Custom domains and Sentry are optional follow-up work.
   separate worker service is needed. A queue-enabled profile can opt in to the
   worker for a short acceptance run, but it is not suitable as an always-on
   Neon Free deployment.
-- Keep Render automatic deploys disabled. The
+- Render auto-deploys commits on `main`. The
   [Render deploy workflow](../.github/workflows/deploy-render.yml) runs Prisma
-  migrations and the idempotent seed against Neon, then calls a Render Deploy
-  Hook. This preserves migration ordering because Render Free does not provide
-  the paid-service pre-deploy command.
+  migrations and the idempotent seed against Neon; Render then builds the same
+  commit. A Deploy Hook is optional for teams that want an explicit rollout
+  trigger after the migration gate. Render Free does not provide the paid
+  service pre-deploy command.
 - Set the Render health check to `/v1/health/ready`, generate a public
   `onrender.com` domain, and use that URL as Vercel's `API_INTERNAL_URL`.
 - Add the `sync: false` variables from the Blueprint in Render's dashboard.
   Keep generated secrets in Render's secret store; never commit or print them.
+- `DATABASE_URL` must be the raw PostgreSQL connection URL only. Do not paste a
+  complete `.env` snippet, comments, or a second `DATABASE_URL=` wrapper into
+  the Render field.
 
 #### Render and UptimeRobot demo policy
 
@@ -112,10 +116,10 @@ Custom domains and Sentry are optional follow-up work.
 These values are used only by `.github/workflows/deploy-render.yml` and are
 never copied into the Render runtime:
 
-| Secret                   | Purpose                                                            |
-| ------------------------ | ------------------------------------------------------------------ |
-| `MIGRATION_DATABASE_URL` | Direct Neon owner/migration URL for Prisma migrations and seed.    |
-| `RENDER_DEPLOY_HOOK_URL` | Render Deploy Hook URL; the workflow appends the exact commit SHA. |
+| Secret                   | Purpose                                                                 |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `MIGRATION_DATABASE_URL` | Direct Neon owner/migration URL for Prisma migrations and seed.         |
+| `RENDER_DEPLOY_HOOK_URL` | Optional Deploy Hook URL for an explicit rollout; omit for auto-deploy. |
 
 ## First deployment order
 
@@ -126,18 +130,21 @@ never copied into the Render runtime:
    short queue-enabled acceptance run. The deploy workflow owns the first
    migration and seed, so do not run them twice.
 3. Create the Render Blueprint from `main`, fill the `sync: false` variables,
-   create a Deploy Hook, and add `MIGRATION_DATABASE_URL` and
-   `RENDER_DEPLOY_HOOK_URL` as GitHub repository secrets.
+   and add `MIGRATION_DATABASE_URL` as a GitHub repository secret. If an
+   explicit rollout gate is desired, also create a Deploy Hook and add its URL
+   as the optional `RENDER_DEPLOY_HOOK_URL` secret.
 4. Merge or push a commit to `main` after CI is green. The
    [`deploy-render.yml`](../.github/workflows/deploy-render.yml) workflow then
-   applies migrations, seeds the canonical fixture, and deploys the API after
-   the successful CI run; it is not a manually dispatched workflow.
+   applies migrations and seeds the canonical fixture. Render's `main` branch
+   auto-deploy builds the API; if the optional hook secret is set, the workflow
+   can trigger the matching commit explicitly.
 5. Set Render's public URL as Vercel `API_INTERNAL_URL` and redeploy Vercel.
 6. Configure the live UptimeRobot monitor (and the optional readiness monitor
    only if its Neon CU cost is acceptable), then run the smoke checklist below
    from the demo origin.
-7. Keep Render auto-deploy disabled; require CI on `main`, block force-pushes
-   and branch deletion, and keep the default branch as `main`.
+7. Keep CI required on `main`, block force-pushes and branch deletion, and keep
+   the default branch as `main`. Leave Render auto-deploy enabled for the normal
+   free-demo path.
 
 The selected Render Free, Neon Free, Vercel Hobby, and UptimeRobot Free path
 does not require a billing upgrade. Do not paste the migration URL or deploy
@@ -147,7 +154,9 @@ hook into source code or chat.
 
 1. Merge a reviewed change to protected `main` after CI is green.
 2. GitHub Actions runs `prisma migrate deploy` followed by the idempotent seed
-   against Neon, then calls the Render Deploy Hook for the same commit.
+   against Neon. Render auto-deploys the same `main` commit; when
+   `RENDER_DEPLOY_HOOK_URL` is configured, the workflow may trigger that hook
+   after the migration gate as an explicit rollout.
 3. Confirm readiness (`queue:not_configured` is expected on the free profile)
    and the Render release log. If the opt-in queue profile is enabled, also
    confirm pg-boss scheduling. Vercel then builds the web project from the same
@@ -157,9 +166,11 @@ hook into source code or chat.
 
 ## Migration failure, rollback, and restore
 
-- A failed GitHub migration/seed job does not call the Render Deploy Hook. Read
-  the failed migration log and fix it in a reviewed migration; never mark
-  `_prisma_migrations` manually.
+- Read a failed GitHub migration/seed log and fix it in a reviewed migration;
+  never mark `_prisma_migrations` manually. If Render auto-deployed the commit
+  before the CI gate failed, cancel or roll back that deployment before
+  retrying. An optional Deploy Hook is only called after the migration/seed
+  commands succeed.
 - For an application regression, redeploy the previous known-good commit via
   Render and Vercel. Do not roll back a schema migration unless the migration
   explicitly includes a safe backwards-compatible down path.

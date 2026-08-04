@@ -22,8 +22,9 @@ unset (`QUEUE_REQUIRED=false`) so an always-on polling worker does not consume
 Neon Free compute hours. Manual integration retries remain synchronous; the
 automatic retry and scheduled reconciliation jobs are enabled only for a short
 queue-enabled acceptance run. The free-tier deployment uses a GitHub Actions
-migration/seed job before a Render deploy hook because Render Free does not
-provide the paid-service pre-deploy command.
+migration/seed gate while Render auto-deploys commits on `main`; an optional
+Render deploy hook can be used for an explicit rollout because Render Free does
+not provide the paid-service pre-deploy command.
 
 Every tenant mutation follows the same shape:
 

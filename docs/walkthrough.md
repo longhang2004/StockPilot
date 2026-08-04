@@ -1,10 +1,10 @@
 # StockPilot two-minute walkthrough
 
-Use the canonical Vercel production origin once provider provisioning is
-approved. The URL is deliberately not fabricated here: update the first line
-below and the README after the first successful deployment.
+Use the canonical Vercel production origin for the public walkthrough.
 
-**Production URL:** _pending Vercel project creation_
+**Production URL:** <https://stock-pilot-web-five.vercel.app>
+
+**API docs:** <https://stockpilot-api-y1aw.onrender.com/docs>
 
 The walkthrough is designed to show the product value before explaining the
 architecture. Use the 1440px desktop viewport for the first pass and the 375px

@@ -6,15 +6,13 @@ StockPilot is a multi-tenant inventory and B2B order operations SaaS for small
 wholesale teams. It gives an operations manager one calm work queue for
 receiving stock, preventing overselling, and fulfilling customer orders.
 
-**Live demo:** provider provisioning is the remaining external step. The
-production-shaped topology and demo release runbook are ready;
-Vercel/Render/Neon OAuth requires the account owner's approval. The selected
-demo path uses free tiers and does not require paid hosting. Once deployed, put the
-canonical Vercel URL here and in [`docs/walkthrough.md`](docs/walkthrough.md).
+**Live demo:** [StockPilot on Vercel](https://stock-pilot-web-five.vercel.app)
+(Vercel Hobby + Render Free + Neon Free; no paid upgrade is required).
 
-**API docs:** the production `/docs` and `/openapi.json` links are added beside
-the live URL after the first Render deployment; the local API docs are
-available at `http://localhost:4000/docs`.
+**API docs:** [Swagger UI](https://stockpilot-api-y1aw.onrender.com/docs) ·
+[OpenAPI JSON](https://stockpilot-api-y1aw.onrender.com/openapi.json). The same
+API is available through the Vercel `/api` proxy used by the browser. Local API
+docs are available at `http://localhost:4000/docs`.
 
 ## Why this project
 
@@ -170,18 +168,18 @@ The version-controlled infrastructure is ready:
   default free-demo profile sets `QUEUE_REQUIRED=false` and intentionally omits
   `QUEUE_DATABASE_URL` to avoid exhausting Neon Free compute hours.
 - [`.github/workflows/deploy-render.yml`](.github/workflows/deploy-render.yml)
-  runs migration plus the idempotent seed from CI, then triggers Render through
-  a deploy hook. This keeps Render Free's paid-only pre-deploy feature out of
-  the deployment path.
+  runs migration plus the idempotent seed from CI. Render auto-deploys commits
+  on `main`; an optional deploy hook can be configured when an explicit rollout
+  gate is preferred.
 - [`apps/web/vercel.json`](apps/web/vercel.json) configures the Next.js workspace
   build.
 - [`infra/postgres/provision-production.sql`](infra/postgres/provision-production.sql)
   creates parameterized Neon runtime/queue roles and emits RLS verification
   queries.
 
-Creating the provider projects and authorizing GitHub/Vercel/Render/Neon are
-intentionally not automated from this repository. The chosen Render Free +
-Neon Free path does not require a billing upgrade. After those approval
-boundaries, follow the first-deployment sequence in
-[`docs/deployment.md`](docs/deployment.md), capture stable Overview/Orders/
-Inventory/receipt screenshots, and add their paths to the walkthrough.
+The provider projects are already provisioned on the free Vercel Hobby + Render
+Free + Neon Free path, with UptimeRobot keeping the Render process warm during
+ordinary demo hours. Follow the release and recovery procedures in
+[`docs/deployment.md`](docs/deployment.md), then use the canonical walkthrough
+in [`docs/walkthrough.md`](docs/walkthrough.md). Free services can still sleep
+or scale Neon to zero; this is a portfolio demo, not an availability SLA.

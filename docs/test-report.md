@@ -33,11 +33,18 @@ domain threshold.
 - The API binds to `0.0.0.0:$PORT`, enables Nest shutdown hooks, stops pg-boss,
   and disconnects Prisma on SIGTERM.
 
-The live provider smoke URL and CI run identifier will be appended after the
-Vercel/Render/Neon approval boundary is completed. Until then, the repository
-CI workflow remains the authoritative clean-environment gate. On `main`, the
-Render deploy workflow runs migrations and the idempotent seed before calling
-the Render deploy hook.
+The live provider smoke run is available at the [Vercel production
+origin](https://stock-pilot-web-five.vercel.app), with API checks at
+[Render readiness](https://stockpilot-api-y1aw.onrender.com/v1/health/ready),
+[Swagger UI](https://stockpilot-api-y1aw.onrender.com/docs), and
+[OpenAPI JSON](https://stockpilot-api-y1aw.onrender.com/openapi.json). The
+`main` CI verification run for commit `1008712` is
+[GitHub Actions run 30921081086](https://github.com/longhang2004/StockPilot/actions/runs/30921081086)
+and is green. The same commit is live on Render; readiness returns `200` with
+`database:ok` and the expected free-profile `queue:not_configured` check. The
+Vercel `/api/v1/health/ready` proxy also returns `200`. Render auto-deploys
+`main`; the deployment workflow runs migration and idempotent seed, while an
+optional deploy hook can be enabled for an explicit rollout.
 
 The free demo tier intentionally permits wake-up latency: Render Free may spin
 down after inactivity, and Neon Free may suspend compute after five minutes.

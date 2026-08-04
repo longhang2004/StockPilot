@@ -80,8 +80,9 @@ demo session.
 
 For a migration failure, do not manually mark `_prisma_migrations` complete.
 Read the failed migration log, fix the migration or database state in a
-reviewed change, then rerun the migration/seed workflow. The Render deploy hook
-is only called after those commands succeed.
+reviewed change, then rerun the migration/seed workflow. If Render auto-deployed
+the commit before the gate failed, cancel or roll it back before retrying. An
+optional Render deploy hook is only called after those commands succeed.
 
 ## Secret rotation
 

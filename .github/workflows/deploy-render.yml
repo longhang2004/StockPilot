@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   migrate-and-deploy:
-    name: Migrate Neon and trigger Render
+    name: Migrate Neon and optionally trigger Render
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main'
@@ -40,7 +40,7 @@ jobs:
             echo "render_deploy_enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "render_deploy_enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Render hook skipped: deploy the service manually or configure RENDER_DEPLOY_HOOK_URL."
+            echo "Render hook skipped: the Render main-branch auto-deploy remains enabled."
           fi
 
       - name: Normalize migration database URL
