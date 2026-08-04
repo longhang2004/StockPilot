@@ -99,21 +99,27 @@ export async function seedDemoIdentity(
     return;
   }
 
-  await prisma.$transaction(async (transaction) => {
-    const seeded = await seedDemoFixture(transaction, {
-      managerUserId,
-      organizationId: organization.id,
-      ownerUserId,
-      staffUserId,
-      warehouseId: warehouse.id,
-    });
-    if (seeded) {
-      await transaction.organization.update({
-        data: { nextDemoResetAt: nextDemoResetAt() },
-        where: { id: organization.id },
+  await prisma.$transaction(
+    async (transaction) => {
+      const seeded = await seedDemoFixture(transaction, {
+        managerUserId,
+        organizationId: organization.id,
+        ownerUserId,
+        staffUserId,
+        warehouseId: warehouse.id,
       });
-    }
-  });
+      if (seeded) {
+        await transaction.organization.update({
+          data: { nextDemoResetAt: nextDemoResetAt() },
+          where: { id: organization.id },
+        });
+      }
+    },
+    // The canonical fixture performs many ledger writes and Neon adds network
+    // latency to each round trip. Keep the all-or-nothing transaction intact
+    // while allowing a first deploy to complete reliably.
+    { maxWait: 15_000, timeout: 60_000 },
+  );
 }
 
 async function main(): Promise<void> {
