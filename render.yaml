@@ -5,7 +5,7 @@ services:
     plan: free
     region: singapore
     branch: main
-    autoDeployTrigger: 'off'
+    autoDeployTrigger: 'commit'
     rootDir: .
     dockerfilePath: ./apps/api/Dockerfile
     dockerContext: .
