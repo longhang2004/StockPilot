@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 describe('demo identity seed', () => {
   const databaseUrl =
+    process.env.MIGRATION_DATABASE_URL ??
     'postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot';
   const slug = `seed-test-${randomUUID()}`;
   let admin: Awaited<ReturnType<typeof createAdminClient>>;
