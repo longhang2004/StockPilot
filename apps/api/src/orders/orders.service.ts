@@ -15,9 +15,9 @@ import type { Prisma } from '../generated/prisma/client.js';
 import { executeIdempotent } from '../idempotency/idempotency.js';
 import {
   InventoryInvariantError,
-  lowStockTransition,
   projectInventory,
 } from '../inventory/inventory-projection.js';
+import { InventoryReconciliationService } from '../inventory/inventory-reconciliation.service.js';
 import {
   canTransition,
   invalidTransitionMessage,
@@ -34,6 +34,8 @@ export interface OrderListQuery {
 export class OrdersService {
   constructor(
     @Inject(TenantDatabase) private readonly database: TenantDatabase,
+    @Inject(InventoryReconciliationService)
+    private readonly reconciliation: InventoryReconciliationService,
   ) {}
 
   create(auth: AuthContext, input: SalesOrderInput) {
@@ -203,6 +205,11 @@ export class OrdersService {
           action: 'ORDER_UPDATED',
           actorUserId: auth.user.id,
           after: { orderId: id, subtotal: replacement.subtotal.toFixed(2) },
+          before: {
+            orderId: existing.id,
+            status: existing.status,
+            subtotal: existing.subtotal.toFixed(2),
+          },
           entityId: id,
           entityType: 'SalesOrder',
           organizationId,
@@ -284,6 +291,13 @@ export class OrdersService {
           },
           where: { id: balance.id },
         });
+        await this.reconciliation.reconcileBalance(transaction, {
+          available: balance.onHand - balance.reserved - line.quantity,
+          organizationId: order.organizationId,
+          productId: line.productId,
+          reorderPoint: balance.reorderPoint,
+          warehouseId: order.warehouseId,
+        });
       }
     }
     if (to === 'FULFILLED') {
@@ -313,6 +327,13 @@ export class OrdersService {
             version: { increment: 1 },
           },
           where: { id: balance.id },
+        });
+        await this.reconciliation.reconcileBalance(transaction, {
+          available: next.available,
+          organizationId: order.organizationId,
+          productId: line.productId,
+          reorderPoint: balance.reorderPoint,
+          warehouseId: order.warehouseId,
         });
         await transaction.stockMovement.create({
           data: {
@@ -350,14 +371,13 @@ export class OrdersService {
           data: { reserved: next.reserved, version: { increment: 1 } },
           where: { id: balance.id },
         });
-        await this.resolveAlertIfRecovered(
-          transaction,
-          order.organizationId,
-          order.warehouseId,
-          line.productId,
-          balance.onHand - balance.reserved,
-          next.available,
-        );
+        await this.reconciliation.reconcileBalance(transaction, {
+          available: next.available,
+          organizationId: order.organizationId,
+          productId: line.productId,
+          reorderPoint: balance.reorderPoint,
+          warehouseId: order.warehouseId,
+        });
       }
     }
 
@@ -383,6 +403,7 @@ export class OrdersService {
       action: `ORDER_${to}`,
       actorUserId: auth.user.id,
       after: { fromStatus: current.status, toStatus: to },
+      before: { status: current.status },
       entityId: order.id,
       entityType: 'SalesOrder',
       organizationId: order.organizationId,
@@ -442,14 +463,22 @@ export class OrdersService {
     productId: string,
   ) {
     const rows = await transaction.$queryRaw<
-      Array<{ id: string; on_hand: number; reserved: number }>
+      Array<{
+        id: string;
+        on_hand: number;
+        reserved: number;
+        reorder_point: number;
+      }>
     >`
-      SELECT "id", "on_hand", "reserved"
-      FROM "inventory_balances"
-      WHERE "organization_id" = ${organizationId}::uuid
-        AND "warehouse_id" = ${warehouseId}::uuid
-        AND "product_id" = ${productId}::uuid
-      FOR UPDATE
+      SELECT ib."id", ib."on_hand", ib."reserved", p."reorder_point"
+      FROM "inventory_balances" ib
+      INNER JOIN "products" p
+        ON p."organization_id" = ib."organization_id"
+       AND p."id" = ib."product_id"
+      WHERE ib."organization_id" = ${organizationId}::uuid
+        AND ib."warehouse_id" = ${warehouseId}::uuid
+        AND ib."product_id" = ${productId}::uuid
+      FOR UPDATE OF ib
     `;
     const row = rows[0];
     if (!row) {
@@ -457,34 +486,12 @@ export class OrdersService {
         'No inventory balance exists for this product.',
       );
     }
-    return { id: row.id, onHand: row.on_hand, reserved: row.reserved };
-  }
-
-  private async resolveAlertIfRecovered(
-    transaction: Prisma.TransactionClient,
-    organizationId: string,
-    warehouseId: string,
-    productId: string,
-    previousAvailable: number,
-    nextAvailable: number,
-  ) {
-    const alert = await transaction.lowStockAlert.findFirst({
-      select: { id: true, reorderPoint: true },
-      where: { organizationId, productId, status: 'OPEN', warehouseId },
-    });
-    if (
-      alert &&
-      lowStockTransition(
-        previousAvailable,
-        nextAvailable,
-        alert.reorderPoint,
-      ) === 'RESOLVE'
-    ) {
-      await transaction.lowStockAlert.update({
-        data: { resolvedAt: new Date(), status: 'RESOLVED' },
-        where: { id: alert.id },
-      });
-    }
+    return {
+      id: row.id,
+      onHand: row.on_hand,
+      reorderPoint: row.reorder_point,
+      reserved: row.reserved,
+    };
   }
 
   private findDetail(

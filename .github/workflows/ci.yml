@@ -44,8 +44,13 @@ jobs:
       - run: psql "$MIGRATION_DATABASE_URL" -f infra/postgres/init.sql
       - run: pnpm db:generate
       - run: pnpm --filter @stockpilot/api exec prisma migrate deploy
+      - run: pnpm db:seed
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
+      - run: pnpm typecheck:e2e
+      - run: pnpm test:unit
+      - run: pnpm --filter @stockpilot/api test:integration
+      - run: pnpm --filter @stockpilot/api test:unit:coverage
       - run: pnpm build
+      - run: pnpm test:e2e

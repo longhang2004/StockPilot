@@ -5,6 +5,8 @@ import helmet from 'helmet';
 
 import { parseEnvironment } from './config/environment.js';
 import { ProblemDetailsFilter } from './problem-details.filter.js';
+import { RequestLoggingInterceptor } from './observability/request-logging.interceptor.js';
+import { SentryReporter } from './observability/sentry-reporter.js';
 
 export function configureApplication(app: INestApplication): void {
   const environment = parseEnvironment(process.env);
@@ -16,7 +18,8 @@ export function configureApplication(app: INestApplication): void {
     credentials: true,
     origin: environment.WEB_ORIGIN,
   });
-  app.useGlobalFilters(new ProblemDetailsFilter());
+  app.useGlobalFilters(new ProblemDetailsFilter(app.get(SentryReporter)));
+  app.useGlobalInterceptors(app.get(RequestLoggingInterceptor));
 
   const openApiConfig = new DocumentBuilder()
     .setTitle('StockPilot API')

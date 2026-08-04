@@ -8,13 +8,15 @@
 
 ## Trust boundaries
 
-| Boundary         | Control                                                              |
-| ---------------- | -------------------------------------------------------------------- |
-| Browser → API    | Same-origin proxy, HttpOnly cookie, Origin check, CSRF token         |
-| API → database   | Runtime role has `NOBYPASSRLS`; every tenant table uses forced RLS   |
-| Storefront → API | HMAC signature, delivery idempotency, explicit organization slug     |
-| Role → mutation  | Permission guard separates Staff, Manager, and Owner actions         |
-| Ledger → UI      | Database checks plus compensating movements; no update/delete grants |
+| Boundary         | Control                                                                  |
+| ---------------- | ------------------------------------------------------------------------ |
+| Browser → API    | Same-origin proxy, HttpOnly cookie, Origin check, CSRF token             |
+| API → database   | Runtime role has `NOBYPASSRLS`; every tenant table uses forced RLS       |
+| Storefront → API | HMAC signature, delivery idempotency, explicit organization slug         |
+| Role → mutation  | Permission guard separates Staff, Manager, and Owner actions             |
+| Ledger → UI      | Database checks plus compensating movements; no update/delete grants     |
+| Logs → operators | Structured request logs with recursive secret redaction; optional Sentry |
+| Browser → assets | CSP, `X-Content-Type-Options`, frame denial, and referrer policy         |
 
 ## Important abuse cases
 
@@ -31,5 +33,8 @@
   organizations only.
 
 Secrets are read from environment variables, never returned in problem details
-or audit payloads. Production deployments should add a managed secret store,
-centralized structured logs, and Sentry DSN configuration.
+or audit payloads. The Next.js response also sets a restrictive CSP and
+security headers. Production deployments should add a managed secret store,
+centralized log retention controls, rate-limit monitoring, and Sentry DSN
+configuration. Mobile and desktop clients use the same tenant-aware API, so
+responsive presentation does not create a second authorization surface.

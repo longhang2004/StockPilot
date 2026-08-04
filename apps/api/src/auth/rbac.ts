@@ -14,6 +14,7 @@ export type Permission =
   | 'order:fulfill'
   | 'order:read'
   | 'organization:reset-demo'
+  | 'organization:settings:read'
   | 'organization:settings:write'
   | 'team:read';
 
@@ -39,6 +40,7 @@ const managerPermissions = new Set<Permission>([
 const ownerPermissions = new Set<Permission>([
   ...managerPermissions,
   'organization:reset-demo',
+  'organization:settings:read',
   'organization:settings:write',
   'team:read',
 ]);

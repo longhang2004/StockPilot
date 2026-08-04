@@ -29,4 +29,20 @@ describe('inventory projection', () => {
     expect(lowStockTransition(12, 20, 16)).toBe('RESOLVE');
     expect(lowStockTransition(20, 18, 16)).toBe('NONE');
   });
+
+  it('opens an alert during reconciliation when a balance starts at or below the threshold', async () => {
+    const { reconcileLowStockTransition } =
+      await import('./inventory-projection.js');
+
+    expect(reconcileLowStockTransition(0, 10, false)).toBe('OPEN');
+    expect(reconcileLowStockTransition(5, 10, false)).toBe('OPEN');
+    expect(reconcileLowStockTransition(5, 10, true)).toBe('NONE');
+  });
+
+  it('resolves an open alert as soon as available stock recovers', async () => {
+    const { reconcileLowStockTransition } =
+      await import('./inventory-projection.js');
+
+    expect(reconcileLowStockTransition(11, 10, true)).toBe('RESOLVE');
+  });
 });

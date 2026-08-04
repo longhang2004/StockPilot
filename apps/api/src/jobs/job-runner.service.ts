@@ -13,6 +13,7 @@ import type { Environment } from '../config/environment.js';
 export const INTEGRATION_RETRY_QUEUE = 'stockpilot.integration.retry';
 export const INTEGRATION_DEAD_LETTER_QUEUE =
   'stockpilot.integration.dead-letter';
+export const INVENTORY_RECONCILE_QUEUE = 'stockpilot.inventory.reconcile';
 
 export interface IntegrationRetryJob {
   actorUserId: string;
@@ -21,12 +22,14 @@ export interface IntegrationRetryJob {
 }
 
 type IntegrationRetryHandler = (job: IntegrationRetryJob) => Promise<void>;
+type InventoryReconcileHandler = () => Promise<void>;
 
 @Injectable()
 export class JobRunnerService implements OnModuleDestroy, OnModuleInit {
   private readonly logger = new Logger(JobRunnerService.name);
   private boss: PgBoss | null = null;
   private handler: IntegrationRetryHandler | null = null;
+  private inventoryReconcileHandler: InventoryReconcileHandler | null = null;
 
   constructor(@Inject(ENVIRONMENT) private readonly environment: Environment) {}
 
@@ -45,6 +48,13 @@ export class JobRunnerService implements OnModuleDestroy, OnModuleInit {
       retryDelay: 30,
       retryLimit: 5,
     });
+    await this.boss.createQueue(INVENTORY_RECONCILE_QUEUE, {
+      deadLetter: INTEGRATION_DEAD_LETTER_QUEUE,
+      deleteAfterSeconds: 24 * 60 * 60,
+      retryBackoff: true,
+      retryDelay: 60,
+      retryLimit: 5,
+    });
     await this.boss.work<IntegrationRetryJob>(
       INTEGRATION_RETRY_QUEUE,
       async (jobs: Job<IntegrationRetryJob>[]) => {
@@ -56,6 +66,25 @@ export class JobRunnerService implements OnModuleDestroy, OnModuleInit {
         }
       },
     );
+    await this.boss.work<Record<string, never>>(
+      INVENTORY_RECONCILE_QUEUE,
+      async (jobs: Job<Record<string, never>>[]) => {
+        if (!this.inventoryReconcileHandler) {
+          throw new Error(
+            'Inventory reconciliation handler is not registered.',
+          );
+        }
+        for (const _job of jobs) {
+          await this.inventoryReconcileHandler();
+        }
+      },
+    );
+    await this.boss.schedule(
+      INVENTORY_RECONCILE_QUEUE,
+      '*/15 * * * *',
+      {},
+      { key: 'stockpilot-inventory-reconcile' },
+    );
     this.logger.log('pg-boss integration retry worker started.');
   }
 
@@ -65,6 +94,10 @@ export class JobRunnerService implements OnModuleDestroy, OnModuleInit {
 
   registerIntegrationRetryHandler(handler: IntegrationRetryHandler): void {
     this.handler = handler;
+  }
+
+  registerInventoryReconcileHandler(handler: InventoryReconcileHandler): void {
+    this.inventoryReconcileHandler = handler;
   }
 
   async enqueueIntegrationRetry(job: IntegrationRetryJob): Promise<void> {

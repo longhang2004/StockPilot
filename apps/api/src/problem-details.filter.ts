@@ -8,9 +8,11 @@ import {
 } from '@nestjs/common';
 import { Prisma } from './generated/prisma/client.js';
 import { ZodError } from 'zod';
+import type { SentryReporter } from './observability/sentry-reporter.js';
 
 interface RequestLike {
   get(name: string): string | undefined;
+  method?: string;
   originalUrl?: string;
   url?: string;
 }
@@ -34,6 +36,8 @@ interface ProblemResponse {
 
 @Catch()
 export class ProblemDetailsFilter implements ExceptionFilter {
+  constructor(private readonly sentry?: SentryReporter) {}
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const context = host.switchToHttp();
     const request = context.getRequest<RequestLike>();
@@ -44,6 +48,11 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       request.originalUrl || request.url || '/',
       traceId,
     );
+    this.sentry?.captureException(exception, {
+      method: request.method,
+      path: problem.instance,
+      traceId,
+    });
     response
       .status(problem.status)
       .setHeader('Content-Type', 'application/problem+json')

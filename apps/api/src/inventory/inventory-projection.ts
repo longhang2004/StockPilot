@@ -56,3 +56,18 @@ export function lowStockTransition(
   }
   return 'NONE';
 }
+
+/**
+ * Reconciles alert state from the current balance rather than from a single
+ * stock delta. This is intentionally separate from `lowStockTransition`,
+ * whose crossing semantics are used by existing mutation code and callers.
+ */
+export function reconcileLowStockTransition(
+  available: number,
+  reorderPoint: number,
+  hasOpenAlert: boolean,
+): LowStockTransition {
+  if (available <= reorderPoint && !hasOpenAlert) return 'OPEN';
+  if (available > reorderPoint && hasOpenAlert) return 'RESOLVE';
+  return 'NONE';
+}

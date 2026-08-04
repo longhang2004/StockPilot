@@ -24,6 +24,7 @@
 ### Task 1: Inventory reconciliation and alert lifecycle
 
 **Files:**
+
 - Create: `apps/api/src/inventory/inventory-reconciliation.service.ts`
 - Create: `apps/api/src/inventory/inventory-reconciliation.service.spec.ts`
 - Modify: `apps/api/src/inventory/inventory-projection.ts`
@@ -35,6 +36,7 @@
 - Modify: `apps/api/src/config/environment.ts`
 
 **Interfaces:**
+
 - Produce `InventoryReconciliationService.reconcileOrganization(organizationId, actorId?)` returning `{ scanned: number; opened: number; resolved: number }` and `reconcileBalance(transaction, { organizationId, warehouseId, productId, reorderPoint, available })` for use inside existing transactions.
 - Change `lowStockTransition(previousAvailable, nextAvailable, reorderPoint, hasOpenAlert = false)` so an already-low balance opens exactly one alert and a recovered balance resolves its open alert.
 - Produce a pg-boss `inventory.reconcile` job scheduled from the existing worker with a safe no-queue result when `QUEUE_DATABASE_URL` is absent.
@@ -50,6 +52,7 @@
 ### Task 2: Owner read models and observability/security hardening
 
 **Files:**
+
 - Create: `apps/api/src/organization/organization.controller.ts`
 - Create: `apps/api/src/organization/organization.service.ts`
 - Create: `apps/api/src/organization/organization.module.ts`
@@ -65,6 +68,7 @@
 - Modify: `apps/api/package.json`
 
 **Interfaces:**
+
 - Add `GET /v1/organization/settings` and `GET /v1/team`, guarded by `organization:settings:read`/`team:read`, returning only the authenticated organization, its single warehouse/currency, and canonical active memberships.
 - Export `redactRecord(value)` that masks `cookie`, `authorization`, `x-csrf-token`, `x-webhook-signature`, `database_url`, `migration_database_url`, and `queue_database_url` recursively.
 - Emit one JSON request line containing trace ID, method, path, status, duration, actor ID, organization ID, and redacted error metadata; capture exceptions only when `SENTRY_DSN` is configured.
@@ -79,6 +83,7 @@
 ### Task 3: Typed web foundation and design tokens
 
 **Files:**
+
 - Create: `apps/web/lib/api-client.ts`
 - Create: `apps/web/lib/query-provider.tsx`
 - Create: `apps/web/lib/forms.ts`
@@ -91,6 +96,7 @@
 - Modify: `package.json`
 
 **Interfaces:**
+
 - `apiRequest<T>(path, options?)` uses same-origin `/api/v1`, cookies, CSRF bootstrap, RFC 9457 parsing, and typed `@stockpilot/contracts` payloads.
 - Provide `AppShell`, `PageHeader`, `StatCard`, `StatusBadge`, `EmptyState`, `ErrorState`, `Skeleton`, `ToastRegion`, `SearchFilterBar`, `ResponsiveDataTable`, `MobileRecordCard`, `Pagination`, `Drawer`, `Dialog`, `ConfirmDialog`, `FormField`, and `UnsavedChangesGuard` with keyboard/focus/body-scroll behavior.
 
@@ -104,6 +110,7 @@
 ### Task 4: Complete workflow routes and drawers
 
 **Files:**
+
 - Create: `apps/web/components/workflows/overview-workspace.tsx`
 - Create: `apps/web/components/workflows/orders-workspace.tsx`
 - Create: `apps/web/components/workflows/inventory-workspace.tsx`
@@ -116,6 +123,7 @@
 - Modify: `apps/web/components/app/workspace-content.tsx`
 
 **Interfaces:**
+
 - Each route consumes typed query/mutation hooks and exposes loading, empty, error, success, and permission states.
 - Orders support search/status filters, draft create/edit, detail drawer with snapshots and transition timeline, confirm/fulfill/cancel actions with idempotency keys and confirm dialogs.
 - Inventory supports balance/alert filters, adjustment drawer, and receipt drawer; catalog/partners support create/edit/inactivate with Staff read-only behavior.
@@ -132,6 +140,7 @@
 ### Task 5: E2E, accessibility, coverage, and CI
 
 **Files:**
+
 - Create: `tests/e2e/manager-receipt-confirm.spec.ts`
 - Create: `tests/e2e/staff-fulfill.spec.ts`
 - Create: `tests/e2e/duplicate-webhook.spec.ts`
@@ -144,6 +153,7 @@
 - Modify: `.github/workflows/ci.yml`
 
 **Interfaces:**
+
 - Playwright starts API and web against an isolated test database, seeds demo users, and tests desktop plus 390px mobile.
 - axe smoke covers public, login, overview, orders, and inventory routes.
 - Core domain coverage thresholds enforce 80% branch coverage without weakening existing test commands.
@@ -157,6 +167,7 @@
 ### Task 6: Deployment, threat model, and portfolio handoff
 
 **Files:**
+
 - Create: `docs/deployment.md`
 - Create: `docs/test-report.md`
 - Create: `docs/walkthrough.md`
@@ -168,6 +179,7 @@
 - Modify: `apps/web/Dockerfile`
 
 **Interfaces:**
+
 - Deployment docs explicitly cover Vercel web same-origin proxy, Railway API/worker, Neon Postgres/RLS migration ordering, queue URL, Sentry optionality, secrets, readiness, and smoke commands.
 - Test report records commands and results; walkthrough is a 2–3 minute reviewer path from demo login through receipt/confirm/fulfill, duplicate webhook, and owner reset.
 
@@ -180,10 +192,10 @@
 ### Task 7: Final review and delivery
 
 **Files:**
+
 - Modify only files identified by verification findings.
 
 - [ ] **Step 1: Inspect `git diff --check`, dependency diff, generated files, and all public route/error contracts.**
 - [ ] **Step 2: Run a tenant/RBAC/ledger/idempotency regression matrix against a fresh database.**
 - [ ] **Step 3: Check git identity is `longhang2004 <nhutlong20112004@gmail.com>` for author and committer.**
 - [ ] **Step 4: Report any push blocker explicitly; only push after a valid GitHub remote and authenticated `gh` account are available.**
-

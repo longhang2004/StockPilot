@@ -90,7 +90,6 @@ export class CatalogService {
   updateProduct(auth: AuthContext, id: string, input: ProductUpdate) {
     return this.inTenant(auth, async (transaction, organizationId) => {
       const existing = await transaction.product.findFirst({
-        select: { id: true },
         where: { id, organizationId },
       });
       if (!existing) {
@@ -104,6 +103,7 @@ export class CatalogService {
         action: 'PRODUCT_UPDATED',
         actorUserId: auth.user.id,
         after: serializeProduct(product),
+        before: serializeProduct(existing),
         entityId: product.id,
         entityType: 'Product',
         organizationId,
@@ -159,11 +159,10 @@ export class CatalogService {
 
   updateCustomer(auth: AuthContext, id: string, input: PartnerUpdate) {
     return this.inTenant(auth, async (transaction, organizationId) => {
-      const customer = await transaction.customer.findFirst({
-        select: { id: true },
+      const existing = await transaction.customer.findFirst({
         where: { id, organizationId },
       });
-      if (!customer) {
+      if (!existing) {
         throw new NotFoundException('Customer not found.');
       }
       return transaction.customer
@@ -176,6 +175,7 @@ export class CatalogService {
             action: 'CUSTOMER_UPDATED',
             actorUserId: auth.user.id,
             after: customer,
+            before: existing,
             entityId: customer.id,
             entityType: 'Customer',
             organizationId,
@@ -232,11 +232,10 @@ export class CatalogService {
 
   updateSupplier(auth: AuthContext, id: string, input: PartnerUpdate) {
     return this.inTenant(auth, async (transaction, organizationId) => {
-      const supplier = await transaction.supplier.findFirst({
-        select: { id: true },
+      const existing = await transaction.supplier.findFirst({
         where: { id, organizationId },
       });
-      if (!supplier) {
+      if (!existing) {
         throw new NotFoundException('Supplier not found.');
       }
       return transaction.supplier
@@ -249,6 +248,7 @@ export class CatalogService {
             action: 'SUPPLIER_UPDATED',
             actorUserId: auth.user.id,
             after: supplier,
+            before: existing,
             entityId: supplier.id,
             entityType: 'Supplier',
             organizationId,

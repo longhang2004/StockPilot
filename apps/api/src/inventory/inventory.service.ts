@@ -18,9 +18,9 @@ import type { Prisma } from '../generated/prisma/client.js';
 import { executeIdempotent } from '../idempotency/idempotency.js';
 import {
   InventoryInvariantError,
-  lowStockTransition,
   projectInventory,
 } from './inventory-projection.js';
+import { InventoryReconciliationService } from './inventory-reconciliation.service.js';
 
 export interface InventoryListQuery {
   page: number;
@@ -39,6 +39,8 @@ interface LockedBalance {
 export class InventoryService {
   constructor(
     @Inject(TenantDatabase) private readonly database: TenantDatabase,
+    @Inject(InventoryReconciliationService)
+    private readonly reconciliation: InventoryReconciliationService,
   ) {}
 
   applyReceipt(auth: AuthContext, input: ReceiptInput, idempotencyKey: string) {
@@ -214,6 +216,7 @@ export class InventoryService {
     });
     const lines = [];
     const balances = [];
+    const beforeBalances = [];
     for (const line of [...input.lines].sort((left, right) =>
       left.productId.localeCompare(right.productId),
     )) {
@@ -227,6 +230,12 @@ export class InventoryService {
         warehouse.id,
         line.productId,
       );
+      beforeBalances.push({
+        available: current.onHand - current.reserved,
+        onHand: current.onHand,
+        productId: line.productId,
+        reserved: current.reserved,
+      });
       const next = projectInventory(current, {
         onHandDelta: line.quantity,
       });
@@ -256,15 +265,13 @@ export class InventoryService {
           warehouseId: warehouse.id,
         },
       });
-      await this.reconcileLowStock(
-        transaction,
+      await this.reconciliation.reconcileBalance(transaction, {
+        available: next.available,
         organizationId,
-        warehouse.id,
-        line.productId,
-        product.reorderPoint,
-        current.onHand - current.reserved,
-        next.available,
-      );
+        productId: line.productId,
+        reorderPoint: product.reorderPoint,
+        warehouseId: warehouse.id,
+      });
       lines.push({
         ...receiptLine,
         unitCost: receiptLine.unitCost?.toFixed(2) ?? null,
@@ -285,6 +292,7 @@ export class InventoryService {
         lines,
         receiptNumber: receipt.receiptNumber,
       },
+      before: { balances: beforeBalances },
       entityId: receipt.id,
       entityType: 'GoodsReceipt',
       organizationId,
@@ -336,6 +344,12 @@ export class InventoryService {
     }
 
     const movementId = randomUUID();
+    const beforeBalance = {
+      available: current.onHand - current.reserved,
+      onHand: current.onHand,
+      productId: product.id,
+      reserved: current.reserved,
+    };
     const balance = await transaction.inventoryBalance.update({
       data: { onHand: next.onHand, version: { increment: 1 } },
       where: { id: current.id },
@@ -355,15 +369,13 @@ export class InventoryService {
         warehouseId: warehouse.id,
       },
     });
-    await this.reconcileLowStock(
-      transaction,
+    await this.reconciliation.reconcileBalance(transaction, {
+      available: next.available,
       organizationId,
-      warehouse.id,
-      product.id,
-      product.reorderPoint,
-      current.onHand - current.reserved,
-      next.available,
-    );
+      productId: product.id,
+      reorderPoint: product.reorderPoint,
+      warehouseId: warehouse.id,
+    });
 
     await recordAudit(transaction, {
       action: 'INVENTORY_ADJUSTED',
@@ -378,6 +390,7 @@ export class InventoryService {
         movementId,
         type: input.type,
       },
+      before: { balance: beforeBalance },
       entityId: movement.id,
       entityType: 'StockMovement',
       organizationId,
@@ -434,44 +447,6 @@ export class InventoryService {
       onHand: balance.on_hand,
       reserved: balance.reserved,
     };
-  }
-
-  private async reconcileLowStock(
-    transaction: Prisma.TransactionClient,
-    organizationId: string,
-    warehouseId: string,
-    productId: string,
-    reorderPoint: number,
-    previousAvailable: number,
-    nextAvailable: number,
-  ): Promise<void> {
-    const transition = lowStockTransition(
-      previousAvailable,
-      nextAvailable,
-      reorderPoint,
-    );
-    if (transition === 'OPEN') {
-      await transaction.lowStockAlert.create({
-        data: {
-          availableAtOpen: nextAvailable,
-          organizationId,
-          productId,
-          reorderPoint,
-          warehouseId,
-        },
-      });
-    }
-    if (transition === 'RESOLVE') {
-      await transaction.lowStockAlert.updateMany({
-        data: { resolvedAt: new Date(), status: 'RESOLVED' },
-        where: {
-          organizationId,
-          productId,
-          status: 'OPEN',
-          warehouseId,
-        },
-      });
-    }
   }
 }
 

@@ -12,6 +12,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "typecheck": "pnpm -r --if-present typecheck",
+    "typecheck:e2e": "tsc -p tests/tsconfig.json",
     "test": "pnpm -r --if-present test",
     "test:unit": "pnpm --filter @stockpilot/contracts test && pnpm --filter @stockpilot/api test:unit && pnpm --filter @stockpilot/web test:unit",
     "test:e2e": "playwright test",
@@ -20,6 +21,7 @@
     "db:seed": "pnpm --filter @stockpilot/api prisma:seed"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@eslint/js": "^9.31.0",
     "@playwright/test": "^1.54.1",
     "eslint": "^9.31.0",

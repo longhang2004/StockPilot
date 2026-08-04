@@ -11,6 +11,8 @@ import { IntegrationModule } from './integrations/integration.module.js';
 import { DatabaseModule } from './database/database.module.js';
 import { JobsModule } from './jobs/jobs.module.js';
 import { OrdersModule } from './orders/orders.module.js';
+import { OrganizationModule } from './organization/organization.module.js';
+import { ObservabilityModule } from './observability/observability.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -25,6 +27,8 @@ import { OrdersModule } from './orders/orders.module.js';
     IntegrationModule,
     JobsModule,
     OrdersModule,
+    OrganizationModule,
+    ObservabilityModule,
   ],
 })
 export class AppModule {}

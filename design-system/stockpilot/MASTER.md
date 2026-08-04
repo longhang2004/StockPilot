@@ -17,18 +17,18 @@
 
 ### Color Palette
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#334155` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#475569` | `--color-secondary` |
-| Accent/CTA | `#059669` | `--color-accent` |
-| Background | `#F8FAFC` | `--color-background` |
-| Foreground | `#0F172A` | `--color-foreground` |
-| Muted | `#F2F3F4` | `--color-muted` |
-| Border | `#E6E8EA` | `--color-border` |
+| Role        | Hex       | CSS Variable          |
+| ----------- | --------- | --------------------- |
+| Primary     | `#334155` | `--color-primary`     |
+| On Primary  | `#FFFFFF` | `--color-on-primary`  |
+| Secondary   | `#475569` | `--color-secondary`   |
+| Accent/CTA  | `#059669` | `--color-accent`      |
+| Background  | `#F8FAFC` | `--color-background`  |
+| Foreground  | `#0F172A` | `--color-foreground`  |
+| Muted       | `#F2F3F4` | `--color-muted`       |
+| Border      | `#E6E8EA` | `--color-border`      |
 | Destructive | `#DC2626` | `--color-destructive` |
-| Ring | `#334155` | `--color-ring` |
+| Ring        | `#334155` | `--color-ring`        |
 
 **Color Notes:** Industrial slate + stock green
 
@@ -40,31 +40,32 @@
 - **Google Fonts:** [Calistoga + Inter](https://fonts.googleapis.com/css2?family=Calistoga:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap)
 
 **CSS Import:**
+
 ```css
 @import url('https://fonts.googleapis.com/css2?family=Calistoga:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 ```
 
 ### Spacing Variables
 
-*Density: 8/10 — Dense / Dashboard*
+_Density: 8/10 — Dense / Dashboard_
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `2px` / `0.125rem` | Tight gaps |
-| `--space-sm` | `4px` / `0.25rem` | Icon gaps, inline spacing |
-| `--space-md` | `8px` / `0.5rem` | Standard padding |
-| `--space-lg` | `12px` / `0.75rem` | Section padding |
-| `--space-xl` | `16px` / `1rem` | Large gaps |
-| `--space-2xl` | `24px` / `1.5rem` | Section margins |
-| `--space-3xl` | `32px` / `2rem` | Hero padding |
+| Token         | Value              | Usage                     |
+| ------------- | ------------------ | ------------------------- |
+| `--space-xs`  | `2px` / `0.125rem` | Tight gaps                |
+| `--space-sm`  | `4px` / `0.25rem`  | Icon gaps, inline spacing |
+| `--space-md`  | `8px` / `0.5rem`   | Standard padding          |
+| `--space-lg`  | `12px` / `0.75rem` | Section padding           |
+| `--space-xl`  | `16px` / `1rem`    | Large gaps                |
+| `--space-2xl` | `24px` / `1.5rem`  | Section margins           |
+| `--space-3xl` | `32px` / `2rem`    | Hero padding              |
 
 ### Shadow Depths
 
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
+| Level         | Value                          | Usage                       |
+| ------------- | ------------------------------ | --------------------------- |
+| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)`   | Subtle lift                 |
+| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)`    | Cards, buttons              |
+| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)`  | Modals, dropdowns           |
 | `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
 
 ---
@@ -107,7 +108,7 @@
 
 ```css
 .card {
-  background: #F8FAFC;
+  background: #f8fafc;
   border-radius: 12px;
   padding: 24px;
   box-shadow: var(--shadow-md);
@@ -126,7 +127,7 @@
 ```css
 .input {
   padding: 12px 16px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 200ms ease;
@@ -184,7 +185,14 @@
 **Stagger List** (Standard) — Trigger: load or scroll | Duration: 300-450ms | Easing: `back.out(1.4)`
 
 ```js
-gsap.from('.grid-item', { opacity: 0, scale: 0.92, y: 16, duration: 0.4, stagger: { each: 0.06, from: 'start', grid: 'auto' }, ease: 'back.out(1.4)' });
+gsap.from('.grid-item', {
+  opacity: 0,
+  scale: 0.92,
+  y: 16,
+  duration: 0.4,
+  stagger: { each: 0.06, from: 'start', grid: 'auto' },
+  ease: 'back.out(1.4)',
+});
 ```
 
 **Framework notes:** grid: 'auto' lets GSAP infer rows/columns from a CSS grid layout for a natural wave stagger

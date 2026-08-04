@@ -151,6 +151,10 @@ export class ProductImportService {
                 action: 'PRODUCT_IMPORT_COMMITTED',
                 actorUserId: auth.user.id,
                 after: { created, importId: id },
+                before: {
+                  rowsValid: run.rowsValid,
+                  status: run.status,
+                },
                 entityId: id,
                 entityType: 'ProductImportRun',
                 organizationId,

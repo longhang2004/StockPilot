@@ -194,6 +194,10 @@ export class IntegrationService {
         status: delivery.status,
       } as const;
     }
+    const before = {
+      attempts: delivery.attempts,
+      status: delivery.status,
+    };
     const payload = MockStorefrontOrderSchema.parse(delivery.payload);
     await transaction.integrationDelivery.update({
       data: {
@@ -223,6 +227,7 @@ export class IntegrationService {
         action: 'INTEGRATION_RETRIED',
         actorUserId,
         after: { orderId: order.id },
+        before,
         entityId: id,
         entityType: 'IntegrationDelivery',
         organizationId,

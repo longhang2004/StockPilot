@@ -32,9 +32,16 @@ The web app runs at `http://localhost:3000`; the API and OpenAPI UI run at
 pnpm format:check
 pnpm lint
 pnpm typecheck
-pnpm test
+pnpm typecheck:e2e
+pnpm test:unit
+pnpm --filter @stockpilot/api test:unit:coverage
+pnpm --filter @stockpilot/api test:integration
+pnpm test:e2e
 pnpm build
 ```
+
+The integration and browser gates need the PostgreSQL service from the local
+Docker setup. Run `pnpm test:unit` for the fast no-database feedback loop.
 
 ## What is implemented
 
@@ -47,7 +54,8 @@ pnpm build
 - Draft → confirmed → fulfilled/cancelled orders with price/SKU snapshots,
   deterministic balance locks, and concurrent confirmation protection.
 - HMAC-signed storefront webhooks, delivery deduplication, failed-delivery
-  retry, RFC 9457 problem details, audit events, and Owner-only demo reset.
+  retry, pg-boss dead-letter handling, RFC 9457 problem details, audit events,
+  structured redacted logs, optional Sentry reporting, and Owner-only demo reset.
 - Responsive `/app` routes for the operational overview, orders, inventory,
   products, partners, receipts, imports, integrations, audit, and settings.
 
@@ -62,9 +70,11 @@ The versioned API is under `/v1`. Health checks are `/v1/health/live` and
 `/v1/health/ready`; interactive OpenAPI is at `/docs` and the JSON document is
 available at `/openapi.json`.
 
-Important workflow routes include `/v1/products`, `/v1/inventory/balances`,
-`/v1/receipts`, `/v1/orders`, `/v1/dashboard/overview`,
-`/v1/product-imports/preview`, `/v1/webhooks/mock-storefront/orders`, and
+Important workflow routes include `/v1/products`, `/v1/customers`,
+`/v1/suppliers`, `/v1/inventory/balances`, `/v1/inventory/movements`,
+`/v1/receipts`, `/v1/orders`, `/v1/dashboard/overview`, `/v1/alerts`,
+`/v1/product-imports/preview`, `/v1/webhooks/mock-storefront/orders`,
+`/v1/integration-deliveries`, `/v1/organization/settings`, `/v1/team`, and
 `/v1/organization/demo-reset`.
 
 ## Security boundary
@@ -81,10 +91,12 @@ webhook writes require a deployment signing secret.
 For a portfolio deployment, run the Next.js web app on Vercel, the API/job
 runner on Railway, and PostgreSQL on Neon. Set `DATABASE_URL` to the runtime
 role, `MIGRATION_DATABASE_URL` to a migration role, and `QUEUE_DATABASE_URL` to
-a dedicated pg-boss database role. The queue worker retries integration jobs
-with exponential backoff and routes exhausted jobs to a dead-letter queue. Run
-`prisma migrate deploy` during release, then verify `/v1/health/ready` before
-serving traffic.
+a dedicated pg-boss database role. The queue worker retries integration and
+inventory reconciliation jobs with exponential backoff and routes exhausted
+jobs to dead-letter queues. Run `prisma migrate deploy` during release, then
+verify `/v1/health/ready` before serving traffic. See
+[`docs/deployment.md`](docs/deployment.md) for the release runbook and
+[`docs/walkthrough.md`](docs/walkthrough.md) for the portfolio demo script.
 
 ## Demo identities
 
