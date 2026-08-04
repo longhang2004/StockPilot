@@ -38,13 +38,44 @@ origin](https://stock-pilot-web-five.vercel.app), with API checks at
 [Render readiness](https://stockpilot-api-y1aw.onrender.com/v1/health/ready),
 [Swagger UI](https://stockpilot-api-y1aw.onrender.com/docs), and
 [OpenAPI JSON](https://stockpilot-api-y1aw.onrender.com/openapi.json). The
-`main` CI verification run for commit `1008712` is
-[GitHub Actions run 30921081086](https://github.com/longhang2004/StockPilot/actions/runs/30921081086)
-and is green. The same commit is live on Render; readiness returns `200` with
+green `main` verification for the deployed documentation/runtime state is
+[GitHub Actions run 30925609072](https://github.com/longhang2004/StockPilot/actions/runs/30925609072).
+Render is running commit `f934e07`; readiness returns `200` with
 `database:ok` and the expected free-profile `queue:not_configured` check. The
 Vercel `/api/v1/health/ready` proxy also returns `200`. Render auto-deploys
 `main`; the deployment workflow runs migration and idempotent seed, while an
 optional deploy hook can be enabled for an explicit rollout.
+
+## Live smoke snapshot · 4 August 2026
+
+The following paths were exercised against the public deployment after the
+canonical Owner reset. Each path completed without a partial mutation:
+
+| Path                                                             | Result                                   |
+| ---------------------------------------------------------------- | ---------------------------------------- |
+| Owner, Manager, and Staff one-click login                        | Pass                                     |
+| Manager receipt apply and inventory movement update              | Pass                                     |
+| Manager Draft → Confirmed; Staff Confirmed → Fulfilled           | Pass                                     |
+| Confirmed cancellation, stock adjustment, and idempotency replay | Pass                                     |
+| Signed duplicate storefront webhook                              | Pass; one Draft created                  |
+| CSV preview with invalid row and valid-row commit                | Pass                                     |
+| Failed integration manual retry                                  | Pass                                     |
+| Owner reset and canonical reseed                                 | Pass; 9 products, 6 orders, 10 movements |
+| Ledger/balance reconciliation after reset                        | Pass; zero violations and mismatches     |
+| Secure session cookie, CSRF, and same-origin `/api` proxy        | Pass                                     |
+
+The matching UI evidence is checked in under
+[`docs/assets/`](assets/README.md): Overview desktop, Orders mobile, Inventory
+desktop, and the mobile receipt drawer.
+
+### Known presentation follow-up
+
+The Overview API returns three rows in `fourteenDayMovements`, while the
+current deployed web build still prefers the older `inboundOutbound14d` alias
+when rendering the movement-window chart. As a result, the chart can show its
+empty state even though the API and ledger data are correct. This is a
+presentation-only follow-up; it does not affect receipt, reservation,
+fulfillment, ledger, or balance invariants.
 
 The free demo tier intentionally permits wake-up latency: Render Free may spin
 down after inactivity, and Neon Free may suspend compute after five minutes.

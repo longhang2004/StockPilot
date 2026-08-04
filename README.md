@@ -1,65 +1,70 @@
 # StockPilot
 
 [![CI](https://github.com/longhang2004/StockPilot/actions/workflows/ci.yml/badge.svg)](https://github.com/longhang2004/StockPilot/actions/workflows/ci.yml)
+[![Live demo](https://img.shields.io/badge/demo-live-16a34a)](https://stock-pilot-web-five.vercel.app)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2563eb.svg)](LICENSE)
 
-StockPilot is a multi-tenant inventory and B2B order operations SaaS for small
-wholesale teams. It gives an operations manager one calm work queue for
+StockPilot is a multi-tenant inventory and B2B order operations workspace for
+small wholesale teams. It gives an operations manager one calm queue for
 receiving stock, preventing overselling, and fulfilling customer orders.
 
-**Live demo:** [StockPilot on Vercel](https://stock-pilot-web-five.vercel.app)
-(Vercel Hobby + Render Free + Neon Free; no paid upgrade is required).
+[Live demo](https://stock-pilot-web-five.vercel.app) ·
+[API docs](https://stockpilot-api-y1aw.onrender.com/docs) ·
+[Walkthrough](docs/walkthrough.md) ·
+[Architecture](docs/architecture.md)
 
-**API docs:** [Swagger UI](https://stockpilot-api-y1aw.onrender.com/docs) ·
-[OpenAPI JSON](https://stockpilot-api-y1aw.onrender.com/openapi.json). The same
-API is available through the Vercel `/api` proxy used by the browser. Local API
-docs are available at `http://localhost:4000/docs`.
+> **Portfolio demo:** the public deployment uses Vercel Hobby, Render Free,
+> Neon Free, and UptimeRobot. It is intentionally designed to demonstrate
+> product and engineering decisions, not to provide a production SLA.
 
-## Why this project
+## Product at a glance
 
-The differentiator is reliability that is visible in ordinary workflows:
+- **One operational work queue** — approvals, low-stock exceptions, failed
+  integrations, open-order value, and recent activity in one overview.
+- **Inventory you can trust** — an append-only movement ledger projected into
+  balances, with `on_hand >= reserved >= 0` enforced at the database boundary.
+- **Safe B2B order flow** — draft, confirm, fulfill, and cancel transitions
+  with price snapshots and deterministic row locks against overselling.
+- **Demoable reliability** — tenant isolation, RBAC, atomic writes, idempotency,
+  webhook deduplication, CSV partial-valid imports, and a canonical reset.
 
-- every tenant query is session-scoped and enforced again by forced PostgreSQL
-  RLS;
-- stock is an append-only ledger projected into balances, with
-  `on_hand >= reserved >= 0` and deterministic row locks against overselling;
-- receipt, order transition, webhook, import commit, and demo reset operations
-  are atomic and idempotent;
-- the responsive UI keeps the same receipt-to-fulfillment path usable on a
-  phone at a warehouse counter.
+## Screenshots
 
-## Architecture
+These images were captured from the canonical Vercel deployment with seeded
+demo data on 4 August 2026. They are cropped to the application viewport so
+the UI, rather than browser chrome, is the focus.
 
-```mermaid
-flowchart LR
-  Browser[Browser] -->|same-origin /api| Vercel[Vercel Next.js]
-  Vercel -->|API_INTERNAL_URL| Render[Render Free NestJS API]
-  Render -->|pooled app URL| Neon[(Neon application DB)]
-```
+| Overview · desktop                                                  | Orders · mobile                                                  |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| ![StockPilot Overview work queue](docs/assets/overview-desktop.png) | ![StockPilot Orders mobile cards](docs/assets/orders-mobile.png) |
 
-This is a modular monolith in a pnpm workspace:
+| Inventory · desktop                                                 | Receive stock · mobile drawer                                              |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| ![StockPilot inventory balances](docs/assets/inventory-desktop.png) | ![StockPilot mobile receipt drawer](docs/assets/receipt-drawer-mobile.png) |
 
-```text
-apps/web              Next.js 16 / React 19 UI
-apps/api              NestJS 11 / Prisma 7 API (optional pg-boss worker)
-packages/contracts    Zod schemas and generated API contracts
-infra/postgres        local role bootstrap and production provisioning SQL
-docs                  deployment, operations, threat model, ERD, test report
-```
+## Core workflows
 
-The API owns tenant context, RBAC, transactions, RLS setup, the stock ledger,
-optional pg-boss scheduling, and RFC 9457 problem details. The browser never
-sends an organization id that decides authorization.
+1. **Receive stock:** apply a receipt and update the balance projection and
+   movement ledger in one transaction.
+2. **Prepare an order:** create a Draft with customer, SKU, product-name, and
+   unit-price snapshots.
+3. **Protect availability:** a Manager confirms the Draft; sorted balance-row
+   locks reserve stock atomically and reject overselling.
+4. **Fulfill safely:** Staff fulfills the Confirmed order; `SALE` movements,
+   `on_hand`, and `reserved` change together.
+5. **Handle exceptions:** retry a failed integration, preview a CSV with
+   row-level errors, and use Audit to trace important mutations.
 
-## Demo role matrix
+## Demo roles
 
-| Role    | Typical demo path                                | Write boundary                                    |
-| ------- | ------------------------------------------------ | ------------------------------------------------- |
-| Owner   | team view, settings, canonical reset             | organization settings and demo reset              |
-| Manager | receipt → confirm → audit, imports, integrations | catalog, receipts, adjustments, order transitions |
-| Staff   | orders and inventory on desktop/mobile           | draft orders and fulfillment of confirmed orders  |
+| Role        | What to show                                     | Write boundary                                        |
+| ----------- | ------------------------------------------------ | ----------------------------------------------------- |
+| **Owner**   | Team view, settings, canonical reset             | Organization settings and demo reset                  |
+| **Manager** | Receipt → confirm → audit, imports, integrations | Catalog, receipts, adjustments, and order transitions |
+| **Staff**   | Orders and inventory on desktop/mobile           | Draft orders and fulfillment of Confirmed orders      |
 
-All demo accounts use `StockPilotDemo!` for credential login; the web app also
-offers one-click role entry.
+All demo accounts use `StockPilotDemo!` for credential login. The landing page
+also provides one-click role entry.
 
 | Role    | Email                                     |
 | ------- | ----------------------------------------- |
@@ -67,15 +72,34 @@ offers one-click role entry.
 | Manager | `manager@stockpilot-demo.stockpilot.test` |
 | Staff   | `staff@stockpilot-demo.stockpilot.test`   |
 
-The canonical demo fixture includes 8 active products plus one inactive product,
-5 customers, 3 suppliers, matching receipt/ledger rows, 2 low-stock alerts,
-2 Draft orders, 1 Confirmed order, 2 Fulfilled orders, 1 Cancelled order, a
-failed integration delivery, and a partial CSV import preview. It is reseeded
-idempotently on first deploy and after the six-hour Owner/automatic reset.
-The selected zero-cost Render/Neon profile leaves pg-boss disabled so Neon Free
-compute is not consumed by an always-on polling worker. Manual integration
-retry remains available; automatic retry and scheduled reconciliation are an
-opt-in queue profile for short acceptance runs.
+The canonical fixture contains 8 active products plus one inactive product, 5
+customers, 3 suppliers, matching receipt/ledger rows, two low-stock alerts,
+six orders across the state machine, one failed integration delivery, and one
+partial CSV import. It is reseeded idempotently on first deploy and after the
+six-hour Owner/automatic reset.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  Browser[Browser] -->|same-origin /api| Vercel[Vercel · Next.js]
+  Vercel -->|API_INTERNAL_URL| Render[Render Free · NestJS API]
+  Render -->|pooled app URL| Neon[(Neon · application DB)]
+```
+
+StockPilot is a modular monolith in a pnpm workspace:
+
+```text
+apps/web              Next.js 16 / React 19 UI
+apps/api              NestJS 11 / Prisma 7 API and optional pg-boss worker
+packages/contracts    Zod schemas and generated API contracts
+infra/postgres        Local role bootstrap and production provisioning SQL
+docs                  Deployment, operations, threat model, ERD, test report
+```
+
+The API owns tenant context, RBAC, transaction boundaries, RLS setup, the stock
+ledger, optional queue scheduling, and RFC 9457 problem details. The browser
+never supplies an organization id that decides authorization.
 
 ## Local development
 
@@ -95,8 +119,8 @@ pnpm db:seed
 pnpm dev
 ```
 
-The web app runs at `http://localhost:3000`; the API, readiness check, and
-OpenAPI UI are at `http://localhost:4000/v1/health/live`,
+The web app runs at `http://localhost:3000`. The API, readiness check, and
+OpenAPI UI run at `http://localhost:4000/v1/health/live`,
 `http://localhost:4000/v1/health/ready`, and `http://localhost:4000/docs`.
 
 ## Verification
@@ -115,71 +139,79 @@ pnpm build
 
 The integration and browser gates need PostgreSQL. CI provisions a clean
 database, applies migrations, seeds the canonical fixture, and runs every
-gate. A local run with no database can still execute the unit, lint, typecheck,
-and build gates.
+gate. Without Docker, unit, lint, typecheck, and build gates can still run.
 
 ## API surface
 
-The versioned API is under `/v1`. Health checks are `/v1/health/live` and
-`/v1/health/ready`; interactive OpenAPI is at `/docs` and JSON is at
-`/openapi.json`.
+The versioned API is under `/v1`:
 
-Important routes include `/v1/products`, `/v1/customers`, `/v1/suppliers`,
-`/v1/inventory/balances`, `/v1/inventory/movements`, `/v1/receipts`,
-`/v1/orders`, `/v1/dashboard/overview`, `/v1/alerts`,
-`/v1/product-imports/preview`, `/v1/webhooks/mock-storefront/orders`,
-`/v1/integration-deliveries`, `/v1/organization/settings`, `/v1/team`, and
-`/v1/organization/demo-reset`.
+- **Auth:** `/auth/login`, `/auth/demo-login`, `/auth/session`, `/auth/csrf`
+- **Catalog:** `/products`, `/customers`, `/suppliers`
+- **Inventory:** `/inventory/balances`, `/inventory/movements`,
+  `/inventory/adjustments`, `/receipts`
+- **Orders:** `/orders`, `/orders/:id/confirm`, `/orders/:id/fulfill`,
+  `/orders/:id/cancel`
+- **Operations:** `/dashboard/overview`, `/alerts`, `/audit-events`
+- **Integrations:** `/webhooks/mock-storefront/orders`,
+  `/integration-deliveries/:id/retry`
+- **Health/docs:** `/health/live`, `/health/ready`, `/docs`, `/openapi.json`
 
-Every state-changing receipt, adjustment, order transition, import commit,
-integration retry, and demo reset requires an `Idempotency-Key`. Reusing a key
-with the same payload replays the original response; a different payload gets
-`409`.
+State-changing receipts, adjustments, order transitions, import commits,
+integration retries, and demo resets require an `Idempotency-Key`. Reusing a
+key with the same payload replays the original response; a different payload
+returns `409`.
 
-## Security and invariants
+## Trust model
 
-- Opaque 32-byte session tokens are stored only as SHA-256 hashes.
-- Passwords use Argon2id; cookies are HttpOnly, Secure in production, and
-  SameSite=Lax.
-- Browser writes require a trusted Origin and a per-session CSRF token.
-- Runtime database role is `NOBYPASSRLS`; migration and queue roles are
+- Session tokens are opaque 32-byte values; only their SHA-256 hashes are stored.
+- Passwords use Argon2id. Production cookies are HttpOnly, Secure, and
+  SameSite=Lax; browser writes require a trusted Origin and CSRF token.
+- The runtime database role is `NOBYPASSRLS`; migration and queue roles are
   separate. Ledger and audit tables revoke update/delete privileges.
-- All stock-changing writes happen in one transaction. `available` is always
-  `on_hand - reserved`; the database and application reject negative states.
-- Webhook delivery IDs and command idempotency records prevent duplicate Draft
-  orders or partial mutations.
+- Stock-changing writes are transactional. `available` is always
+  `on_hand - reserved`, and negative states are rejected by both application
+  and database constraints.
+- Webhook delivery ids and command idempotency records prevent duplicate Draft
+  orders and partial mutations.
 
-## Portfolio documentation
+## Public demo topology
 
-- [Architecture and data flow](docs/architecture.md)
-- [Demo deployment runbook](docs/deployment.md)
-- [Operations and incident guide](docs/operations.md)
-- [Threat model](docs/threat-model.md)
-- [Entity relationship diagram](docs/erd.md)
-- [Verification and test report](docs/test-report.md)
-- [Two-minute walkthrough](docs/walkthrough.md)
+| Layer     | Free-tier service                       | Responsibility                              |
+| --------- | --------------------------------------- | ------------------------------------------- |
+| Web       | [Vercel](https://vercel.com/)           | Next.js app and same-origin `/api` proxy    |
+| API       | [Render](https://render.com/)           | NestJS API, migrations, and optional worker |
+| Database  | [Neon](https://neon.tech/)              | Application PostgreSQL; queue DB is opt-in  |
+| Keep-warm | [UptimeRobot](https://uptimerobot.com/) | Periodic health checks for the Render demo  |
 
-## Deployment status
+The default free profile sets `QUEUE_REQUIRED=false` and leaves pg-boss
+disabled so Neon Free compute is not consumed by an always-on poller. Manual
+integration retry remains available; automatic retry and scheduled
+reconciliation are opt-in queue-profile features.
 
-The version-controlled infrastructure is ready:
+## Documentation map
 
-- [`render.yaml`](render.yaml) defines the free Render web service, Docker
-  context, Singapore region, readiness path, and secret placeholders. Its
-  default free-demo profile sets `QUEUE_REQUIRED=false` and intentionally omits
-  `QUEUE_DATABASE_URL` to avoid exhausting Neon Free compute hours.
-- [`.github/workflows/deploy-render.yml`](.github/workflows/deploy-render.yml)
-  runs migration plus the idempotent seed from CI. Render auto-deploys commits
-  on `main`; an optional deploy hook can be configured when an explicit rollout
-  gate is preferred.
-- [`apps/web/vercel.json`](apps/web/vercel.json) configures the Next.js workspace
-  build.
-- [`infra/postgres/provision-production.sql`](infra/postgres/provision-production.sql)
-  creates parameterized Neon runtime/queue roles and emits RLS verification
-  queries.
+| Document                                           | Use it for                                         |
+| -------------------------------------------------- | -------------------------------------------------- |
+| [Architecture and data flow](docs/architecture.md) | Boundaries, tenant context, and transactions       |
+| [Deployment runbook](docs/deployment.md)           | Provider settings, releases, rollback, and secrets |
+| [Operations guide](docs/operations.md)             | Health, logs, queue failures, reset, and incidents |
+| [Threat model](docs/threat-model.md)               | Security assumptions and mitigations               |
+| [Entity relationship diagram](docs/erd.md)         | Data model and invariants                          |
+| [Verification report](docs/test-report.md)         | CI, live smoke checks, and acceptance matrix       |
+| [Two-minute walkthrough](docs/walkthrough.md)      | A reviewer-ready product tour                      |
+| [Screenshot notes](docs/assets/README.md)          | Capture provenance and asset rules                 |
 
-The provider projects are already provisioned on the free Vercel Hobby + Render
-Free + Neon Free path, with UptimeRobot keeping the Render process warm during
-ordinary demo hours. Follow the release and recovery procedures in
-[`docs/deployment.md`](docs/deployment.md), then use the canonical walkthrough
-in [`docs/walkthrough.md`](docs/walkthrough.md). Free services can still sleep
-or scale Neon to zero; this is a portfolio demo, not an availability SLA.
+## Scope
+
+Included: one warehouse, catalog and partners, receipts, inventory ledger,
+B2B orders, CSV imports, mock storefront webhooks, audit, RBAC, RLS, and
+responsive operations workflows.
+
+Out of scope: signup/invitations, payments, tax, debt, returns, purchase
+orders, partial receiving/fulfillment, variants, barcodes, lot/serial
+tracking, valuation, multiple warehouses, Redis, marketplace integrations,
+and production SLA commitments.
+
+## License
+
+[MIT](LICENSE) © 2026 `longhang2004`.

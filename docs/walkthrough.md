@@ -10,6 +10,20 @@ The walkthrough is designed to show the product value before explaining the
 architecture. Use the 1440px desktop viewport for the first pass and the 375px
 mobile viewport for the final pass.
 
+## Screenshot gallery
+
+The following checked-in captures are from the live Vercel origin with the
+canonical fixture. They are useful for a README preview, portfolio review, or
+recording storyboard; the browser chrome has been cropped out.
+
+| Overview · desktop                                  | Orders · mobile                                  |
+| --------------------------------------------------- | ------------------------------------------------ |
+| ![Overview work queue](assets/overview-desktop.png) | ![Orders mobile cards](assets/orders-mobile.png) |
+
+| Inventory · desktop                                 | Receive stock · mobile drawer                       |
+| --------------------------------------------------- | --------------------------------------------------- |
+| ![Inventory balances](assets/inventory-desktop.png) | ![Receipt drawer](assets/receipt-drawer-mobile.png) |
+
 ## 0:00–0:20 — orient the reviewer
 
 Open the landing page and say: “StockPilot gives a small wholesale team one
@@ -48,12 +62,12 @@ idempotent integrations.”
 
 For the mobile recording, use the 375px viewport and repeat the receipt-to-
 fulfillment path with the bottom navigation: **Overview**, **Orders**,
-**Inventory**, **More**. Capture these stable portfolio assets after deployment:
+**Inventory**, **More**. The checked-in assets are:
 
-- `docs/assets/overview-desktop.png`
-- `docs/assets/orders-mobile.png`
-- `docs/assets/inventory-desktop.png`
-- `docs/assets/receipt-drawer-mobile.png`
+- `docs/assets/overview-desktop.png` — Overview work queue
+- `docs/assets/orders-mobile.png` — responsive order cards and actions
+- `docs/assets/inventory-desktop.png` — balances and low-stock exceptions
+- `docs/assets/receipt-drawer-mobile.png` — receipt form and action drawer
 
 Do not capture credentials, cookies, provider dashboards, or a preview-domain
 URL. The final recording should link to the canonical Vercel origin and mention
