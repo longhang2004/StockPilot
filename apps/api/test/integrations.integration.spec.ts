@@ -7,8 +7,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 describe('storefront integrations API', () => {
   const adminDatabaseUrl =
+    process.env.MIGRATION_DATABASE_URL ??
     'postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot';
   const appDatabaseUrl =
+    process.env.DATABASE_URL ??
     'postgresql://stockpilot_app:stockpilot_app@localhost:5432/stockpilot';
   const webOrigin = 'http://localhost:3000';
   const webhookSecret = 'integrations-webhook-secret';
