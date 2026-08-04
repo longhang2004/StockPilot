@@ -43,6 +43,26 @@ jobs:
             echo "Render hook skipped: deploy the service manually or configure RENDER_DEPLOY_HOOK_URL."
           fi
 
+      - name: Normalize migration database URL
+        if: steps.config.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          migration_url="$MIGRATION_DATABASE_URL"
+          if [[ "$migration_url" == *"DATABASE_URL="* ]]; then
+            migration_url="$(printf '%s\n' "$migration_url" | sed -nE "s/^[[:space:]]*DATABASE_URL[[:space:]]*=[[:space:]]*['\"]?([^'\"]+)['\"]?[[:space:]]*$/\1/p" | head -n 1)"
+          fi
+
+          migration_url="${migration_url/-pooler./.}"
+          if [[ "$migration_url" != postgres://* && "$migration_url" != postgresql://* ]]; then
+            echo "MIGRATION_DATABASE_URL must be a PostgreSQL URL or a DATABASE_URL assignment." >&2
+            exit 1
+          fi
+
+          echo "::add-mask::$migration_url"
+          printf 'DATABASE_URL=%s\n' "$migration_url" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@v6
         if: steps.config.outputs.enabled == 'true'
         with:
