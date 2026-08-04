@@ -11,7 +11,6 @@ services:
     dockerContext: .
     healthCheckPath: /v1/health/ready
     numInstances: 1
-    maxShutdownDelaySeconds: 30
     buildFilter:
       paths:
         - apps/api/**
