@@ -54,6 +54,12 @@ test.describe.serial('manager receipt and order confirmation', () => {
       .filter({ hasText: `E2E Customer ${suffix}` });
     await expect(orderRecord).toHaveCount(1);
     await orderRecord.click();
+    const confirmRequestPromise = page.waitForRequest(
+      (request) =>
+        request.url().includes('/api/v1/orders/') &&
+        request.url().endsWith('/confirm') &&
+        request.method() === 'POST',
+    );
     const confirmResponsePromise = page.waitForResponse(
       (response) =>
         response.url().includes('/api/v1/orders/') &&
@@ -61,6 +67,8 @@ test.describe.serial('manager receipt and order confirmation', () => {
         response.request().method() === 'POST',
     );
     await page.getByRole('button', { name: /confirm order/i }).click();
+    const confirmRequest = await confirmRequestPromise;
+    console.log(`confirm request: ${confirmRequest.url()}`);
     const confirmResponse = await confirmResponsePromise;
     console.log(
       `confirm response: ${confirmResponse.status()} ${await confirmResponse.text()}`,
