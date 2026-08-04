@@ -29,11 +29,18 @@ jobs:
         id: config
         shell: bash
         run: |
-          if [[ -n "$MIGRATION_DATABASE_URL" && -n "$RENDER_DEPLOY_HOOK_URL" ]]; then
+          if [[ -n "$MIGRATION_DATABASE_URL" ]]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Render deploy skipped: configure MIGRATION_DATABASE_URL and RENDER_DEPLOY_HOOK_URL repository secrets."
+            echo "Migration and seed skipped: configure the MIGRATION_DATABASE_URL repository secret."
+          fi
+
+          if [[ -n "$RENDER_DEPLOY_HOOK_URL" ]]; then
+            echo "render_deploy_enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "render_deploy_enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Render hook skipped: deploy the service manually or configure RENDER_DEPLOY_HOOK_URL."
           fi
 
       - uses: actions/checkout@v6
@@ -69,7 +76,9 @@ jobs:
         run: pnpm db:seed
 
       - name: Trigger Render deploy
-        if: steps.config.outputs.enabled == 'true'
+        if: >-
+          steps.config.outputs.enabled == 'true' &&
+          steps.config.outputs.render_deploy_enabled == 'true'
         shell: bash
         run: |
           separator='?'
