@@ -47,7 +47,13 @@ test.describe.serial('manager receipt and order confirmation', () => {
     await page.getByLabel('Quantity').fill('2');
     await page.getByRole('button', { name: /save draft/i }).click();
     await expect(page.getByText(/draft order created/i)).toBeVisible();
-    await page.getByRole('row').nth(1).click();
+    const orderRecord = page
+      .locator(
+        '.operations-table tbody tr:visible, .mobile-record-card:visible',
+      )
+      .filter({ hasText: `E2E Customer ${suffix}` });
+    await expect(orderRecord).toHaveCount(1);
+    await orderRecord.click();
     await page.getByRole('button', { name: /confirm order/i }).click();
     await expect(page.getByText(/order status updated/i)).toBeVisible();
   });
