@@ -60,10 +60,13 @@ export function OrdersWorkspace({ role }: { role: Role }) {
   });
   const transition = useMutation({
     mutationFn: async (to: 'CONFIRMED' | 'FULFILLED' | 'CANCELLED') =>
-      apiRequest<OrderDetail>(`/orders/${selectedId}/${to.toLowerCase()}`, {
-        method: 'POST',
-        idempotencyKey: newIdempotencyKey(`order-${to.toLowerCase()}`),
-      }),
+      apiRequest<OrderDetail>(
+        `/orders/${selectedId}/${transitionPathByStatus[to]}`,
+        {
+          method: 'POST',
+          idempotencyKey: newIdempotencyKey(`order-${to.toLowerCase()}`),
+        },
+      ),
     onError: (error) =>
       push(
         error instanceof Error ? error.message : 'Order transition failed.',
@@ -203,6 +206,12 @@ export function OrdersWorkspace({ role }: { role: Role }) {
     </section>
   );
 }
+
+const transitionPathByStatus = {
+  CANCELLED: 'cancel',
+  CONFIRMED: 'confirm',
+  FULFILLED: 'fulfill',
+} as const;
 
 const orderColumns: TableColumn<OrderRecord>[] = [
   {
