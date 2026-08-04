@@ -4,8 +4,11 @@ import type { AuthContext } from '../auth/auth-context.js';
 import { recordAudit } from '../audit/audit-record.js';
 import { TenantDatabase } from '../database/tenant-database.js';
 import { executeIdempotent } from '../idempotency/idempotency.js';
-
-const RESET_INTERVAL_MS = 6 * 60 * 60 * 1000;
+import {
+  findDemoFixtureActors,
+  nextDemoResetAt,
+  seedDemoFixture,
+} from './demo-fixture.js';
 
 @Injectable()
 export class DemoResetService {
@@ -35,24 +38,31 @@ export class DemoResetService {
                 SELECT stockpilot_reset_demo_data(${organizationId}::uuid)
               `;
               const now = new Date();
-              const nextDemoResetAt = new Date(
-                now.getTime() + RESET_INTERVAL_MS,
+              const scheduledResetAt = nextDemoResetAt(now);
+              const actors = await findDemoFixtureActors(
+                transaction,
+                organizationId,
               );
-              await transaction.organization.update({
-                data: { nextDemoResetAt },
-                where: { id: organizationId },
+              await seedDemoFixture(transaction, {
+                ...actors,
+                force: true,
+                organizationId,
               });
               const resetEventId = organizationId;
               await recordAudit(transaction, {
                 action: 'DEMO_RESET',
                 actorUserId: auth.user.id,
-                after: { nextDemoResetAt },
+                after: { nextDemoResetAt: scheduledResetAt },
                 entityId: resetEventId,
                 entityType: 'Organization',
                 organizationId,
               });
+              await transaction.organization.update({
+                data: { nextDemoResetAt: scheduledResetAt },
+                where: { id: organizationId },
+              });
               return {
-                nextDemoResetAt,
+                nextDemoResetAt: scheduledResetAt,
                 resetAt: now,
                 organizationId,
               };

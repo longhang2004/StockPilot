@@ -5,6 +5,12 @@ import { verify } from 'argon2';
 import { ENVIRONMENT } from '../config/environment.module.js';
 import type { Environment } from '../config/environment.js';
 import { PrismaService } from '../database/prisma.service.js';
+import { recordAudit } from '../audit/audit-record.js';
+import {
+  findDemoFixtureActors,
+  nextDemoResetAt,
+  seedDemoFixture,
+} from '../demo/demo-fixture.js';
 import type { AuthContext } from './auth-context.js';
 import {
   createSessionCredentials,
@@ -113,12 +119,34 @@ export class AuthService {
         return;
       }
       await transaction.$executeRaw`
+        SELECT set_config('app.current_org_id', ${organizationId}, true)
+      `;
+      await transaction.$executeRaw`
+        SELECT set_config('app.current_actor_id', '', true)
+      `;
+      await transaction.$executeRaw`
         SELECT stockpilot_reset_demo_data(${organizationId}::uuid)
       `;
+      const actors = await findDemoFixtureActors(transaction, organizationId);
+      await transaction.$executeRaw`
+        SELECT set_config('app.current_actor_id', ${actors.ownerUserId}, true)
+      `;
+      await seedDemoFixture(transaction, {
+        ...actors,
+        force: true,
+        organizationId,
+      });
+      const scheduledResetAt = nextDemoResetAt();
+      await recordAudit(transaction, {
+        action: 'DEMO_RESET_AUTOMATIC',
+        actorUserId: actors.ownerUserId,
+        after: { nextDemoResetAt: scheduledResetAt },
+        entityId: organizationId,
+        entityType: 'Organization',
+        organizationId,
+      });
       await transaction.organization.update({
-        data: {
-          nextDemoResetAt: new Date(Date.now() + 6 * 60 * 60 * 1000),
-        },
+        data: { nextDemoResetAt: scheduledResetAt },
         where: { id: organizationId },
       });
     });

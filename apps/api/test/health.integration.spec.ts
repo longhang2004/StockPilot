@@ -42,4 +42,32 @@ describe('health endpoints', () => {
     expect(openApi.status).toBe(200);
     expect(openApi.body.info.title).toBe('StockPilot API');
   });
+
+  it('returns 503 when the queue is required but not configured', async () => {
+    const previous = process.env.QUEUE_REQUIRED;
+    process.env.QUEUE_REQUIRED = 'true';
+    try {
+      const { AppModule } = await import('../src/app.module.js');
+      const { configureApplication } =
+        await import('../src/configure-application.js');
+      const moduleRef = await Test.createTestingModule({
+        imports: [AppModule],
+      }).compile();
+      app = moduleRef.createNestApplication();
+      configureApplication(app);
+      await app.init();
+
+      const readiness = await request(app.getHttpServer()).get(
+        '/v1/health/ready',
+      );
+      expect(readiness.status).toBe(503);
+      expect(readiness.body).toEqual({
+        checks: { database: 'ok', queue: 'not_configured' },
+        status: 'degraded',
+      });
+    } finally {
+      if (previous === undefined) delete process.env.QUEUE_REQUIRED;
+      else process.env.QUEUE_REQUIRED = previous;
+    }
+  });
 });

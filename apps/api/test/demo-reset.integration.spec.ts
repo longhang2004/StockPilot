@@ -5,6 +5,8 @@ import { Test } from '@nestjs/testing';
 import request, { type Agent } from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { DEMO_FIXTURE_COUNTS } from '../src/demo/demo-fixture.js';
+
 describe('demo reset API', () => {
   const adminDatabaseUrl =
     process.env.MIGRATION_DATABASE_URL ??
@@ -131,12 +133,20 @@ describe('demo reset API', () => {
     expect(replay.status).toBe(200);
     expect(replay.body.resetAt).toBe(reset.body.resetAt);
 
-    expect((await manager.get('/v1/products')).body.total).toBe(0);
-    expect((await manager.get('/v1/customers')).body.total).toBe(0);
-    expect((await manager.get('/v1/inventory/balances')).body.total).toBe(0);
+    expect((await manager.get('/v1/products')).body.total).toBe(
+      DEMO_FIXTURE_COUNTS.activeProducts,
+    );
+    expect((await manager.get('/v1/customers')).body.total).toBe(
+      DEMO_FIXTURE_COUNTS.customers,
+    );
+    expect((await manager.get('/v1/inventory/balances')).body.total).toBe(8);
     const audit = await owner.get('/v1/audit-events');
-    expect(audit.body.items).toHaveLength(1);
-    expect(audit.body.items[0].action).toBe('DEMO_RESET');
+    expect(audit.body.items.length).toBeGreaterThan(1);
+    expect(
+      audit.body.items.some(
+        (item: { action: string }) => item.action === 'DEMO_RESET',
+      ),
+    ).toBe(true);
   });
 
   it('automatically resets a due demo on the next demo login', async () => {
@@ -162,6 +172,8 @@ describe('demo reset API', () => {
       .set('Origin', webOrigin)
       .send({ role: 'STAFF' });
     expect(login.status).toBe(200);
-    expect((await manager.get('/v1/products')).body.total).toBe(0);
+    expect((await manager.get('/v1/products')).body.total).toBe(
+      DEMO_FIXTURE_COUNTS.activeProducts,
+    );
   });
 });

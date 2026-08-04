@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { hash } from 'argon2';
 
 import { createPrismaClient } from '../src/database/prisma-client.js';
+import { nextDemoResetAt, seedDemoFixture } from '../src/demo/demo-fixture.js';
 import type { PrismaClient, Role } from '../src/generated/prisma/client.js';
 
 const demoUsers: ReadonlyArray<{
@@ -42,7 +43,7 @@ export async function seedDemoIdentity(
     where: { slug },
   });
 
-  await prisma.warehouse.upsert({
+  const warehouse = await prisma.warehouse.upsert({
     create: {
       name: 'Main Warehouse',
       organizationId: organization.id,
@@ -52,6 +53,7 @@ export async function seedDemoIdentity(
   });
 
   const passwordHash = await hash('StockPilotDemo!');
+  const userIds = new Map<Role, string>();
   for (const demoUser of demoUsers) {
     const email = `${demoUser.emailPrefix}@${slug}.stockpilot.test`;
     const user = await prisma.user.upsert({
@@ -81,7 +83,31 @@ export async function seedDemoIdentity(
         },
       },
     });
+    userIds.set(demoUser.role, user.id);
   }
+
+  const ownerUserId = userIds.get('OWNER');
+  const managerUserId = userIds.get('MANAGER');
+  const staffUserId = userIds.get('STAFF');
+  if (!ownerUserId || !managerUserId || !staffUserId) {
+    throw new Error('Demo users could not be provisioned.');
+  }
+
+  await prisma.$transaction(async (transaction) => {
+    const seeded = await seedDemoFixture(transaction, {
+      managerUserId,
+      organizationId: organization.id,
+      ownerUserId,
+      staffUserId,
+      warehouseId: warehouse.id,
+    });
+    if (seeded) {
+      await transaction.organization.update({
+        data: { nextDemoResetAt: nextDemoResetAt() },
+        where: { id: organization.id },
+      });
+    }
+  });
 }
 
 async function main(): Promise<void> {
