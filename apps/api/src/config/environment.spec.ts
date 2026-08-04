@@ -5,6 +5,7 @@ describe('parseEnvironment', () => {
     const { parseEnvironment } = await import('./environment.js');
 
     const config = parseEnvironment({
+      CSRF_SECRET: 'development-csrf-secret-with-enough-length',
       DATABASE_URL:
         'postgresql://stockpilot:stockpilot@localhost:5432/stockpilot',
       WEB_ORIGIN: 'http://localhost:3000',
@@ -24,6 +25,7 @@ describe('parseEnvironment', () => {
 
     expect(() =>
       parseEnvironment({
+        CSRF_SECRET: 'development-csrf-secret-with-enough-length',
         DATABASE_URL:
           'postgresql://stockpilot:stockpilot@localhost:5432/stockpilot',
         WEB_ORIGIN: 'http://localhost:3000',

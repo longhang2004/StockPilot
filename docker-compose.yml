@@ -7,30 +7,41 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://stockpilot:stockpilot@postgres:5432/stockpilot
+      CSRF_SECRET: local-docker-csrf-secret-at-least-32-characters
+      DATABASE_URL: postgresql://stockpilot_app:stockpilot_app@postgres:5432/stockpilot
       DEMO_MODE: 'true'
+      DEMO_ORGANIZATION_SLUG: stockpilot-demo
       NODE_ENV: production
+      MIGRATION_DATABASE_URL: postgresql://stockpilot_admin:stockpilot_admin@postgres:5432/stockpilot
       PORT: 4000
       WEB_ORIGIN: http://localhost:3000
       WEBHOOK_SIGNING_SECRET: local-docker-signing-secret
     ports:
       - '4000:4000'
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        pnpm --filter @stockpilot/api exec prisma migrate deploy &&
+        pnpm --filter @stockpilot/api prisma:seed &&
+        pnpm --filter @stockpilot/api start
 
   postgres:
     image: postgres:18-alpine
     environment:
-      POSTGRES_USER: stockpilot
-      POSTGRES_PASSWORD: stockpilot
+      POSTGRES_USER: stockpilot_admin
+      POSTGRES_PASSWORD: stockpilot_admin
       POSTGRES_DB: stockpilot
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U stockpilot -d stockpilot']
+      test: ['CMD-SHELL', 'pg_isready -U stockpilot_admin -d stockpilot']
       interval: 5s
       timeout: 5s
       retries: 10
     ports:
       - '5432:5432'
     volumes:
-      - stockpilot-postgres:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/001-roles.sql:ro
+      - stockpilot-postgres:/var/lib/postgresql
 
   web:
     build:
