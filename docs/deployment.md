@@ -37,8 +37,31 @@ Custom domains and Sentry are optional follow-up work.
 - The service builds `apps/api/Dockerfile`, runs migrations and the idempotent
   seed as a pre-deploy command, starts the API/worker, checks
   `/v1/health/ready`, and restarts on failure up to ten times.
+- This is one long-running API + pg-boss service; no second worker service is
+  needed. Generate a Railway public domain after the first healthy deploy and
+  use that URL as Vercel's `API_INTERNAL_URL`.
+- Leave **Serverless/app sleeping disabled** for this demo. The pg-boss worker
+  and scheduled reconciliation are intended to stay available continuously.
 - Generate secrets in Railway's secret store. Do not commit them or paste them
   into a deployment log.
+
+#### Railway cost and cold-start policy
+
+- Railway's Free plan includes $1 of monthly resource credit. Hobby is $5/month
+  and that subscription includes $5 of resource usage; usage beyond that
+  credit is billed at the published CPU/RAM/egress rates. An active paid
+  subscription and payment method are required for the Hobby deployment.
+- A normal persistent Railway service does not intentionally sleep, so this
+  topology has no periodic cold start. Railway's optional **Serverless** mode
+  can stop an inactive service after roughly ten minutes without outbound
+  traffic; the first request after it sleeps has a cold-boot delay. Database
+  connections or worker traffic can prevent sleep, but we do not rely on that
+  behavior for correctness.
+- Keep Serverless off for the public demo. If cost pressure makes it necessary
+  later, measure queue latency and first-request latency before enabling it, and
+  keep the `/v1/health/ready` smoke check in the release checklist.
+- Configure a low usage alert and hard limit in Railway. A hard limit protects
+  the budget by stopping workloads when the configured usage ceiling is hit.
 
 ### Neon
 
@@ -137,12 +160,15 @@ Then verify through the canonical Vercel origin:
 ## Cost and safety guardrails
 
 Use Railway Hobby and Neon usage billing only after the account owner approves
-the payment boundary. Set low usage alerts/hard limits, review usage after one
-week, and pause the public service if the demo is no longer needed. Vercel
-Hobby is sufficient for the personal portfolio web project; a custom domain,
-Sentry DSN, and narrated video are optional.
+the payment boundary. Review usage after one week and pause the public service
+if the demo is no longer needed. Vercel Hobby is sufficient for the personal
+portfolio web project; a custom domain, Sentry DSN, and narrated video are
+optional.
 
 Official provider references: [Railway config as code](https://docs.railway.com/config-as-code/reference),
 [Railway health checks](https://docs.railway.com/deployments/healthchecks),
+[Railway pricing](https://docs.railway.com/pricing/plans),
+[Railway Serverless](https://docs.railway.com/deployments/serverless),
+[Railway cost control](https://docs.railway.com/pricing/cost-control),
 [Neon pooling](https://neon.com/docs/connect/connection-pooling), and
 [Neon role behavior](https://neon.com/docs/reference/compatibility).
