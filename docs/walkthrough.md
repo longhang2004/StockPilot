@@ -1,8 +1,14 @@
 # StockPilot two-minute walkthrough
 
-Use the public landing page and the three one-click demo identities. The
-walkthrough is designed to show the product value before explaining the
-architecture.
+Use the canonical Vercel production origin once provider provisioning is
+approved. The URL is deliberately not fabricated here: update the first line
+below and the README after the first successful deployment.
+
+**Production URL:** _pending Vercel project creation_
+
+The walkthrough is designed to show the product value before explaining the
+architecture. Use the 1440px desktop viewport for the first pass and the 375px
+mobile viewport for the final pass.
 
 ## 0:00–0:20 — orient the reviewer
 
@@ -42,4 +48,13 @@ idempotent integrations.”
 
 For the mobile recording, use the 375px viewport and repeat the receipt-to-
 fulfillment path with the bottom navigation: **Overview**, **Orders**,
-**Inventory**, **More**.
+**Inventory**, **More**. Capture these stable portfolio assets after deployment:
+
+- `docs/assets/overview-desktop.png`
+- `docs/assets/orders-mobile.png`
+- `docs/assets/inventory-desktop.png`
+- `docs/assets/receipt-drawer-mobile.png`
+
+Do not capture credentials, cookies, provider dashboards, or a preview-domain
+URL. The final recording should link to the canonical Vercel origin and mention
+that the Railway/Neon worker keeps retries and reconciliation alive.

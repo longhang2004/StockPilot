@@ -6,12 +6,19 @@ RLS context, and the PostgreSQL ledger.
 
 ```mermaid
 flowchart LR
-  Browser[Next.js web] -->|same-origin /api| API[NestJS API]
+  Browser[Canonical Vercel origin] -->|same-origin /api| Web[Next.js web]
+  Web -->|API_INTERNAL_URL| API[NestJS API on Railway]
   Storefront[Signed storefront webhook] --> API
   API -->|tenant transaction + RLS| DB[(PostgreSQL)]
-  API -->|pg-boss retries| Jobs[Queue worker]
+  API -->|direct connection| Queue[(Neon stockpilot_queue)]
+  Queue --> Jobs[pg-boss worker]
   API --> Docs[OpenAPI /docs]
 ```
+
+Production uses a pooled Neon URL for application traffic, a direct migration
+URL for Prisma release commands, and a separate direct queue URL for pg-boss.
+The Railway service runs the API and worker together so readiness can require
+the queue without moving business code into serverless functions.
 
 Every tenant mutation follows the same shape:
 
@@ -38,3 +45,8 @@ Sentry is optional and receives only the redacted exception context.
 The database is authoritative for `on_hand`, `reserved`, and the movement
 ledger. `available` is always computed as `on_hand - reserved`; no UI value is
 allowed to become a second source of truth.
+
+The public demo is seeded with deterministic, organization-scoped fixture IDs.
+The first deploy only seeds an empty demo organization; Owner and automatic
+six-hour reset use the same fixture after deleting operational rows, then write
+the reset audit event and next-reset schedule in the same transaction.

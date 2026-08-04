@@ -13,10 +13,29 @@ feedback from database-backed acceptance coverage.
 | Production build       | `pnpm build`                                       | Contracts, NestJS API, and Next.js production bundles                                                     |
 | Browser acceptance     | `pnpm test:e2e`                                    | Desktop/mobile workflows and axe accessibility smoke checks                                               |
 
-The repository currently has 24 API unit tests and 7 web unit tests. The core
-branch threshold is enforced per file; the aggregate report is also emitted
-for visibility, but untested infrastructure adapters are not allowed to hide
-the domain threshold.
+The repository currently has the API/web unit suites plus integration coverage
+for the canonical seed/reset fixture and readiness policy. The core branch
+threshold is enforced per file; the aggregate report is also emitted for
+visibility, but untested infrastructure adapters are not allowed to hide the
+domain threshold.
+
+## Production-specific checks
+
+- Readiness returns `200/ready` when the database is healthy and the queue is
+  optional, and `503/degraded` when the database is down or a required queue is
+  not configured.
+- The idempotent demo seed creates 8 active products, 1 inactive product, 5
+  customers, 3 suppliers, 8 balances, matching receipt/sale ledger totals, 2
+  open alerts, six orders, one failed delivery, and one partial import.
+- Owner and automatic reset both delete, reseed, audit, and schedule the next
+  reset in one transaction; a second seed does not duplicate or overwrite
+  operational data.
+- The API binds to `0.0.0.0:$PORT`, enables Nest shutdown hooks, stops pg-boss,
+  and disconnects Prisma on SIGTERM.
+
+The live provider smoke URL and CI run identifier will be appended after the
+Vercel/Railway/Neon approval boundary is completed. Until then, the repository
+CI workflow remains the authoritative clean-environment gate.
 
 ## Expected local prerequisites
 

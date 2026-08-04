@@ -1,85 +1,148 @@
-# StockPilot deployment runbook
+# StockPilot production deployment runbook
 
-This is the smallest production-shaped deployment for the portfolio demo:
+This is the production-shaped portfolio topology:
 
 ```mermaid
 flowchart LR
-  Browser[Vercel Next.js] -->|same-origin /api proxy| API[Railway NestJS]
-  API --> DB[(Neon PostgreSQL)]
-  API --> Queue[(pg-boss database)]
-  API --> Sentry[Sentry optional]
+  Browser[Canonical Vercel origin] -->|same-origin /api rewrite| Web[Next.js web]
+  Web -->|API_INTERNAL_URL| API[Railway NestJS + pg-boss]
+  API -->|pooled app URL| DB[(Neon application database)]
+  API -->|direct queue URL| Queue[(Neon stockpilot_queue)]
 ```
 
-## Local release rehearsal
+The public demo uses the default Vercel domain. Preview deployments are not
+functional demos because the API trusts one canonical `WEB_ORIGIN` for CSRF.
+Custom domains and Sentry are optional follow-up work.
 
-1. Copy `.env.example` to `.env` and replace every placeholder secret.
-2. Start PostgreSQL with `docker compose up -d postgres`.
-3. Generate the Prisma client, apply migrations, and seed the demo:
+## Provider settings
 
-   ```bash
-   pnpm db:generate
-   pnpm --filter @stockpilot/api exec prisma migrate deploy
-   pnpm db:seed
-   ```
+### Vercel
 
-4. Run `pnpm build` and start the API and web apps with `pnpm dev`.
-5. Verify `GET /v1/health/live`, `GET /v1/health/ready`, login, receipt,
-   confirm, fulfill, duplicate webhook, and Owner reset flows.
+- Import `longhang2004/StockPilot` and set **Root Directory** to `apps/web`.
+- Enable Vercel's **Include source files outside of the Root Directory** option
+  so the workspace lockfile and `packages/contracts` are available to the
+  build.
+- Keep **Framework Preset** as Next.js and use Node.js 24 in project settings.
+- The checked-in [`apps/web/vercel.json`](../apps/web/vercel.json) runs the
+  contracts build before the web build and installs the workspace lockfile.
+- Set `API_INTERNAL_URL` to the Railway public API URL and `NODE_ENV=production`.
+- Do not expose `API_INTERNAL_URL` as a client-side variable. The rewrite keeps
+  browser requests on the Vercel origin so session cookies and CSRF checks are
+  same-origin.
 
-## Vercel web
+### Railway
 
-- Root directory: repository root.
-- Build command: `pnpm --filter @stockpilot/contracts build && pnpm --filter @stockpilot/web build`.
-- Output: Next.js standalone/server output from the web app.
-- Environment variables: `API_INTERNAL_URL` (Railway API URL) and
-  `NODE_ENV=production`.
-- Configure the Vercel domain as `WEB_ORIGIN` on Railway. The Next.js rewrite
-  keeps browser API calls same-origin so the session cookie and CSRF checks are
-  consistent.
+- Create one service from `main` and keep the repository root as the build
+  context. Railway reads [`railway.json`](../railway.json).
+- The service builds `apps/api/Dockerfile`, runs migrations and the idempotent
+  seed as a pre-deploy command, starts the API/worker, checks
+  `/v1/health/ready`, and restarts on failure up to ten times.
+- Generate secrets in Railway's secret store. Do not commit them or paste them
+  into a deployment log.
 
-## Railway API and worker
+### Neon
 
-Use one Railway service for the API and pg-boss worker. The API module starts
-the worker only when `QUEUE_DATABASE_URL` is present, which keeps local
-development deterministic. A release command should be:
+- Create the project in the region closest to Railway (Singapore/Asia when
+  available).
+- Run [`infra/postgres/provision-production.sql`](../infra/postgres/provision-production.sql)
+  with a direct migration connection and psql variables for both passwords.
+- Apply Prisma migrations through the direct migration URL. The runtime API
+  uses a pooled `stockpilot_app` URL; pg-boss uses a direct URL to the separate
+  `stockpilot_queue` database.
+- Confirm `stockpilot_app` has `rolbypassrls=false`, is not a member of
+  `neon_superuser`, and that tenant tables have both RLS and forced RLS.
+
+## Environment matrix
+
+| Variable                 | Vercel             | Railway                       | Notes                                            |
+| ------------------------ | ------------------ | ----------------------------- | ------------------------------------------------ |
+| `API_INTERNAL_URL`       | Railway public URL | —                             | Production-only rewrite target.                  |
+| `DATABASE_URL`           | —                  | pooled `stockpilot_app` URL   | Runtime queries only.                            |
+| `MIGRATION_DATABASE_URL` | —                  | direct migration URL          | Pre-deploy and seed only; do not use at runtime. |
+| `QUEUE_DATABASE_URL`     | —                  | direct `stockpilot_queue` URL | pg-boss worker database.                         |
+| `QUEUE_REQUIRED`         | —                  | `true`                        | Readiness is 503 until pg-boss starts.           |
+| `WEB_ORIGIN`             | —                  | exact Vercel origin           | No trailing slash; one canonical origin.         |
+| `NODE_ENV`               | `production`       | `production`                  | Enables secure cookies and production behavior.  |
+| `DEMO_MODE`              | —                  | `true`                        | Enables one-click demo accounts.                 |
+| `DEMO_ORGANIZATION_SLUG` | —                  | `stockpilot-demo`             | Canonical demo tenant.                           |
+| `CSRF_SECRET`            | —                  | generated secret (32+ chars)  | Rotate in Railway secret storage.                |
+| `WEBHOOK_SIGNING_SECRET` | —                  | generated secret (16+ chars)  | Share only with the signed sender.               |
+| `SESSION_COOKIE_NAME`    | —                  | `stockpilot_session`          | Change to expire all existing cookies.           |
+| `SENTRY_DSN`             | —                  | optional                      | Leave empty when Sentry is not configured.       |
+
+## First deployment order
+
+1. Create the Vercel project and record its canonical production origin.
+2. Create the Neon project, provision roles and `stockpilot_queue`, then apply
+   migrations with the direct migration URL.
+3. Run the seed once. It creates identities and the canonical fixture only when
+   the demo organization has no operational data.
+4. Create the Railway service from `main`, set the environment matrix, and
+   deploy. Wait for migrations, seed, and readiness to finish.
+5. Set Railway's public URL as Vercel `API_INTERNAL_URL` and redeploy Vercel.
+6. Run the smoke checklist below from the production origin.
+7. Enable auto-deploy from `main`; require CI, block force-pushes and branch
+   deletion, and keep the default branch as `main`.
+
+The Railway and Neon Hobby/Launch billing steps are approval boundaries. Do not
+enable billing or accept provider OAuth on behalf of the project owner.
+
+## Routine release
+
+1. Merge a reviewed change to protected `main` after CI is green.
+2. Railway builds the Docker image and runs `prisma migrate deploy` followed by
+   the idempotent seed before swapping traffic.
+3. Confirm readiness, queue scheduling, and the release log. Vercel then builds
+   the web project from the same commit.
+4. Run the smoke paths that touch the changed area and record the release URL
+   in the test report.
+
+## Migration failure, rollback, and restore
+
+- A non-zero pre-deploy command prevents promotion. Read the failed migration
+  log and fix it in a reviewed migration; never mark `_prisma_migrations`
+  manually.
+- For an application regression, roll Railway and Vercel back to the previous
+  known-good commit. Do not roll back a schema migration unless the migration
+  explicitly includes a safe backwards-compatible down path.
+- For database corruption or accidental data loss, create a Neon point-in-time
+  restore/branch, apply migrations using the direct migration URL, run the role
+  and ledger verification queries, then point Railway to the restored pooled
+  URL.
+- Restore queue data separately when needed. pg-boss jobs are retryable; a
+  duplicate integration delivery must remain deduplicated by its external ID.
+
+## Production smoke checklist
 
 ```bash
-pnpm --filter @stockpilot/api exec prisma migrate deploy
-pnpm --filter @stockpilot/api prisma:seed
+curl -fsS "$API_URL/v1/health/live"
+curl -fsS "$API_URL/v1/health/ready"
+curl -fsS "$API_URL/docs" >/dev/null
+curl -fsS "$API_URL/openapi.json" >/dev/null
 ```
 
-The start command is `pnpm --filter @stockpilot/api start`. Set:
+Then verify through the canonical Vercel origin:
 
-- `DATABASE_URL`: application role with `NOBYPASSRLS`.
-- `MIGRATION_DATABASE_URL`: migration-only role, used only by the release step.
-- `QUEUE_DATABASE_URL`: dedicated pg-boss database or role.
-- `WEB_ORIGIN`: exact Vercel origin, without a trailing slash.
-- `CSRF_SECRET`, `WEBHOOK_SIGNING_SECRET`, and `SESSION_COOKIE_NAME`.
-- `DEMO_MODE` and `DEMO_ORGANIZATION_SLUG` for the public portfolio demo.
-- `SENTRY_DSN` optionally; leave it blank to keep error reporting disabled.
+- one-click Owner, Manager, and Staff login;
+- Manager receipt and order confirmation;
+- Staff fulfillment and the resulting sale movement;
+- duplicate webhook creates one Draft order;
+- Owner reset recreates the canonical fixture;
+- Secure/HttpOnly/SameSite cookies and CSRF through `/api`;
+- failed integration retry is accepted by pg-boss and reconciliation is
+  scheduled;
+- runtime role cannot bypass RLS or update/delete ledger rows;
+- desktop/mobile screenshots and axe smoke remain green.
 
-Keep the migration role out of the runtime environment after deployment. Do
-not grant `BYPASSRLS` to the API role. Use managed secret storage for all
-values containing credentials or signing material.
+## Cost and safety guardrails
 
-## Neon PostgreSQL
+Use Railway Hobby and Neon usage billing only after the account owner approves
+the payment boundary. Set low usage alerts/hard limits, review usage after one
+week, and pause the public service if the demo is no longer needed. Vercel
+Hobby is sufficient for the personal portfolio web project; a custom domain,
+Sentry DSN, and narrated video are optional.
 
-Create the application role and grants from `infra/postgres/init.sql` before
-the first migration. Run migrations against the migration URL, then verify
-that the runtime URL can read and write tenant data but cannot bypass RLS.
-The API depends on PostgreSQL extensions and row-level policies created by the
-Prisma migrations; do not edit production tables manually.
-
-## Smoke checklist
-
-- `/v1/health/live` returns `200` without database access.
-- `/v1/health/ready` returns `200` only after database and queue dependencies
-  are ready.
-- Three demo accounts resolve to one organization with distinct roles.
-- A receipt changes balance and ledger together.
-- Two concurrent confirmations cannot reserve more than available stock.
-- Replaying a webhook delivery does not create a second order.
-- Logs contain trace/actor/organization metadata but redact cookies, tokens,
-  URLs with credentials, CSRF values, and webhook signatures.
-- The Vercel domain can complete a login and state-changing request through the
-  same-origin `/api` rewrite.
+Official provider references: [Railway config as code](https://docs.railway.com/config-as-code/reference),
+[Railway health checks](https://docs.railway.com/deployments/healthchecks),
+[Neon pooling](https://neon.com/docs/connect/connection-pooling), and
+[Neon role behavior](https://neon.com/docs/reference/compatibility).
