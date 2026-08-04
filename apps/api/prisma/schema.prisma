@@ -13,12 +13,39 @@ enum Role {
   STAFF
 }
 
+enum StockMovementType {
+  RECEIPT
+  SALE
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+}
+
+enum LowStockAlertStatus {
+  OPEN
+  RESOLVED
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  FULFILLED
+  CANCELLED
+}
+
+enum IntegrationDeliveryStatus {
+  RECEIVED
+  PROCESSING
+  SUCCEEDED
+  FAILED
+}
+
 model User {
   id           String       @id @default(uuid()) @db.Uuid
   email        String       @unique @db.VarChar(320)
   passwordHash String       @map("password_hash") @db.Text
   displayName  String       @map("display_name") @db.VarChar(120)
   memberships  Membership[]
+  auditEvents  AuditEvent[] @relation("AuditActor")
   createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -26,16 +53,31 @@ model User {
 }
 
 model Organization {
-  id              String       @id @default(uuid()) @db.Uuid
-  name            String       @db.VarChar(160)
-  slug            String       @unique @db.VarChar(80)
-  currency        String       @default("USD") @db.Char(3)
-  isDemo          Boolean      @default(false) @map("is_demo")
-  nextDemoResetAt DateTime?    @map("next_demo_reset_at") @db.Timestamptz(3)
-  memberships     Membership[]
-  warehouse       Warehouse?
-  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id                    String                @id @default(uuid()) @db.Uuid
+  name                  String                @db.VarChar(160)
+  slug                  String                @unique @db.VarChar(80)
+  currency              String                @default("USD") @db.Char(3)
+  isDemo                Boolean               @default(false) @map("is_demo")
+  nextDemoResetAt       DateTime?             @map("next_demo_reset_at") @db.Timestamptz(3)
+  memberships           Membership[]
+  warehouse             Warehouse?
+  products              Product[]
+  customers             Customer[]
+  suppliers             Supplier[]
+  inventoryBalances     InventoryBalance[]
+  stockMovements        StockMovement[]
+  goodsReceipts         GoodsReceipt[]
+  goodsReceiptLines     GoodsReceiptLine[]
+  lowStockAlerts        LowStockAlert[]
+  salesOrders           SalesOrder[]
+  salesOrderLines       SalesOrderLine[]
+  orderTransitions      OrderTransition[]
+  integrationDeliveries IntegrationDelivery[]
+  productImportRuns     ProductImportRun[]
+  auditEvents           AuditEvent[]
+  idempotencyRecords    IdempotencyRecord[]
+  createdAt             DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@map("organizations")
 }
@@ -72,14 +114,313 @@ model Session {
 }
 
 model Warehouse {
-  id             String       @id @default(uuid()) @db.Uuid
-  organizationId String       @unique @map("organization_id") @db.Uuid
-  name           String       @db.VarChar(120)
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id                String             @id @default(uuid()) @db.Uuid
+  organizationId    String             @unique @map("organization_id") @db.Uuid
+  name              String             @db.VarChar(120)
+  organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  inventoryBalances InventoryBalance[]
+  stockMovements    StockMovement[]
+  goodsReceipts     GoodsReceipt[]
+  lowStockAlerts    LowStockAlert[]
+  salesOrders       SalesOrder[]
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@unique([organizationId, id])
   @@map("warehouses")
 }
 
+model Product {
+  id                String             @id @default(uuid()) @db.Uuid
+  organizationId    String             @map("organization_id") @db.Uuid
+  sku               String             @db.VarChar(64)
+  name              String             @db.VarChar(160)
+  description       String?            @db.Text
+  salePrice         Decimal            @map("sale_price") @db.Decimal(12, 2)
+  reorderPoint      Int                @default(0) @map("reorder_point")
+  isActive          Boolean            @default(true) @map("is_active")
+  organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  inventoryBalances InventoryBalance[]
+  stockMovements    StockMovement[]
+  goodsReceiptLines GoodsReceiptLine[]
+  lowStockAlerts    LowStockAlert[]
+  salesOrderLines   SalesOrderLine[]
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([organizationId, sku])
+  @@unique([organizationId, id])
+  @@index([organizationId, name])
+  @@map("products")
+}
+
+model Customer {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  companyName    String       @map("company_name") @db.VarChar(160)
+  contactName    String?      @map("contact_name") @db.VarChar(160)
+  email          String?      @db.VarChar(320)
+  phone          String?      @db.VarChar(40)
+  isActive       Boolean      @default(true) @map("is_active")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  salesOrders    SalesOrder[]
+
+  @@unique([organizationId, id])
+  @@index([organizationId, companyName])
+  @@map("customers")
+}
+
+model Supplier {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @map("organization_id") @db.Uuid
+  companyName    String         @map("company_name") @db.VarChar(160)
+  contactName    String?        @map("contact_name") @db.VarChar(160)
+  email          String?        @db.VarChar(320)
+  phone          String?        @db.VarChar(40)
+  isActive       Boolean        @default(true) @map("is_active")
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  goodsReceipts  GoodsReceipt[]
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([organizationId, id])
+  @@index([organizationId, companyName])
+  @@map("suppliers")
+}
+
+model InventoryBalance {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  warehouseId    String       @map("warehouse_id") @db.Uuid
+  productId      String       @map("product_id") @db.Uuid
+  onHand         Int          @default(0) @map("on_hand")
+  reserved       Int          @default(0)
+  version        Int          @default(0)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  warehouse      Warehouse    @relation(fields: [organizationId, warehouseId], references: [organizationId, id], onDelete: Cascade)
+  product        Product      @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([organizationId, warehouseId, productId])
+  @@index([organizationId, productId])
+  @@map("inventory_balances")
+}
+
+model StockMovement {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @map("organization_id") @db.Uuid
+  warehouseId    String            @map("warehouse_id") @db.Uuid
+  productId      String            @map("product_id") @db.Uuid
+  type           StockMovementType
+  quantityDelta  Int               @map("quantity_delta")
+  onHandAfter    Int               @map("on_hand_after")
+  referenceType  String            @map("reference_type") @db.VarChar(40)
+  referenceId    String            @map("reference_id") @db.Uuid
+  reason         String?           @db.VarChar(500)
+  actorUserId    String?           @map("actor_user_id") @db.Uuid
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  warehouse      Warehouse         @relation(fields: [organizationId, warehouseId], references: [organizationId, id], onDelete: Restrict)
+  product        Product           @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Restrict)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([organizationId, productId, createdAt])
+  @@index([organizationId, referenceType, referenceId])
+  @@map("stock_movements")
+}
+
+model GoodsReceipt {
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String             @map("organization_id") @db.Uuid
+  warehouseId    String             @map("warehouse_id") @db.Uuid
+  supplierId     String             @map("supplier_id") @db.Uuid
+  receiptNumber  String             @map("receipt_number") @db.VarChar(80)
+  receivedAt     DateTime           @map("received_at") @db.Timestamptz(3)
+  note           String?            @db.VarChar(1000)
+  actorUserId    String?            @map("actor_user_id") @db.Uuid
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  warehouse      Warehouse          @relation(fields: [organizationId, warehouseId], references: [organizationId, id], onDelete: Restrict)
+  supplier       Supplier           @relation(fields: [organizationId, supplierId], references: [organizationId, id], onDelete: Restrict)
+  lines          GoodsReceiptLine[]
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([organizationId, receiptNumber])
+  @@unique([organizationId, id])
+  @@index([organizationId, receivedAt])
+  @@map("goods_receipts")
+}
+
+model GoodsReceiptLine {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  goodsReceiptId String       @map("goods_receipt_id") @db.Uuid
+  productId      String       @map("product_id") @db.Uuid
+  quantity       Int
+  unitCost       Decimal?     @map("unit_cost") @db.Decimal(12, 2)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  goodsReceipt   GoodsReceipt @relation(fields: [organizationId, goodsReceiptId], references: [organizationId, id], onDelete: Cascade)
+  product        Product      @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Restrict)
+
+  @@index([organizationId, goodsReceiptId])
+  @@map("goods_receipt_lines")
+}
+
+model LowStockAlert {
+  id              String              @id @default(uuid()) @db.Uuid
+  organizationId  String              @map("organization_id") @db.Uuid
+  warehouseId     String              @map("warehouse_id") @db.Uuid
+  productId       String              @map("product_id") @db.Uuid
+  status          LowStockAlertStatus @default(OPEN)
+  availableAtOpen Int                 @map("available_at_open")
+  reorderPoint    Int                 @map("reorder_point")
+  openedAt        DateTime            @default(now()) @map("opened_at") @db.Timestamptz(3)
+  resolvedAt      DateTime?           @map("resolved_at") @db.Timestamptz(3)
+  organization    Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  warehouse       Warehouse           @relation(fields: [organizationId, warehouseId], references: [organizationId, id], onDelete: Cascade)
+  product         Product             @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Cascade)
+
+  @@index([organizationId, status, openedAt])
+  @@index([organizationId, warehouseId, productId])
+  @@map("low_stock_alerts")
+}
+
+model AuditEvent {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  actorUserId    String?      @map("actor_user_id") @db.Uuid
+  action         String       @db.VarChar(100)
+  entityType     String       @map("entity_type") @db.VarChar(80)
+  entityId       String       @map("entity_id") @db.Uuid
+  before         Json?
+  after          Json?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor          User?        @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, entityType, entityId])
+  @@map("audit_events")
+}
+
+model IdempotencyRecord {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  scope          String       @db.VarChar(80)
+  key            String       @db.VarChar(255)
+  fingerprint    String       @db.Char(64)
+  responseStatus Int          @map("response_status")
+  responseBody   Json         @map("response_body")
+  expiresAt      DateTime     @map("expires_at") @db.Timestamptz(3)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([organizationId, scope, key])
+  @@index([expiresAt])
+  @@map("idempotency_records")
+}
+
+model SalesOrder {
+  id                  String            @id @default(uuid()) @db.Uuid
+  organizationId      String            @map("organization_id") @db.Uuid
+  warehouseId         String            @map("warehouse_id") @db.Uuid
+  customerId          String            @map("customer_id") @db.Uuid
+  orderNumber         String            @map("order_number") @db.VarChar(80)
+  status              OrderStatus       @default(DRAFT)
+  customerCompanyName String            @map("customer_company_name") @db.VarChar(160)
+  customerContactName String?           @map("customer_contact_name") @db.VarChar(160)
+  customerEmail       String?           @map("customer_email") @db.VarChar(320)
+  note                String?           @db.VarChar(1000)
+  subtotal            Decimal           @default(0) @db.Decimal(12, 2)
+  createdByUserId     String            @map("created_by_user_id") @db.Uuid
+  confirmedAt         DateTime?         @map("confirmed_at") @db.Timestamptz(3)
+  fulfilledAt         DateTime?         @map("fulfilled_at") @db.Timestamptz(3)
+  cancelledAt         DateTime?         @map("cancelled_at") @db.Timestamptz(3)
+  organization        Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  warehouse           Warehouse         @relation(fields: [organizationId, warehouseId], references: [organizationId, id], onDelete: Restrict)
+  customer            Customer          @relation(fields: [organizationId, customerId], references: [organizationId, id], onDelete: Restrict)
+  lines               SalesOrderLine[]
+  transitions         OrderTransition[]
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([organizationId, orderNumber])
+  @@unique([organizationId, id])
+  @@index([organizationId, status, createdAt])
+  @@map("sales_orders")
+}
+
+model SalesOrderLine {
+  id                  String       @id @default(uuid()) @db.Uuid
+  organizationId      String       @map("organization_id") @db.Uuid
+  salesOrderId        String       @map("sales_order_id") @db.Uuid
+  productId           String       @map("product_id") @db.Uuid
+  quantity            Int
+  skuSnapshot         String       @map("sku_snapshot") @db.VarChar(64)
+  productNameSnapshot String       @map("product_name_snapshot") @db.VarChar(160)
+  unitPrice           Decimal      @map("unit_price") @db.Decimal(12, 2)
+  lineTotal           Decimal      @map("line_total") @db.Decimal(12, 2)
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  salesOrder          SalesOrder   @relation(fields: [organizationId, salesOrderId], references: [organizationId, id], onDelete: Cascade)
+  product             Product      @relation(fields: [organizationId, productId], references: [organizationId, id], onDelete: Restrict)
+
+  @@unique([organizationId, salesOrderId, productId])
+  @@index([organizationId, productId])
+  @@map("sales_order_lines")
+}
+
+model OrderTransition {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  salesOrderId   String       @map("sales_order_id") @db.Uuid
+  fromStatus     OrderStatus? @map("from_status")
+  toStatus       OrderStatus  @map("to_status")
+  actorUserId    String       @map("actor_user_id") @db.Uuid
+  note           String?      @db.VarChar(500)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  salesOrder     SalesOrder   @relation(fields: [organizationId, salesOrderId], references: [organizationId, id], onDelete: Cascade)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([organizationId, salesOrderId, createdAt])
+  @@map("order_transitions")
+}
+
+model IntegrationDelivery {
+  id                 String                    @id @default(uuid()) @db.Uuid
+  organizationId     String                    @map("organization_id") @db.Uuid
+  externalDeliveryId String                    @map("external_delivery_id") @db.VarChar(160)
+  eventType          String                    @map("event_type") @db.VarChar(120)
+  payload            Json
+  status             IntegrationDeliveryStatus @default(RECEIVED)
+  attempts           Int                       @default(0)
+  lastError          String?                   @map("last_error") @db.VarChar(1000)
+  salesOrderId       String?                   @map("sales_order_id") @db.Uuid
+  processedAt        DateTime?                 @map("processed_at") @db.Timestamptz(3)
+  organization       Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt          DateTime                  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([organizationId, externalDeliveryId])
+  @@index([organizationId, status, createdAt])
+  @@map("integration_deliveries")
+}
+
+model ProductImportRun {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @map("organization_id") @db.Uuid
+  fileName        String       @map("file_name") @db.VarChar(255)
+  status          String       @db.VarChar(40)
+  rowsTotal       Int          @map("rows_total")
+  rowsValid       Int          @map("rows_valid")
+  rowsInvalid     Int          @map("rows_invalid")
+  validRows       Json?        @map("valid_rows")
+  errors          Json?
+  createdByUserId String       @map("created_by_user_id") @db.Uuid
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([organizationId, createdAt])
+  @@map("product_import_runs")
+}

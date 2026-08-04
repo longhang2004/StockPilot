@@ -5,19 +5,30 @@ import {
   type CanActivate,
   type ExecutionContext,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 
 import { ENVIRONMENT } from '../config/environment.module.js';
 import type { Environment } from '../config/environment.js';
 import type { AuthenticatedRequest } from './auth-context.js';
+import { CSRF_EXEMPT_ROUTE } from './csrf-exempt.decorator.js';
 import { verifyCsrfToken } from './session-credentials.js';
 
 const safeMethods = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 @Injectable()
 export class CsrfGuard implements CanActivate {
-  constructor(@Inject(ENVIRONMENT) private readonly environment: Environment) {}
+  constructor(
+    @Inject(ENVIRONMENT) private readonly environment: Environment,
+    @Inject(Reflector) private readonly reflector: Reflector,
+  ) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const isExempt = this.reflector.getAllAndOverride<boolean>(
+      CSRF_EXEMPT_ROUTE,
+      [context.getHandler(), context.getClass()],
+    );
+    if (isExempt) return true;
+
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     if (safeMethods.has(request.method)) {
       return true;

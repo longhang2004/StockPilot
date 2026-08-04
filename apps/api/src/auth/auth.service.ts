@@ -48,9 +48,20 @@ export class AuthService {
     if (!this.environment.DEMO_MODE) {
       throw new UnauthorizedException('Demo login is disabled.');
     }
-    const membership = await this.findDemoMembership(role);
+    let membership = await this.findDemoMembership(role);
     if (!membership) {
       throw new UnauthorizedException('Demo account is unavailable.');
+    }
+
+    if (
+      membership.organization.nextDemoResetAt &&
+      membership.organization.nextDemoResetAt.getTime() <= Date.now()
+    ) {
+      await this.resetDueDemoOrganization(membership.organization.id);
+      membership = await this.findDemoMembership(role);
+      if (!membership) {
+        throw new UnauthorizedException('Demo account is unavailable.');
+      }
     }
 
     return this.createSession(membership);
@@ -80,6 +91,36 @@ export class AuthService {
         },
         role,
       },
+    });
+  }
+
+  private async resetDueDemoOrganization(
+    organizationId: string,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.$executeRaw`
+        SELECT pg_advisory_xact_lock(hashtextextended(${`demo-reset:${organizationId}`}, 0))
+      `;
+      const organization = await transaction.organization.findUnique({
+        select: { isDemo: true, nextDemoResetAt: true },
+        where: { id: organizationId },
+      });
+      if (
+        !organization?.isDemo ||
+        !organization.nextDemoResetAt ||
+        organization.nextDemoResetAt.getTime() > Date.now()
+      ) {
+        return;
+      }
+      await transaction.$executeRaw`
+        SELECT stockpilot_reset_demo_data(${organizationId}::uuid)
+      `;
+      await transaction.organization.update({
+        data: {
+          nextDemoResetAt: new Date(Date.now() + 6 * 60 * 60 * 1000),
+        },
+        where: { id: organizationId },
+      });
     });
   }
 

@@ -116,4 +116,117 @@ describe('tenant database isolation', () => {
       ),
     ).rejects.toMatchObject({ code: 'P2002' });
   });
+
+  it('isolates catalog rows and makes the stock ledger append-only for the app role', async () => {
+    const { TenantDatabase } =
+      await import('../src/database/tenant-database.js');
+    const tenantDatabase = new TenantDatabase(app);
+    const suffix = randomUUID();
+    const [organizationA, organizationB] = await Promise.all([
+      admin.organization.create({
+        data: { name: 'Catalog RLS A', slug: `rls-test-catalog-a-${suffix}` },
+      }),
+      admin.organization.create({
+        data: { name: 'Catalog RLS B', slug: `rls-test-catalog-b-${suffix}` },
+      }),
+    ]);
+    const [warehouseA] = await Promise.all([
+      tenantDatabase.withTenant(
+        { organizationId: organizationA.id },
+        (transaction) =>
+          transaction.warehouse.create({
+            data: { name: 'Warehouse A', organizationId: organizationA.id },
+          }),
+      ),
+      tenantDatabase.withTenant(
+        { organizationId: organizationB.id },
+        (transaction) =>
+          transaction.warehouse.create({
+            data: { name: 'Warehouse B', organizationId: organizationB.id },
+          }),
+      ),
+    ]);
+    const productA = await tenantDatabase.withTenant(
+      { organizationId: organizationA.id },
+      (transaction) =>
+        transaction.product.create({
+          data: {
+            name: 'Tenant A Product',
+            organizationId: organizationA.id,
+            reorderPoint: 2,
+            salePrice: '10.00',
+            sku: `A-${suffix}`,
+          },
+        }),
+    );
+    await tenantDatabase.withTenant(
+      { organizationId: organizationB.id },
+      (transaction) =>
+        transaction.product.create({
+          data: {
+            name: 'Tenant B Product',
+            organizationId: organizationB.id,
+            reorderPoint: 2,
+            salePrice: '10.00',
+            sku: `B-${suffix}`,
+          },
+        }),
+    );
+
+    const visibleProducts = await tenantDatabase.withTenant(
+      { organizationId: organizationA.id },
+      (transaction) => transaction.product.findMany(),
+    );
+    expect(visibleProducts.map((product) => product.id)).toEqual([productA.id]);
+    await expect(app.product.findMany()).resolves.toEqual([]);
+    await expect(
+      tenantDatabase.withTenant(
+        { organizationId: organizationA.id },
+        (transaction) =>
+          transaction.product.create({
+            data: {
+              name: 'Cross-tenant write',
+              organizationId: organizationB.id,
+              reorderPoint: 0,
+              salePrice: '1.00',
+              sku: `CROSS-${suffix}`,
+            },
+          }),
+      ),
+    ).rejects.toBeDefined();
+
+    const movement = await tenantDatabase.withTenant(
+      { organizationId: organizationA.id },
+      (transaction) =>
+        transaction.stockMovement.create({
+          data: {
+            onHandAfter: 1,
+            organizationId: organizationA.id,
+            productId: productA.id,
+            quantityDelta: 1,
+            referenceId: randomUUID(),
+            referenceType: 'TEST_RECEIPT',
+            type: 'RECEIPT',
+            warehouseId: warehouseA.id,
+          },
+        }),
+    );
+    await expect(
+      tenantDatabase.withTenant(
+        { organizationId: organizationA.id },
+        (transaction) =>
+          transaction.stockMovement.update({
+            data: { reason: 'Ledger rewrite attempt' },
+            where: { id: movement.id },
+          }),
+      ),
+    ).rejects.toBeDefined();
+    await expect(
+      tenantDatabase.withTenant(
+        { organizationId: organizationA.id },
+        (transaction) =>
+          transaction.stockMovement.delete({ where: { id: movement.id } }),
+      ),
+    ).rejects.toBeDefined();
+  });
 });

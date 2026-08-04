@@ -757,7 +757,8 @@ footer p {
 
 .secondary-button,
 .panel-heading button,
-.work-row button {
+.work-row button,
+.work-row a {
   background: white;
   border: 1px solid var(--line);
   border-radius: 0.45rem;
@@ -767,6 +768,12 @@ footer p {
   font-weight: 750;
   min-height: 2.3rem;
   padding-inline: 0.8rem;
+}
+
+.work-row a {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
 }
 
 .secondary-button {
@@ -939,6 +946,85 @@ footer p {
     gap: 1rem;
   }
 
+  .section-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .section-page-heading .secondary-button {
+    width: 100%;
+  }
+
+  .guidance-grid,
+  .settings-layout,
+  .more-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resource-table-wrap {
+    overflow: visible;
+  }
+
+  .resource-table {
+    min-width: 0;
+  }
+
+  .resource-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .resource-table,
+  .resource-table tbody,
+  .resource-table tr,
+  .resource-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .resource-table tr {
+    border-bottom: 1px solid var(--line);
+    padding: 0.55rem 1rem;
+  }
+
+  .resource-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  .resource-table td {
+    align-items: baseline;
+    border-bottom: 0;
+    display: flex;
+    font-size: 0.78rem;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0;
+    text-align: right;
+  }
+
+  .resource-table td::before {
+    color: var(--muted);
+    content: attr(data-label);
+    font-size: 0.64rem;
+    font-weight: 750;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .quick-form {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .quick-form .secondary-button {
+    width: 100%;
+  }
+
   .workspace-stats {
     grid-template-columns: 1fr 1fr;
   }
@@ -961,6 +1047,244 @@ footer p {
     font-size: 0.66rem;
     font-weight: 700;
     text-align: center;
+  }
+}
+
+.mobile-nav-active {
+  color: #ffffff !important;
+}
+
+.empty-activity {
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 1.4rem 1rem;
+}
+
+.workspace-section-page {
+  margin: 2.4rem auto 0;
+  max-width: 1260px;
+}
+
+.section-page-heading {
+  align-items: end;
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  margin-bottom: 1.7rem;
+}
+
+.section-page-heading h1 {
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+  margin: 0 0 0.45rem;
+  max-width: none;
+}
+
+.section-page-heading p:not(.kicker) {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0;
+  max-width: 44rem;
+}
+
+.resource-table-wrap,
+.empty-panel,
+.guidance-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+}
+
+.resource-table-wrap {
+  overflow-x: auto;
+}
+
+.resource-table {
+  border-collapse: collapse;
+  min-width: 680px;
+  width: 100%;
+}
+
+.resource-table th,
+.resource-table td {
+  border-bottom: 1px solid var(--line);
+  font-size: 0.75rem;
+  padding: 0.9rem 1rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.resource-table th {
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.resource-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.resource-table td:nth-child(n + 2) {
+  font-variant-numeric: tabular-nums;
+}
+
+.empty-panel {
+  padding: 2.2rem;
+}
+
+.empty-panel strong,
+.guidance-card h2 {
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.empty-panel p,
+.guidance-card p {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin: 0.4rem 0 0;
+}
+
+.inline-error {
+  background: #fee6dd;
+  border: 1px solid #f2b9a5;
+  border-radius: 0.65rem;
+  color: #842b19;
+  font-size: 0.8rem;
+  padding: 1rem;
+}
+
+.quick-form {
+  align-items: end;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1.2fr 1fr 1fr 0.65fr auto;
+  margin-top: 0.8rem;
+  padding: 1rem;
+}
+
+.quick-form h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.quick-form .kicker {
+  font-size: 0.58rem;
+  margin-bottom: 0.2rem;
+}
+
+.quick-form label {
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.66rem;
+  font-weight: 750;
+  gap: 0.3rem;
+}
+
+.quick-form select,
+.quick-form input {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  color: var(--ink);
+  font: inherit;
+  min-height: 2.35rem;
+  padding-inline: 0.6rem;
+}
+
+.quick-form .secondary-button {
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.form-status {
+  color: var(--brand-dark);
+  grid-column: 1 / -1;
+}
+
+.guidance-grid,
+.settings-layout,
+.more-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.settings-layout {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.guidance-card {
+  min-height: 11rem;
+  padding: 1.2rem;
+}
+
+.guidance-card h2 {
+  margin: 1.2rem 0 0;
+}
+
+.guidance-card .secondary-button {
+  border: 0;
+  cursor: pointer;
+  margin-top: 1.2rem;
+}
+
+.step-number {
+  color: var(--brand);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.muted-note {
+  color: var(--muted);
+  display: block;
+  font-size: 0.68rem;
+  margin-top: 0.8rem;
+}
+
+.success-note {
+  color: var(--brand-dark);
+  display: block;
+  font-size: 0.68rem;
+  margin-top: 0.7rem;
+}
+
+.more-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.more-link {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  display: flex;
+  justify-content: space-between;
+  min-height: 4.2rem;
+  padding: 1rem;
+}
+
+.more-link:hover {
+  border-color: #8db8a2;
+  background: var(--brand-soft);
+}
+
+@media (max-width: 760px) {
+  .quick-form {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .quick-form .secondary-button {
+    width: 100%;
   }
 }
 

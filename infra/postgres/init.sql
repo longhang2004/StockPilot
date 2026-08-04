@@ -22,7 +22,10 @@ BEGIN
 END
 $$;
 GRANT USAGE ON SCHEMA public TO stockpilot_app;
+-- Migrations grant the minimum table privileges explicitly. Keeping default
+-- privileges empty prevents a newly-created tenant table from accidentally
+-- becoming writable by the runtime role.
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO stockpilot_app;
+  REVOKE ALL ON TABLES FROM stockpilot_app;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-  GRANT USAGE, SELECT ON SEQUENCES TO stockpilot_app;
+  REVOKE ALL ON SEQUENCES FROM stockpilot_app;

@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 import { parseEnvironment } from './config/environment.js';
+import { ProblemDetailsFilter } from './problem-details.filter.js';
 
 export function configureApplication(app: INestApplication): void {
   const environment = parseEnvironment(process.env);
@@ -15,6 +16,7 @@ export function configureApplication(app: INestApplication): void {
     credentials: true,
     origin: environment.WEB_ORIGIN,
   });
+  app.useGlobalFilters(new ProblemDetailsFilter());
 
   const openApiConfig = new DocumentBuilder()
     .setTitle('StockPilot API')
@@ -24,4 +26,12 @@ export function configureApplication(app: INestApplication): void {
     .build();
   const document = SwaggerModule.createDocument(app, openApiConfig);
   SwaggerModule.setup('docs', app, document);
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .get(
+      '/openapi.json',
+      (_request: unknown, response: { json(value: unknown): void }) =>
+        response.json(document),
+    );
 }

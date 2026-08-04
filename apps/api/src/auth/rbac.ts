@@ -12,6 +12,7 @@ export type Permission =
   | 'order:confirm'
   | 'order:draft:write'
   | 'order:fulfill'
+  | 'order:read'
   | 'organization:reset-demo'
   | 'organization:settings:write'
   | 'team:read';
@@ -19,6 +20,7 @@ export type Permission =
 const staffPermissions = new Set<Permission>([
   'catalog:read',
   'inventory:read',
+  'order:read',
   'order:draft:write',
   'order:fulfill',
 ]);

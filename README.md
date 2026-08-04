@@ -36,9 +36,52 @@ pnpm test
 pnpm build
 ```
 
-The full architecture, data model, security trade-offs, demo accounts, and
-deployment guide will be expanded as the corresponding implementation phases
-land.
+## What is implemented
+
+- A modular monolith split into `apps/web`, `apps/api`, and
+  `packages/contracts`; PostgreSQL is the source of truth for tenant data.
+- Catalog and partners with inactive lifecycle, CSV preview/commit/export, and
+  row-level error downloads.
+- An append-only stock ledger with atomic receipts, compensating adjustments,
+  low-stock alert transitions, and `on_hand >= reserved >= 0` enforcement.
+- Draft → confirmed → fulfilled/cancelled orders with price/SKU snapshots,
+  deterministic balance locks, and concurrent confirmation protection.
+- HMAC-signed storefront webhooks, delivery deduplication, failed-delivery
+  retry, RFC 9457 problem details, audit events, and Owner-only demo reset.
+- Responsive `/app` routes for the operational overview, orders, inventory,
+  products, partners, receipts, imports, integrations, audit, and settings.
+
+Every state-changing receipt, adjustment, order transition, import commit,
+integration retry, and demo reset requires an `Idempotency-Key`. The same key
+and payload replay the original response; reusing a key with another payload
+returns `409`.
+
+## API surface
+
+The versioned API is under `/v1`. Health checks are `/v1/health/live` and
+`/v1/health/ready`; interactive OpenAPI is at `/docs` and the JSON document is
+available at `/openapi.json`.
+
+Important workflow routes include `/v1/products`, `/v1/inventory/balances`,
+`/v1/receipts`, `/v1/orders`, `/v1/dashboard/overview`,
+`/v1/product-imports/preview`, `/v1/webhooks/mock-storefront/orders`, and
+`/v1/organization/demo-reset`.
+
+## Security boundary
+
+The client never chooses its organization. The API derives tenant context from
+the opaque session and sets it inside every transaction; tenant tables also use
+forced PostgreSQL RLS. The runtime role has `NOBYPASSRLS`, and ledger/audit
+tables revoke update/delete privileges. Passwords use Argon2id, session cookies
+are HttpOnly/SameSite, browser writes require Origin + CSRF validation, and
+webhook writes require a deployment signing secret.
+
+## Deployment shape
+
+For a portfolio deployment, run the Next.js web app on Vercel, the API/job
+runner on Railway, and PostgreSQL on Neon. Set `DATABASE_URL` to the runtime
+role and `MIGRATION_DATABASE_URL` to a migration role, run `prisma migrate
+deploy` during release, then verify `/v1/health/ready` before serving traffic.
 
 ## Demo identities
 
