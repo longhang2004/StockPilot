@@ -17,6 +17,11 @@ describe('HealthController', () => {
             .JobRunnerService,
           useValue: { queueStatus: vi.fn().mockReturnValue('not_configured') },
         },
+        {
+          provide: (await import('../config/environment.module.js'))
+            .ENVIRONMENT,
+          useValue: { QUEUE_REQUIRED: false },
+        },
       ],
     }).compile();
 
@@ -44,12 +49,91 @@ describe('HealthController', () => {
             .JobRunnerService,
           useValue: { queueStatus: vi.fn().mockReturnValue('not_configured') },
         },
+        {
+          provide: (await import('../config/environment.module.js'))
+            .ENVIRONMENT,
+          useValue: { QUEUE_REQUIRED: false },
+        },
       ],
     }).compile();
 
-    await expect(moduleRef.get(HealthController).ready()).resolves.toEqual({
+    const response = { status: vi.fn() };
+    await expect(
+      moduleRef.get(HealthController).ready(response),
+    ).resolves.toEqual({
       checks: { database: 'ok', queue: 'not_configured' },
       status: 'ready',
     });
+    expect(response.status).not.toHaveBeenCalled();
+  });
+
+  it('returns degraded readiness when the required queue is not configured', async () => {
+    const { HealthController } = await import('./health.controller.js');
+    const moduleRef = await Test.createTestingModule({
+      controllers: [HealthController],
+      providers: [
+        {
+          provide: (await import('../database/prisma.service.js'))
+            .PrismaService,
+          useValue: {
+            $queryRaw: vi.fn().mockResolvedValue([{ '?column?': 1 }]),
+          },
+        },
+        {
+          provide: (await import('../jobs/job-runner.service.js'))
+            .JobRunnerService,
+          useValue: { queueStatus: vi.fn().mockReturnValue('not_configured') },
+        },
+        {
+          provide: (await import('../config/environment.module.js'))
+            .ENVIRONMENT,
+          useValue: { QUEUE_REQUIRED: true },
+        },
+      ],
+    }).compile();
+
+    const response = { status: vi.fn() };
+    await expect(
+      moduleRef.get(HealthController).ready(response),
+    ).resolves.toEqual({
+      checks: { database: 'ok', queue: 'not_configured' },
+      status: 'degraded',
+    });
+    expect(response.status).toHaveBeenCalledWith(503);
+  });
+
+  it('returns degraded readiness when the database is unavailable', async () => {
+    const { HealthController } = await import('./health.controller.js');
+    const moduleRef = await Test.createTestingModule({
+      controllers: [HealthController],
+      providers: [
+        {
+          provide: (await import('../database/prisma.service.js'))
+            .PrismaService,
+          useValue: {
+            $queryRaw: vi.fn().mockRejectedValue(new Error('offline')),
+          },
+        },
+        {
+          provide: (await import('../jobs/job-runner.service.js'))
+            .JobRunnerService,
+          useValue: { queueStatus: vi.fn().mockReturnValue('ready') },
+        },
+        {
+          provide: (await import('../config/environment.module.js'))
+            .ENVIRONMENT,
+          useValue: { QUEUE_REQUIRED: true },
+        },
+      ],
+    }).compile();
+
+    const response = { status: vi.fn() };
+    await expect(
+      moduleRef.get(HealthController).ready(response),
+    ).resolves.toEqual({
+      checks: { database: 'unavailable', queue: 'ready' },
+      status: 'degraded',
+    });
+    expect(response.status).toHaveBeenCalledWith(503);
   });
 });

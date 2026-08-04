@@ -14,6 +14,7 @@ services:
       NODE_ENV: production
       MIGRATION_DATABASE_URL: postgresql://stockpilot_admin:stockpilot_admin@postgres:5432/stockpilot
       PORT: 4000
+      QUEUE_REQUIRED: 'false'
       WEB_ORIGIN: http://localhost:3000
       WEBHOOK_SIGNING_SECRET: local-docker-signing-secret
     ports:

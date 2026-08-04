@@ -6,6 +6,7 @@ import { CatalogModule } from './catalog/catalog.module.js';
 import { DashboardModule } from './dashboard/dashboard.module.js';
 import { DemoModule } from './demo/demo.module.js';
 import { HealthController } from './health/health.controller.js';
+import { EnvironmentModule } from './config/environment.module.js';
 import { InventoryModule } from './inventory/inventory.module.js';
 import { IntegrationModule } from './integrations/integration.module.js';
 import { DatabaseModule } from './database/database.module.js';
@@ -18,6 +19,7 @@ import { ObservabilityModule } from './observability/observability.module.js';
   controllers: [HealthController],
   imports: [
     DatabaseModule,
+    EnvironmentModule,
     AuthModule,
     AuditModule,
     CatalogModule,

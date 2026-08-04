@@ -12,6 +12,7 @@ describe('JobRunnerService', () => {
       MIGRATION_DATABASE_URL: undefined,
       NODE_ENV: 'test',
       PORT: 4000,
+      QUEUE_REQUIRED: false,
       QUEUE_DATABASE_URL: undefined,
       SENTRY_DSN: undefined,
       SESSION_COOKIE_NAME: 'session',

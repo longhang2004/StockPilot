@@ -9,6 +9,10 @@ const EnvironmentSchema = z.object({
     .default('true')
     .transform((value) => value === 'true'),
   DEMO_ORGANIZATION_SLUG: z.string().min(1).default('stockpilot-demo'),
+  QUEUE_REQUIRED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
     .default('development'),

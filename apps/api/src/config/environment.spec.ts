@@ -16,6 +16,7 @@ describe('parseEnvironment', () => {
       DEMO_MODE: true,
       NODE_ENV: 'development',
       PORT: 4000,
+      QUEUE_REQUIRED: false,
       SESSION_TTL_HOURS: 12,
     });
   });

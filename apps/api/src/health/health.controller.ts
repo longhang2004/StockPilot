@@ -1,9 +1,15 @@
-import { Controller, Get, Inject } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Inject, Res } from '@nestjs/common';
+import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '../auth/public.decorator.js';
+import { ENVIRONMENT } from '../config/environment.module.js';
+import type { Environment } from '../config/environment.js';
 import { PrismaService } from '../database/prisma.service.js';
 import { JobRunnerService } from '../jobs/job-runner.service.js';
+
+interface HealthResponse {
+  status(code: number): void;
+}
 
 @ApiTags('health')
 @Public()
@@ -12,6 +18,7 @@ export class HealthController {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(JobRunnerService) private readonly jobs: JobRunnerService,
+    @Inject(ENVIRONMENT) private readonly environment: Environment,
   ) {}
 
   @Get('live')
@@ -25,24 +32,30 @@ export class HealthController {
 
   @Get('ready')
   @ApiOkResponse({ description: 'Dependency readiness checks.' })
-  async ready() {
+  @ApiResponse({ status: 503, description: 'A required dependency is down.' })
+  async ready(@Res({ passthrough: true }) response: HealthResponse) {
+    const queue = this.jobs.queueStatus();
     try {
       await this.prisma.$queryRaw`SELECT 1`;
-      return {
-        checks: {
-          database: 'ok' as const,
-          queue: this.jobs.queueStatus(),
-        },
-        status: 'ready' as const,
-      };
     } catch {
+      response.status(503);
       return {
-        checks: {
-          database: 'unavailable' as const,
-          queue: this.jobs.queueStatus(),
-        },
+        checks: { database: 'unavailable' as const, queue },
         status: 'degraded' as const,
       };
     }
+
+    if (this.environment.QUEUE_REQUIRED && queue !== 'ready') {
+      response.status(503);
+      return {
+        checks: { database: 'ok' as const, queue },
+        status: 'degraded' as const,
+      };
+    }
+
+    return {
+      checks: { database: 'ok' as const, queue },
+      status: 'ready' as const,
+    };
   }
 }
