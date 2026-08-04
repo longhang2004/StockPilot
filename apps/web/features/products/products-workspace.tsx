@@ -18,7 +18,7 @@ import {
   type TableColumn,
 } from '../../components/ui/operations-ui';
 import { apiRequest } from '../../lib/api-client';
-import { usePage } from '../../hooks/use-page-query';
+import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
 import { ProductDrawer } from './components/product-drawer';
 import { type ProductRecord } from '../shared/types';
@@ -53,7 +53,7 @@ export function ProductsWorkspace({ role }: { role: Role }) {
     onSuccess: () => {
       setFormOpen(false);
       setEditing(null);
-      void queryClient.invalidateQueries({ queryKey: ['page', '/products'] });
+      void invalidatePageQueries(queryClient, '/products');
       push('Product saved.', 'success');
     },
   });

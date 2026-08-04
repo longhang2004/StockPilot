@@ -17,7 +17,7 @@ import {
   type TableColumn,
 } from '../../components/ui/operations-ui';
 import { apiRequest } from '../../lib/api-client';
-import { usePage } from '../../hooks/use-page-query';
+import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
 import { PartnerDrawer } from './components/partner-drawer';
 import { type PartnerRecord } from '../shared/types';
@@ -50,7 +50,7 @@ export function PartnersWorkspace({ role }: { role: Role }) {
     onSuccess: () => {
       setFormOpen(false);
       setEditing(null);
-      void queryClient.invalidateQueries({ queryKey: ['page', `/${kind}`] });
+      void invalidatePageQueries(queryClient, `/${kind}`);
       push('Partner saved.', 'success');
     },
   });

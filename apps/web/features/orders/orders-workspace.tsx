@@ -22,7 +22,7 @@ import {
 } from '../../components/ui/operations-ui';
 import { apiRequest, newIdempotencyKey } from '../../lib/api-client';
 import { formatDate, formatDateTime } from '../../lib/formatters';
-import { usePage } from '../../hooks/use-page-query';
+import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
 import { OrderDetailView } from './components/order-detail-view';
 import { OrderFormDrawer } from './components/order-form-drawer';
@@ -70,7 +70,7 @@ export function OrdersWorkspace({ role }: { role: Role }) {
         'error',
       ),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['page', '/orders'] });
+      void invalidatePageQueries(queryClient, '/orders');
       void queryClient.invalidateQueries({ queryKey: ['order', selectedId] });
       setConfirmAction(null);
       push('Order status updated.', 'success');
@@ -157,7 +157,7 @@ export function OrdersWorkspace({ role }: { role: Role }) {
         onClose={() => setFormOpen(false)}
         onSaved={() => {
           setFormOpen(false);
-          void queryClient.invalidateQueries({ queryKey: ['page', '/orders'] });
+          void invalidatePageQueries(queryClient, '/orders');
           push('Draft order created.', 'success');
         }}
         push={push}

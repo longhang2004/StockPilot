@@ -19,7 +19,7 @@ import {
   type TableColumn,
 } from '../../components/ui/operations-ui';
 import { formatDate, formatDateTime } from '../../lib/formatters';
-import { usePage } from '../../hooks/use-page-query';
+import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
 import { AdjustmentDrawer } from './components/adjustment-drawer';
 import { type AlertRecord, type BalanceRecord } from '../shared/types';
@@ -174,10 +174,8 @@ export function InventoryWorkspace({ role }: { role: Role }) {
         onClose={() => setAdjustOpen(false)}
         onSaved={() => {
           setAdjustOpen(false);
-          void queryClient.invalidateQueries({
-            queryKey: ['page', '/inventory/balances'],
-          });
-          void queryClient.invalidateQueries({ queryKey: ['page', '/alerts'] });
+          void invalidatePageQueries(queryClient, '/inventory/balances');
+          void invalidatePageQueries(queryClient, '/alerts');
           push('Stock adjustment applied.', 'success');
         }}
         push={push}

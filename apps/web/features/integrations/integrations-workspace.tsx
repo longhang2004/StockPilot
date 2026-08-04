@@ -17,7 +17,7 @@ import {
 } from '../../components/ui/operations-ui';
 import { apiRequest, newIdempotencyKey } from '../../lib/api-client';
 import { formatDate, formatDateTime } from '../../lib/formatters';
-import { usePage } from '../../hooks/use-page-query';
+import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
 import { type IntegrationRecord } from '../shared/types';
 
@@ -37,9 +37,7 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
     onError: (error) =>
       push(error instanceof Error ? error.message : 'Retry failed.', 'error'),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: ['page', '/integration-deliveries'],
-      });
+      void invalidatePageQueries(queryClient, '/integration-deliveries');
       push('Delivery retry queued.', 'success');
     },
   });

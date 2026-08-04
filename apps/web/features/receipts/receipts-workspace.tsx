@@ -24,7 +24,7 @@ import {
 } from '../../components/ui/operations-ui';
 import { apiRequest, newIdempotencyKey } from '../../lib/api-client';
 import { closeFormSafely, formatDateTime } from '../../lib/formatters';
-import { usePage } from '../../hooks/use-page-query';
+import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
 import {
   type MovementRecord,
@@ -87,9 +87,7 @@ export function ReceiptsWorkspace() {
         onClose={() => setOpen(false)}
         onSaved={() => {
           setOpen(false);
-          void queryClient.invalidateQueries({
-            queryKey: ['page', '/inventory/movements'],
-          });
+          void invalidatePageQueries(queryClient, '/inventory/movements');
           push('Receipt applied to the ledger.', 'success');
         }}
         push={push}
