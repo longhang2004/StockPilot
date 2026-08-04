@@ -1,0 +1,11 @@
+.agents/
+.claude/
+skills/
+SKILLS-SYNC.md
+.next/
+coverage/
+dist/
+node_modules/
+playwright-report/
+test-results/
+apps/api/src/generated/

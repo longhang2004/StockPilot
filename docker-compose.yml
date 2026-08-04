@@ -1,0 +1,48 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://stockpilot:stockpilot@postgres:5432/stockpilot
+      DEMO_MODE: 'true'
+      NODE_ENV: production
+      PORT: 4000
+      WEB_ORIGIN: http://localhost:3000
+      WEBHOOK_SIGNING_SECRET: local-docker-signing-secret
+    ports:
+      - '4000:4000'
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: stockpilot
+      POSTGRES_PASSWORD: stockpilot
+      POSTGRES_DB: stockpilot
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U stockpilot -d stockpilot']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - '5432:5432'
+    volumes:
+      - stockpilot-postgres:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    depends_on:
+      - api
+    environment:
+      API_INTERNAL_URL: http://api:4000
+      NODE_ENV: production
+    ports:
+      - '3000:3000'
+
+volumes:
+  stockpilot-postgres:
