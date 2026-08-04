@@ -57,4 +57,5 @@ fulfillment path with the bottom navigation: **Overview**, **Orders**,
 
 Do not capture credentials, cookies, provider dashboards, or a preview-domain
 URL. The final recording should link to the canonical Vercel origin and mention
-that the Railway/Neon worker keeps retries and reconciliation alive.
+that the free demo keeps the core workflows online; automatic background retry
+and reconciliation are an optional queue-enabled acceptance profile.

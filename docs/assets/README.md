@@ -10,4 +10,5 @@ origin after provider provisioning:
 
 Use seeded demo data only. Do not capture passwords, cookies, provider
 dashboards, preview origins, or database URLs. The deployment gate is currently
-waiting on Vercel/Railway/Neon account authorization and billing approval.
+waiting on Vercel/Render/Neon account authorization; the selected free path
+does not require billing approval.

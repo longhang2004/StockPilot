@@ -34,8 +34,17 @@ domain threshold.
   and disconnects Prisma on SIGTERM.
 
 The live provider smoke URL and CI run identifier will be appended after the
-Vercel/Railway/Neon approval boundary is completed. Until then, the repository
-CI workflow remains the authoritative clean-environment gate.
+Vercel/Render/Neon approval boundary is completed. Until then, the repository
+CI workflow remains the authoritative clean-environment gate. On `main`, the
+Render deploy workflow runs migrations and the idempotent seed before calling
+the Render deploy hook.
+
+The free demo tier intentionally permits wake-up latency: Render Free may spin
+down after inactivity, and Neon Free may suspend compute after five minutes.
+UptimeRobot keeps the Render process warm but does not query Neon. The selected
+profile leaves pg-boss disabled to preserve Neon Free compute hours; automatic
+retry/reconciliation smoke requires the opt-in queue profile and is not part of
+the always-on free demo.
 
 ## Expected local prerequisites
 

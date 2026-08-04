@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: stockpilot-api
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    autoDeployTrigger: 'off'
+    rootDir: .
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /v1/health/ready
+    numInstances: 1
+    maxShutdownDelaySeconds: 30
+    buildFilter:
+      paths:
+        - apps/api/**
+        - packages/contracts/**
+        - infra/postgres/**
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - tsconfig.base.json
+        - render.yaml
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEMO_MODE
+        value: 'true'
+      - key: DEMO_ORGANIZATION_SLUG
+        value: stockpilot-demo
+      - key: QUEUE_REQUIRED
+        value: 'false'
+      - key: SESSION_COOKIE_NAME
+        value: stockpilot_session
+      - key: SESSION_TTL_HOURS
+        value: '12'
+      - key: CSRF_SECRET
+        generateValue: true
+      - key: WEBHOOK_SIGNING_SECRET
+        generateValue: true
+      - key: WEB_ORIGIN
+        sync: false
+      - key: DATABASE_URL
+        sync: false

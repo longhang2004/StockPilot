@@ -1,0 +1,81 @@
+name: Render demo deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: render-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrate-and-deploy:
+    name: Migrate Neon and trigger Render
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    env:
+      MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      RENDER_COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Check deployment secrets
+        id: config
+        shell: bash
+        run: |
+          if [[ -n "$MIGRATION_DATABASE_URL" && -n "$RENDER_DEPLOY_HOOK_URL" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Render deploy skipped: configure MIGRATION_DATABASE_URL and RENDER_DEPLOY_HOOK_URL repository secrets."
+          fi
+
+      - uses: actions/checkout@v6
+        if: steps.config.outputs.enabled == 'true'
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: pnpm/action-setup@v4.4.0
+        if: steps.config.outputs.enabled == 'true'
+        with:
+          version: 10.13.1
+
+      - uses: actions/setup-node@v6
+        if: steps.config.outputs.enabled == 'true'
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.config.outputs.enabled == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        if: steps.config.outputs.enabled == 'true'
+        run: pnpm db:generate
+
+      - name: Apply production migrations
+        if: steps.config.outputs.enabled == 'true'
+        run: pnpm --filter @stockpilot/api exec prisma migrate deploy
+
+      - name: Seed canonical demo fixture
+        if: steps.config.outputs.enabled == 'true'
+        run: pnpm db:seed
+
+      - name: Trigger Render deploy
+        if: steps.config.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          separator='?'
+          if [[ "$RENDER_DEPLOY_HOOK_URL" == *'?'* ]]; then
+            separator='&'
+          fi
+          curl --fail --silent --show-error \
+            --request POST \
+            "${RENDER_DEPLOY_HOOK_URL}${separator}ref=${RENDER_COMMIT_SHA}"

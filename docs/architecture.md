@@ -7,18 +7,23 @@ RLS context, and the PostgreSQL ledger.
 ```mermaid
 flowchart LR
   Browser[Canonical Vercel origin] -->|same-origin /api| Web[Next.js web]
-  Web -->|API_INTERNAL_URL| API[NestJS API on Railway]
+  Web -->|API_INTERNAL_URL| API[NestJS API on Render Free]
   Storefront[Signed storefront webhook] --> API
   API -->|tenant transaction + RLS| DB[(PostgreSQL)]
-  API -->|direct connection| Queue[(Neon stockpilot_queue)]
-  Queue --> Jobs[pg-boss worker]
+  API -.->|optional direct connection| Queue[(Neon stockpilot_queue)]
+  Queue -.-> Jobs[pg-boss worker]
   API --> Docs[OpenAPI /docs]
 ```
 
-Production uses a pooled Neon URL for application traffic, a direct migration
-URL for Prisma release commands, and a separate direct queue URL for pg-boss.
-The Railway service runs the API and worker together so readiness can require
-the queue without moving business code into serverless functions.
+The API uses a pooled Neon URL for application traffic and a direct migration
+URL for Prisma release commands. A separate direct queue URL can be supplied
+for pg-boss, but the selected zero-cost demo profile intentionally leaves it
+unset (`QUEUE_REQUIRED=false`) so an always-on polling worker does not consume
+Neon Free compute hours. Manual integration retries remain synchronous; the
+automatic retry and scheduled reconciliation jobs are enabled only for a short
+queue-enabled acceptance run. The free-tier deployment uses a GitHub Actions
+migration/seed job before a Render deploy hook because Render Free does not
+provide the paid-service pre-deploy command.
 
 Every tenant mutation follows the same shape:
 
@@ -30,8 +35,9 @@ Every tenant mutation follows the same shape:
 5. Store the idempotent response under a stable payload fingerprint.
 
 Stock-changing mutations call the low-stock reconciliation service in the same
-transaction. A scheduled pg-boss job periodically locks and reconciles every
-balance so an alert cannot remain stale after an out-of-band repair. The
+transaction. When the queue profile is enabled, a scheduled pg-boss job
+periodically locks and reconciles every balance so an alert cannot remain stale
+after an out-of-band repair. The
 dashboard and Owner settings/team screens are read models over the same
 tenant-scoped transaction boundary; they never accept organization identity
 from the browser.

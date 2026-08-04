@@ -7,12 +7,13 @@ wholesale teams. It gives an operations manager one calm work queue for
 receiving stock, preventing overselling, and fulfilling customer orders.
 
 **Live demo:** provider provisioning is the remaining external step. The
-production topology and release runbook are ready; Vercel/Railway/Neon OAuth
-and billing require the account owner's approval. Once deployed, put the
+production-shaped topology and demo release runbook are ready;
+Vercel/Render/Neon OAuth requires the account owner's approval. The selected
+demo path uses free tiers and does not require paid hosting. Once deployed, put the
 canonical Vercel URL here and in [`docs/walkthrough.md`](docs/walkthrough.md).
 
 **API docs:** the production `/docs` and `/openapi.json` links are added beside
-the live URL after the first Railway deployment; the local API docs are
+the live URL after the first Render deployment; the local API docs are
 available at `http://localhost:4000/docs`.
 
 ## Why this project
@@ -33,24 +34,23 @@ The differentiator is reliability that is visible in ordinary workflows:
 ```mermaid
 flowchart LR
   Browser[Browser] -->|same-origin /api| Vercel[Vercel Next.js]
-  Vercel -->|API_INTERNAL_URL| Railway[Railway NestJS + pg-boss]
-  Railway -->|pooled app URL| Neon[(Neon application DB)]
-  Railway -->|direct queue URL| Queue[(Neon stockpilot_queue)]
+  Vercel -->|API_INTERNAL_URL| Render[Render Free NestJS API]
+  Render -->|pooled app URL| Neon[(Neon application DB)]
 ```
 
 This is a modular monolith in a pnpm workspace:
 
 ```text
 apps/web              Next.js 16 / React 19 UI
-apps/api              NestJS 11 / Prisma 7 API and worker
+apps/api              NestJS 11 / Prisma 7 API (optional pg-boss worker)
 packages/contracts    Zod schemas and generated API contracts
 infra/postgres        local role bootstrap and production provisioning SQL
 docs                  deployment, operations, threat model, ERD, test report
 ```
 
 The API owns tenant context, RBAC, transactions, RLS setup, the stock ledger,
-pg-boss scheduling, and RFC 9457 problem details. The browser never sends an
-organization id that decides authorization.
+optional pg-boss scheduling, and RFC 9457 problem details. The browser never
+sends an organization id that decides authorization.
 
 ## Demo role matrix
 
@@ -74,6 +74,10 @@ The canonical demo fixture includes 8 active products plus one inactive product,
 2 Draft orders, 1 Confirmed order, 2 Fulfilled orders, 1 Cancelled order, a
 failed integration delivery, and a partial CSV import preview. It is reseeded
 idempotently on first deploy and after the six-hour Owner/automatic reset.
+The selected zero-cost Render/Neon profile leaves pg-boss disabled so Neon Free
+compute is not consumed by an always-on polling worker. Manual integration
+retry remains available; automatic retry and scheduled reconciliation are an
+opt-in queue profile for short acceptance runs.
 
 ## Local development
 
@@ -150,7 +154,7 @@ with the same payload replays the original response; a different payload gets
 ## Portfolio documentation
 
 - [Architecture and data flow](docs/architecture.md)
-- [Production deployment runbook](docs/deployment.md)
+- [Demo deployment runbook](docs/deployment.md)
 - [Operations and incident guide](docs/operations.md)
 - [Threat model](docs/threat-model.md)
 - [Entity relationship diagram](docs/erd.md)
@@ -161,16 +165,23 @@ with the same payload replays the original response; a different payload gets
 
 The version-controlled infrastructure is ready:
 
-- [`railway.json`](railway.json) builds the API Dockerfile, runs migration plus
-  idempotent seed, checks readiness, and restarts on failure.
+- [`render.yaml`](render.yaml) defines the free Render web service, Docker
+  context, Singapore region, readiness path, and secret placeholders. Its
+  default free-demo profile sets `QUEUE_REQUIRED=false` and intentionally omits
+  `QUEUE_DATABASE_URL` to avoid exhausting Neon Free compute hours.
+- [`.github/workflows/deploy-render.yml`](.github/workflows/deploy-render.yml)
+  runs migration plus the idempotent seed from CI, then triggers Render through
+  a deploy hook. This keeps Render Free's paid-only pre-deploy feature out of
+  the deployment path.
 - [`apps/web/vercel.json`](apps/web/vercel.json) configures the Next.js workspace
   build.
 - [`infra/postgres/provision-production.sql`](infra/postgres/provision-production.sql)
   creates parameterized Neon runtime/queue roles and emits RLS verification
   queries.
 
-Creating the provider projects, accepting Railway/Neon billing, and authorizing
-GitHub/Vercel/Railway/Neon are intentionally not automated from this repository.
-After those approval boundaries, follow the first-deployment sequence in
+Creating the provider projects and authorizing GitHub/Vercel/Render/Neon are
+intentionally not automated from this repository. The chosen Render Free +
+Neon Free path does not require a billing upgrade. After those approval
+boundaries, follow the first-deployment sequence in
 [`docs/deployment.md`](docs/deployment.md), capture stable Overview/Orders/
 Inventory/receipt screenshots, and add their paths to the walkthrough.
