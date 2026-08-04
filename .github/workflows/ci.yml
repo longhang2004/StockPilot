@@ -53,5 +53,5 @@ jobs:
       - run: pnpm --filter @stockpilot/api test:integration
       - run: pnpm --filter @stockpilot/api test:unit:coverage
       - run: pnpm build
-      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright install chromium
       - run: pnpm test:e2e
