@@ -45,7 +45,7 @@ describe('storefront integrations API', () => {
     });
     admin = await createAdminClient();
     const { seedDemoIdentity } = await import('../prisma/seed.js');
-    await seedDemoIdentity(admin, { slug: demoSlug });
+    await seedDemoIdentity(admin, { seedFixture: false, slug: demoSlug });
     const [{ AppModule }, { configureApplication }] = await Promise.all([
       import('../src/app.module.js'),
       import('../src/configure-application.js'),

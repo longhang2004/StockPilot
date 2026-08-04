@@ -20,6 +20,8 @@ const demoUsers: ReadonlyArray<{
 
 export interface DemoSeedOptions {
   slug?: string;
+  /** Integration tests can provision identities without operational fixture rows. */
+  seedFixture?: boolean;
 }
 
 export async function seedDemoIdentity(
@@ -91,6 +93,10 @@ export async function seedDemoIdentity(
   const staffUserId = userIds.get('STAFF');
   if (!ownerUserId || !managerUserId || !staffUserId) {
     throw new Error('Demo users could not be provisioned.');
+  }
+
+  if (options.seedFixture === false) {
+    return;
   }
 
   await prisma.$transaction(async (transaction) => {
