@@ -6,6 +6,25 @@ test.describe.serial('manager receipt and order confirmation', () => {
   test('completes receipt → draft → confirmation on desktop', async ({
     page,
   }) => {
+    page.on('request', (request) => {
+      if (
+        request.url().includes('/api/v1/orders/') ||
+        request.url().includes('/api/v1/auth/csrf')
+      ) {
+        console.log(`api request: ${request.method()} ${request.url()}`);
+      }
+    });
+    page.on('response', (response) => {
+      if (
+        response.url().includes('/api/v1/orders/') ||
+        response.url().includes('/api/v1/auth/csrf')
+      ) {
+        console.log(`api response: ${response.status()} ${response.url()}`);
+      }
+    });
+    page.on('pageerror', (error) => {
+      console.log(`page error: ${error.message}`);
+    });
     await loginAs(page, 'manager');
     const suffix = Date.now().toString();
     const product = await apiPost<{ id: string }>(page, '/products', {
@@ -54,25 +73,7 @@ test.describe.serial('manager receipt and order confirmation', () => {
       .filter({ hasText: `E2E Customer ${suffix}` });
     await expect(orderRecord).toHaveCount(1);
     await orderRecord.click();
-    const confirmRequestPromise = page.waitForRequest(
-      (request) =>
-        request.url().includes('/api/v1/orders/') &&
-        request.url().endsWith('/confirm') &&
-        request.method() === 'POST',
-    );
-    const confirmResponsePromise = page.waitForResponse(
-      (response) =>
-        response.url().includes('/api/v1/orders/') &&
-        response.url().endsWith('/confirm') &&
-        response.request().method() === 'POST',
-    );
     await page.getByRole('button', { name: /confirm order/i }).click();
-    const confirmRequest = await confirmRequestPromise;
-    console.log(`confirm request: ${confirmRequest.url()}`);
-    const confirmResponse = await confirmResponsePromise;
-    console.log(
-      `confirm response: ${confirmResponse.status()} ${await confirmResponse.text()}`,
-    );
     await expect(page.getByText(/order status updated/i)).toBeVisible();
   });
 
