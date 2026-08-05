@@ -53,7 +53,7 @@ test.describe.serial('manager receipt and order confirmation', () => {
       )
       .filter({ hasText: `E2E Customer ${suffix}` });
     await expect(orderRecord).toHaveCount(1);
-    await orderRecord.click();
+    await orderRecord.getByRole('button', { name: /open/i }).click();
     await page.getByRole('button', { name: /confirm order/i }).click();
     await expect(page.getByText(/order status updated/i)).toBeVisible();
   });
