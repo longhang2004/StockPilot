@@ -68,7 +68,11 @@ export const metadata: Metadata = {
     template: '%s | StockPilot',
   },
   icons: {
-    icon: '/icon',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon', type: 'image/png', sizes: '64x64' },
+    ],
+    shortcut: '/favicon.svg',
     apple: '/apple-icon',
   },
   manifest: '/manifest.webmanifest',

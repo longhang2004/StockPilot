@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('public SEO surface', () => {
   test('homepage exposes crawlable metadata and no horizontal overflow', async ({
     page,
+    request,
   }) => {
     await page.goto('/');
 
@@ -25,6 +26,27 @@ test.describe('public SEO surface', () => {
       'content',
       'summary_large_image',
     );
+    await expect(
+      page.locator('link[rel="icon"][href*="favicon.svg"]'),
+    ).toHaveCount(1);
+    await expect(page.locator('link[rel="icon"][href*="/icon"]')).toHaveCount(
+      1,
+    );
+    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
+      'href',
+      /apple-icon/,
+    );
+
+    const faviconAssets: ReadonlyArray<[string, string]> = [
+      ['/favicon.svg', 'image/svg+xml'],
+      ['/icon', 'image/png'],
+      ['/apple-icon', 'image/png'],
+    ];
+    for (const [asset, contentType] of faviconAssets) {
+      const response = await request.get(asset);
+      expect(response.ok()).toBe(true);
+      expect(response.headers()['content-type']).toContain(contentType);
+    }
 
     const jsonLd = await page
       .locator('script[type="application/ld+json"]')
