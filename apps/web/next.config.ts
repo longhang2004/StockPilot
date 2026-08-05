@@ -7,13 +7,21 @@ const scriptSources = [
 ].join(' ');
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+    ],
+  },
   async headers() {
     return [
       {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: `default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src ${scriptSources}; connect-src 'self' https://*.sentry.io; font-src 'self' data:`,
+            value: `default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; img-src 'self' data: https://res.cloudinary.com; style-src 'self' 'unsafe-inline'; script-src ${scriptSources}; connect-src 'self' https://*.sentry.io; font-src 'self' data:`,
           },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },

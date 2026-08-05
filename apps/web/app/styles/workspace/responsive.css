@@ -54,7 +54,7 @@
   }
 
   .stat-card > strong {
-    font-size: 1.25rem;
+    font-size: var(--text-lg);
   }
 
   .search-filter-bar {
@@ -84,13 +84,12 @@
 
   .mobile-record-card {
     border: 1px solid var(--line);
-    border-radius: 0.55rem;
+    border-radius: var(--radius-md);
     padding: 0.85rem;
   }
 
-  .mobile-record-card.is-clickable:hover,
-  .mobile-record-card.is-clickable:focus-visible {
-    background: #f8fafc;
+  .mobile-record-card:hover {
+    background: var(--color-background);
   }
 
   .mobile-record-heading {
@@ -102,7 +101,14 @@
   }
 
   .mobile-record-heading strong {
-    font-size: 0.8rem;
+    font-size: var(--text-xs);
+  }
+
+  .mobile-record-primary {
+    align-items: center;
+    display: inline-flex;
+    margin-left: auto;
+    min-width: 0;
   }
 
   .mobile-record-card dl {
@@ -118,15 +124,29 @@
 
   .mobile-record-card dt {
     color: var(--muted);
-    font-size: 0.62rem;
+    font-size: var(--text-xs);
     margin-bottom: 0.15rem;
   }
 
   .mobile-record-card dd {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .mobile-record-action {
+    margin-top: 0.85rem;
+    width: 100%;
+  }
+
+  .product-image-preview {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+  }
+
+  .product-image-remove {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 
   .form-grid {
@@ -149,8 +169,10 @@
     align-items: center;
     color: var(--muted);
     display: flex;
-    font-size: 0.67rem;
+    flex-direction: column;
+    font-size: var(--text-xs);
     font-weight: 700;
+    gap: 0.2rem;
     justify-content: center;
     min-height: 3rem;
   }

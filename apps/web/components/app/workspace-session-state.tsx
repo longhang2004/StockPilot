@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowUpRight } from '@phosphor-icons/react';
 import Link from 'next/link';
 
 export function WorkspaceLoading() {
@@ -27,7 +28,8 @@ export function WorkspaceSessionExpired() {
           exploring StockPilot.
         </p>
         <Link className="button button-primary" href="/login">
-          Return to demo login <span aria-hidden="true">→</span>
+          Return to demo login
+          <ArrowUpRight size={18} weight="bold" aria-hidden="true" />
         </Link>
       </div>
     </main>

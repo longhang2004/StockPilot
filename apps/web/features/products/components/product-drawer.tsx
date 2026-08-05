@@ -1,8 +1,8 @@
 'use client';
 
-import { ProductInputSchema } from '@stockpilot/contracts';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { ProductInputSchema } from '@stockpilot/contracts';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
@@ -14,24 +14,39 @@ import {
 import { closeFormSafely } from '../../../lib/formatters';
 import { type ProductRecord } from '../../shared/types';
 
+const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const PRODUCT_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+export type ProductFormValue = z.infer<typeof ProductInputSchema> & {
+  isActive?: boolean;
+};
+
 export function ProductDrawer({
   open,
   editing,
+  imageFile,
+  imageError,
   onClose,
+  onImageFileChange,
+  onRemoveImage,
   onSave,
   pending,
+  removeImage,
 }: {
   open: boolean;
   editing: ProductRecord | null;
+  imageFile: File | null;
+  imageError?: string | null;
   onClose: () => void;
-  onSave: (
-    value: z.infer<typeof ProductInputSchema> & { isActive?: boolean },
-  ) => void;
+  onImageFileChange: (file: File | null) => void;
+  onRemoveImage: () => void;
+  onSave: (value: ProductFormValue) => void;
   pending: boolean;
+  removeImage: boolean;
 }) {
-  const form = useForm<
-    z.infer<typeof ProductInputSchema> & { isActive?: boolean }
-  >({
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [localImageError, setLocalImageError] = useState<string | null>(null);
+  const form = useForm<ProductFormValue>({
     resolver: zodResolver(ProductInputSchema) as never,
     defaultValues: {
       description: null,
@@ -41,11 +56,12 @@ export function ProductDrawer({
       sku: '',
     },
   });
+
   useEffect(() => {
     form.reset(
       editing
         ? {
-            description: null,
+            description: editing.description,
             isActive: editing.isActive,
             name: editing.name,
             reorderPoint: editing.reorderPoint,
@@ -61,7 +77,45 @@ export function ProductDrawer({
           },
     );
   }, [editing, form]);
-  const close = closeFormSafely(form.formState.isDirty, onClose);
+
+  useEffect(() => {
+    if (!imageFile) {
+      setPreviewUrl(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(imageFile);
+    setPreviewUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [imageFile]);
+
+  const dirty =
+    form.formState.isDirty ||
+    Boolean(imageFile) ||
+    removeImage ||
+    Boolean(imageError) ||
+    Boolean(localImageError);
+  const close = closeFormSafely(dirty, onClose);
+  const currentImageUrl =
+    !removeImage && !previewUrl ? (editing?.image?.url ?? null) : null;
+  const imagePreviewUrl = previewUrl ?? currentImageUrl;
+  const imageAlt = editing ? `${editing.name} product image` : 'Product image';
+
+  function selectImage(file: File | undefined) {
+    if (!file) return;
+    if (!PRODUCT_IMAGE_TYPES.has(file.type)) {
+      setLocalImageError('Choose a JPEG, PNG, or WebP image.');
+      onImageFileChange(null);
+      return;
+    }
+    if (file.size > PRODUCT_IMAGE_MAX_BYTES) {
+      setLocalImageError('Product images must be smaller than 5 MiB.');
+      onImageFileChange(null);
+      return;
+    }
+    setLocalImageError(null);
+    onImageFileChange(file);
+  }
+
   return (
     <Drawer
       description="SKU stays unique inside the current organization."
@@ -69,7 +123,7 @@ export function ProductDrawer({
       open={open}
       title={editing ? 'Edit product' : 'Add product'}
     >
-      <UnsavedChangesGuard dirty={form.formState.isDirty} />
+      <UnsavedChangesGuard dirty={dirty} />
       <form
         className="form-stack"
         onSubmit={(event) => void form.handleSubmit(onSave)(event)}
@@ -124,6 +178,96 @@ export function ProductDrawer({
             id="product-description"
             {...form.register('description')}
           />
+        </FormField>
+        <FormField
+          error={imageError ?? localImageError ?? undefined}
+          hint="JPEG, PNG, or WebP · up to 5 MiB · one image per SKU"
+          htmlFor="product-image"
+          label="Product image"
+        >
+          <div className="product-image-picker">
+            {pending ? (
+              <span
+                aria-live="polite"
+                className="product-image-status"
+                role="status"
+              >
+                {imageFile
+                  ? 'Uploading image…'
+                  : removeImage
+                    ? 'Removing image…'
+                    : 'Saving product…'}
+              </span>
+            ) : null}
+            {imagePreviewUrl ? (
+              <div className="product-image-preview">
+                <img
+                  alt={imageAlt}
+                  height={160}
+                  src={imagePreviewUrl}
+                  width={160}
+                />
+                <div className="product-image-preview-copy">
+                  <strong>{imageFile?.name ?? 'Current product image'}</strong>
+                  <span>
+                    {imageFile
+                      ? 'Ready to upload when you save.'
+                      : `${editing?.image?.width ?? 0} × ${editing?.image?.height ?? 0}px`}
+                  </span>
+                </div>
+                <button
+                  className="button button-secondary product-image-remove"
+                  disabled={pending}
+                  onClick={() => {
+                    if (imageFile) {
+                      onImageFileChange(null);
+                      setLocalImageError(null);
+                    } else onRemoveImage();
+                  }}
+                  type="button"
+                >
+                  {imageFile ? 'Discard selection' : 'Remove image'}
+                </button>
+              </div>
+            ) : removeImage ? (
+              <div className="product-image-removed" role="status">
+                <span>Image will be removed when you save.</span>
+                <button
+                  className="text-link"
+                  disabled={pending}
+                  onClick={onRemoveImage}
+                  type="button"
+                >
+                  Undo
+                </button>
+              </div>
+            ) : null}
+            <label
+              className="product-image-dropzone"
+              htmlFor="product-image"
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault();
+                selectImage(event.dataTransfer.files[0]);
+              }}
+            >
+              <input
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={pending}
+                id="product-image"
+                onChange={(event) => {
+                  selectImage(event.target.files?.[0]);
+                  event.currentTarget.value = '';
+                }}
+                type="file"
+              />
+              <strong>
+                {imagePreviewUrl ? 'Replace image' : 'Choose an image'}
+              </strong>
+              <span>Drop a product photo here or browse files.</span>
+            </label>
+          </div>
         </FormField>
         {editing ? (
           <label className="checkbox-field">

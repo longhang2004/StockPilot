@@ -10,7 +10,7 @@ describe('StockPilot public page', () => {
     expect(
       screen.getByRole('heading', {
         level: 1,
-        name: /stock control without the guesswork/i,
+        name: /stock control, under control/i,
       }),
     ).toBeInTheDocument();
     const managerLinks = screen.getAllByRole('link', {

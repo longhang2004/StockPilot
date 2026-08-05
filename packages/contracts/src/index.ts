@@ -91,6 +91,15 @@ export const ProductInputSchema = z.object({
 });
 export type ProductInput = z.infer<typeof ProductInputSchema>;
 
+/** Public metadata returned after a product image is stored. */
+export const ProductImageSchema = z.object({
+  url: z.url(),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  format: z.string().trim().min(1),
+});
+export type ProductImage = z.infer<typeof ProductImageSchema>;
+
 export const CustomerInputSchema = z.object({
   companyName: z.string().trim().min(2).max(160),
   contactName: OptionalContactSchema,

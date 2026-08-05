@@ -1,15 +1,21 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Header,
+  HttpCode,
+  HttpStatus,
   Inject,
   Param,
   Patch,
   Post,
   Query,
   Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import {
   CustomerInputSchema,
@@ -22,6 +28,11 @@ import type { AuthenticatedRequest } from '../auth/auth-context.js';
 import { RequirePermission } from '../auth/permission.decorator.js';
 import { ProductImportService } from '../imports/product-import.service.js';
 import { CatalogService } from './catalog.service.js';
+import { PRODUCT_IMAGE_MAX_BYTES } from './product-image-storage.js';
+import {
+  ProductImageService,
+  type ProductImageUpload,
+} from './product-image.service.js';
 
 const IdentifierSchema = z.uuid();
 const ListQuerySchema = z.object({
@@ -47,6 +58,8 @@ export class ProductsController {
     @Inject(CatalogService) private readonly catalog: CatalogService,
     @Inject(ProductImportService)
     private readonly imports: ProductImportService,
+    @Inject(ProductImageService)
+    private readonly images: ProductImageService,
   ) {}
 
   @RequirePermission('catalog:read')
@@ -92,6 +105,38 @@ export class ProductsController {
       request.auth,
       IdentifierSchema.parse(id),
       ProductUpdateSchema.parse(body),
+    );
+  }
+
+  @RequirePermission('catalog:write')
+  @Post(':id/image')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: PRODUCT_IMAGE_MAX_BYTES, files: 1 },
+      // MIME headers are intentionally not trusted. The image service checks
+      // magic bytes and then decodes the payload with Sharp.
+      fileFilter: (_request, _file, callback) => callback(null, true),
+    }),
+  )
+  uploadImage(
+    @Req() request: AuthenticatedRequest,
+    @Param('id') id: string,
+    @UploadedFile() file: ProductImageUpload | undefined,
+  ) {
+    return this.images.uploadProductImage(
+      request.auth,
+      IdentifierSchema.parse(id),
+      file,
+    );
+  }
+
+  @RequirePermission('catalog:write')
+  @Delete(':id/image')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteImage(@Req() request: AuthenticatedRequest, @Param('id') id: string) {
+    return this.images.deleteProductImage(
+      request.auth,
+      IdentifierSchema.parse(id),
     );
   }
 }

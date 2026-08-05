@@ -1,8 +1,43 @@
 import type { Prisma, Product } from '../generated/prisma/client.js';
 import type { CatalogListQuery } from './catalog.types.js';
+import { productImageUrl } from './product-image-storage.js';
 
 export function serializeProduct(product: Product) {
-  return { ...product, salePrice: product.salePrice.toFixed(2) };
+  const {
+    imageBytes,
+    imageFormat,
+    imageHeight,
+    imagePublicId,
+    imageVersion,
+    imageWidth,
+    ...productFields
+  } = product;
+  return {
+    ...productFields,
+    image:
+      imagePublicId &&
+      imageVersion &&
+      imageFormat &&
+      imageWidth &&
+      imageHeight &&
+      imageBytes
+        ? {
+            format: imageFormat,
+            height: imageHeight,
+            url: productImageUrl(imagePublicId, imageVersion),
+            width: imageWidth,
+          }
+        : null,
+    salePrice: product.salePrice.toFixed(2),
+  };
+}
+
+/** Keep derived delivery URLs out of the JSON audit snapshot persisted in SQL. */
+export function serializeProductAudit(product: Product) {
+  const serialized = serializeProduct(product);
+  if (!serialized.image) return serialized;
+  const { url: _url, ...imageMetadata } = serialized.image;
+  return { ...serialized, image: imageMetadata };
 }
 
 export function customerWhere(

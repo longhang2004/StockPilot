@@ -65,7 +65,12 @@ export function ReceiptsWorkspace() {
           onRetry={() => void movements.refetch()}
         />
       ) : receipts.length ? (
-        <ResponsiveDataTable columns={movementColumns} data={receipts} />
+        <ResponsiveDataTable
+          ariaLabel="Receipt movements"
+          columns={movementColumns}
+          data={receipts}
+          getRowLabel={(record) => record.product?.sku ?? record.id}
+        />
       ) : (
         <EmptyState
           description="Create a receipt to increase on-hand stock and resolve low-stock alerts."

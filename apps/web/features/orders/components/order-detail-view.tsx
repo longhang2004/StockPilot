@@ -46,7 +46,7 @@ export function OrderDetailView({
             <span className="timeline-dot" aria-hidden="true" />
             <span>
               <strong>
-                {transition.fromStatus ? `${transition.fromStatus} → ` : ''}
+                {transition.fromStatus ? `${transition.fromStatus} to ` : ''}
                 {transition.toStatus}
               </strong>
               <small>{formatDateTime(transition.createdAt)}</small>

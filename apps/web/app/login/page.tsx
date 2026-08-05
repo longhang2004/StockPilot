@@ -2,6 +2,7 @@ import type { Role } from '@stockpilot/contracts';
 import Link from 'next/link';
 
 import { DemoLoginCard } from '../../components/auth/demo-login-card';
+import { MarketingArrowLeftIcon } from '../../components/ui/marketing-icons';
 
 const queryRoleMap: Record<string, Role> = {
   manager: 'MANAGER',
@@ -27,17 +28,18 @@ export default async function LoginPage({
           <span>StockPilot</span>
         </Link>
         <Link className="text-link" href="/">
+          <MarketingArrowLeftIcon />
           Back to product overview
         </Link>
       </header>
 
       <section className="login-layout" aria-label="StockPilot demo login">
         <div className="login-context">
-          <p className="kicker">Harbor & Pine Wholesale</p>
-          <h2>A working operation, ready to explore.</h2>
+          <h1>A working operation, ready to explore.</h1>
           <p>
-            The sample company includes live inventory, supplier receipts, B2B
-            orders, low-stock exceptions, and an immutable activity history.
+            Enter a seeded Harbor &amp; Pine Wholesale workspace with live
+            inventory, supplier receipts, B2B orders, and an immutable activity
+            history.
           </p>
           <ul>
             <li>

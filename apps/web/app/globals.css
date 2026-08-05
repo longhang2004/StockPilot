@@ -1,10 +1,9 @@
 @import 'tailwindcss';
 @import './styles/foundation.css';
 @import './styles/marketing.css';
+@import './styles/auth.css';
 @import './styles/workspace/shell.css';
 @import './styles/workspace/primitives.css';
 @import './styles/workspace/responsive.css';
-@import './styles/workspace/legacy.css';
+@import './styles/workspace/workflows.css';
 @import './styles/workspace/features.css';
-@import './styles/auth.css';
-@import './styles/overrides.css';

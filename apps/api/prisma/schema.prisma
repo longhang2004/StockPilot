@@ -139,6 +139,12 @@ model Product {
   salePrice         Decimal            @map("sale_price") @db.Decimal(12, 2)
   reorderPoint      Int                @default(0) @map("reorder_point")
   isActive          Boolean            @default(true) @map("is_active")
+  imagePublicId     String?            @map("image_public_id") @db.VarChar(255)
+  imageVersion      Int?              @map("image_version")
+  imageWidth        Int?              @map("image_width")
+  imageHeight       Int?              @map("image_height")
+  imageFormat       String?            @map("image_format") @db.VarChar(16)
+  imageBytes        Int?              @map("image_bytes")
   organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   inventoryBalances InventoryBalance[]
   stockMovements    StockMovement[]

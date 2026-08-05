@@ -2,6 +2,10 @@ import { z } from 'zod';
 
 const EnvironmentSchema = z.object({
   API_INTERNAL_URL: z.url().optional(),
+  CLOUDINARY_API_KEY: z.string().trim().min(1).optional().or(z.literal('')),
+  CLOUDINARY_API_SECRET: z.string().trim().min(1).optional().or(z.literal('')),
+  CLOUDINARY_CLOUD_NAME: z.string().trim().min(1).optional().or(z.literal('')),
+  CLOUDINARY_URL: z.string().trim().min(1).optional().or(z.literal('')),
   CSRF_SECRET: z.string().min(32),
   DATABASE_URL: z.string().min(1),
   DEMO_MODE: z

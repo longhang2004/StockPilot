@@ -207,8 +207,10 @@ export function OverviewWorkspace({ session }: { session: SessionView }) {
         </div>
         {data.recentOrders.length ? (
           <ResponsiveDataTable
+            ariaLabel="Recent orders"
             columns={recentOrderColumns}
             data={data.recentOrders}
+            getRowLabel={(record) => record.orderNumber}
           />
         ) : (
           <EmptyState

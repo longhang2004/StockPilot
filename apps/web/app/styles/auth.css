@@ -12,11 +12,17 @@
   width: calc(100% - 3rem);
 }
 
+.login-header .text-link {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
 .login-layout {
   align-items: center;
   display: grid;
   gap: clamp(3rem, 8vw, 8rem);
-  grid-template-columns: minmax(0, 1fr) minmax(24rem, 0.8fr);
+  grid-template-columns: minmax(0, 1fr) minmax(22rem, 0.78fr);
   margin-inline: auto;
   min-height: calc(100vh - 90px);
   max-width: 1040px;
@@ -24,17 +30,18 @@
   width: calc(100% - 3rem);
 }
 
-.login-context h2 {
-  font-size: clamp(2.6rem, 5vw, 4.4rem);
-  letter-spacing: -0.06em;
-  line-height: 1;
-  margin-bottom: 1.5rem;
+.login-context h1 {
+  font-size: clamp(2.75rem, 5vw, 4.4rem);
+  letter-spacing: -0.065em;
+  line-height: 0.98;
+  margin: 0 0 1.5rem;
   max-width: 10ch;
 }
 
-.login-context > p:not(.kicker) {
+.login-context > p {
   color: var(--muted);
   line-height: 1.75;
+  margin: 0;
   max-width: 34rem;
 }
 
@@ -51,36 +58,45 @@
   border-bottom: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
-  padding-block: 0.85rem;
+  min-height: 3.75rem;
+  padding-block: 0.75rem;
+}
+
+.login-context li strong,
+.login-context li span {
+  font-size: var(--text-xs);
 }
 
 .login-context li strong {
-  font-size: 0.8rem;
+  font-weight: 800;
 }
 
 .login-context li span {
   color: var(--muted);
-  font-size: 0.72rem;
+  text-align: right;
 }
 
 .login-card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 1rem;
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  max-width: 32rem;
   padding: clamp(1.5rem, 4vw, 2.5rem);
 }
 
-.login-card-heading h1 {
-  font-size: 2rem;
+.login-card-heading h2 {
+  font-size: var(--text-xl);
   letter-spacing: -0.045em;
-  margin-bottom: 0.6rem;
+  margin: 0 0 0.6rem;
 }
 
 .login-card-heading > p:last-child,
 .reset-note {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  margin-bottom: 0;
 }
 
 .role-picker {
@@ -92,27 +108,29 @@
 }
 
 .role-picker legend {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   font-weight: 800;
   margin-bottom: 0.7rem;
-  text-transform: uppercase;
 }
 
 .role-option {
   align-items: center;
   border: 1px solid var(--line);
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   cursor: pointer;
   display: flex;
   gap: 0.8rem;
   min-height: 4.4rem;
   padding: 0.85rem;
+  transition:
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
 }
 
 .role-option:hover,
 .role-option-selected {
-  background: var(--brand-soft);
-  border-color: #8db8a2;
+  background: var(--color-success-surface);
+  border-color: var(--color-success);
 }
 
 .role-option input {
@@ -123,7 +141,7 @@
 }
 
 .role-option:has(input:focus-visible) {
-  outline: 3px solid #4e9f7a;
+  outline: var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -134,26 +152,28 @@
 }
 
 .role-option-copy strong {
-  font-size: 0.84rem;
+  font-size: var(--text-sm);
 }
 
 .role-option-copy small {
   color: var(--muted);
-  font-size: 0.69rem;
+  font-size: var(--text-xs);
+  line-height: 1.45;
   margin-top: 0.18rem;
 }
 
 .radio-indicator {
-  border: 1px solid #8a9690;
+  border: 1px solid var(--color-slate-400);
   border-radius: 50%;
+  flex: 0 0 auto;
   height: 1rem;
   width: 1rem;
 }
 
 .role-option-selected .radio-indicator {
-  background: var(--brand);
-  border: 3px solid var(--brand-soft);
-  box-shadow: 0 0 0 1px var(--brand);
+  background: var(--color-success);
+  border: 3px solid var(--color-success-surface);
+  outline: 1px solid var(--color-success);
 }
 
 .login-submit {
@@ -169,10 +189,13 @@
 }
 
 .form-error {
-  background: #fee6dd;
-  border-radius: 0.5rem;
-  color: #842b19;
-  font-size: 0.75rem;
+  background: var(--color-danger-surface-strong);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-danger-foreground);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  margin: 0 0 1rem;
   padding: 0.75rem;
 }
 
@@ -186,8 +209,12 @@
     grid-template-columns: 1fr;
   }
 
-  .login-context h2 {
+  .login-context h1 {
     max-width: 13ch;
+  }
+
+  .login-card {
+    max-width: 38rem;
   }
 }
 
@@ -198,7 +225,7 @@
   }
 
   .login-header .text-link {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
   }
 
   .login-layout {
@@ -210,5 +237,10 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 0.2rem;
+    justify-content: center;
+  }
+
+  .login-context li span {
+    text-align: left;
   }
 }

@@ -4,6 +4,9 @@ import { ArrowRight, WarningCircle, X } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { useEffect, useId, useRef } from 'react';
 
+const focusableSelector =
+  'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [contenteditable="true"], [tabindex]:not([tabindex="-1"])';
+
 export function Drawer({
   open,
   title,
@@ -29,19 +32,25 @@ export function Drawer({
 
   useEffect(() => {
     if (!open) return;
-    restoreRef.current = document.activeElement as HTMLElement | null;
+    restoreRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const timer = window.setTimeout(() => {
-      const focusable = panelRef.current?.querySelector<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
-      );
-      focusable?.focus();
+      const firstFocusable =
+        panelRef.current?.querySelector<HTMLElement>(focusableSelector);
+      (firstFocusable ?? panelRef.current)?.focus();
     }, 0);
     return () => {
       window.clearTimeout(timer);
       document.body.style.overflow = previousOverflow;
-      restoreRef.current?.focus();
+      const restoreElement = restoreRef.current;
+      if (restoreElement && document.contains(restoreElement)) {
+        restoreElement.focus();
+      }
+      restoreRef.current = null;
     };
   }, [open]);
 
@@ -60,16 +69,26 @@ export function Drawer({
         aria-modal="true"
         className={`drawer-panel drawer-${size}`}
         onKeyDown={(event) => {
-          if (event.key === 'Escape') onClose();
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            onClose();
+            return;
+          }
           if (event.key !== 'Tab') return;
           const focusable = Array.from(
             panelRef.current?.querySelectorAll<HTMLElement>(
-              'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+              focusableSelector,
             ) ?? [],
           );
           if (focusable.length === 0) {
             event.preventDefault();
             panelRef.current?.focus();
+            return;
+          }
+          if (!panelRef.current?.contains(document.activeElement)) {
+            event.preventDefault();
+            focusable[0]?.focus();
             return;
           }
           const first = focusable[0];

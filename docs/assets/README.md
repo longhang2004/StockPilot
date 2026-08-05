@@ -1,8 +1,8 @@
 # Portfolio screenshots
 
-This stable screenshot set was captured from the canonical Vercel production
-origin with the seeded demo fixture on 4 August 2026. Browser chrome is cropped
-out so the images can be embedded directly in GitHub documentation.
+This stable screenshot set was captured from the local production build with
+the seeded demo fixture on 5 August 2026. Browser chrome is cropped out so the
+images can be embedded directly in GitHub documentation.
 
 | File                        | View               | Contents                                    |
 | --------------------------- | ------------------ | ------------------------------------------- |

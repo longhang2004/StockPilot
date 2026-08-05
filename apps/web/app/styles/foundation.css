@@ -1,19 +1,127 @@
 :root {
-  --ink: #0f172a;
-  --muted: #475569;
-  --line: #e6e8ea;
-  --surface: #ffffff;
-  --surface-subtle: #f2f3f4;
-  --brand: #334155;
-  --brand-dark: #1e293b;
-  --brand-soft: #e2e8f0;
-  --success: #059669;
-  --success-soft: #d1fae5;
-  --warning: #b45309;
-  --warning-soft: #fef3c7;
-  --danger: #dc2626;
-  --danger-soft: #fee2e2;
-  --shadow: 0 18px 45px rgb(15 23 42 / 9%);
+  /* Primitive palette: warm neutral surfaces with a single terracotta accent. */
+  --color-white: #fcfbf7;
+  --color-slate-950: #17201f;
+  --color-slate-900: #24302d;
+  --color-slate-800: #34413d;
+  --color-slate-700: #44504b;
+  --color-slate-600: #5d6562;
+  --color-slate-500: #7d8580;
+  --color-slate-400: #9ba19b;
+  --color-slate-300: #c5c3ba;
+  --color-slate-200: #d9d6ce;
+  --color-slate-100: #e8e5dc;
+  --color-slate-50: #f2f0ea;
+  --color-emerald-700: #285a43;
+  --color-emerald-600: #2f6b4f;
+  --color-emerald-200: #b7d0bd;
+  --color-emerald-100: #e0ece0;
+  --color-amber-700: #8a5a16;
+  --color-amber-800: #704711;
+  --color-amber-100: #f3e6c6;
+  --color-red-800: #7f2f26;
+  --color-red-700: #9e3b2f;
+  --color-red-600: #b34b39;
+  --color-red-300: #e5b2a5;
+  --color-red-200: #e9c9bf;
+  --color-red-50: #f7e8e3;
+  --color-red-100: #f2dcd5;
+  --color-blue-700: #4a667a;
+  --color-blue-300: #b4c8d3;
+  --color-blue-100: #e4edf0;
+
+  /* Semantic tokens: components should consume these aliases, not raw hex. */
+  --color-background: #f2f0ea;
+  --color-surface: var(--color-white);
+  --color-surface-subtle: #ebe8df;
+  --color-foreground: #17201f;
+  --color-muted-foreground: #5d6562;
+  --color-border: #d9d6ce;
+  --color-primary: var(--color-foreground);
+  --color-primary-hover: var(--color-slate-900);
+  --color-on-primary: var(--color-white);
+  --color-secondary: var(--color-slate-600);
+  --color-accent: #c45a2a;
+  --color-accent-hover: #a94722;
+  --color-success: var(--color-emerald-600);
+  --color-success-surface: var(--color-emerald-100);
+  --color-success-border: var(--color-emerald-200);
+  --color-success-foreground: var(--color-emerald-700);
+  --color-warning: var(--color-amber-700);
+  --color-warning-surface: var(--color-amber-100);
+  --color-warning-foreground: var(--color-amber-800);
+  --color-danger: var(--color-red-600);
+  --color-danger-hover: var(--color-red-700);
+  --color-danger-surface: var(--color-red-100);
+  --color-danger-surface-strong: var(--color-red-50);
+  --color-danger-border: var(--color-red-200);
+  --color-danger-foreground: var(--color-red-800);
+  --color-info: var(--color-blue-700);
+  --color-info-surface: var(--color-blue-100);
+  --color-info-foreground: var(--color-blue-700);
+  --color-ring: var(--color-accent);
+  --color-overlay: rgb(23 32 31 / 50%);
+  --color-surface-translucent: rgb(252 251 247 / 94%);
+
+  /* Semantic aliases retained for existing route styles. */
+  --ink: var(--color-foreground);
+  --muted: var(--color-muted-foreground);
+  --line: var(--color-border);
+  --surface: var(--color-surface);
+  --surface-subtle: var(--color-surface-subtle);
+  --brand: var(--color-primary);
+  --brand-dark: var(--color-primary-hover);
+  --brand-soft: var(--color-slate-200);
+  --success: var(--color-success);
+  --success-soft: var(--color-success-surface);
+  --warning: var(--color-warning);
+  --warning-soft: var(--color-warning-surface);
+  --danger: var(--color-danger);
+  --danger-soft: var(--color-danger-surface);
+
+  /* Primitive scales. Keep the compact scale predictable across dense tables. */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-overlay: -18px 0 55px rgb(23 32 31 / 15%);
+  --shadow-bottom-nav: none;
+  --shadow: var(--shadow-md);
+  --motion-fast: 150ms;
+  --motion-normal: 180ms;
+  --motion-slow: 220ms;
+  --font-sans:
+    var(--font-ibm-plex-sans), 'IBM Plex Sans', ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:
+    var(--font-ibm-plex-mono), 'IBM Plex Mono', ui-monospace, SFMono-Regular,
+    Menlo, monospace;
+
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 20px;
+  --text-xl: 28px;
+  --text-2xl: 36px;
+  --text-3xl: 48px;
+
+  /* Component tokens. */
+  --button-radius: var(--radius-md);
+  --button-min-height: 2.75rem;
+  --input-radius: var(--radius-sm);
+  --input-min-height: 2.75rem;
+  --focus-ring: 3px solid var(--color-ring);
   color-scheme: light;
 }
 
@@ -27,22 +135,9 @@ html {
 
 body {
   margin: 0;
-  background:
-    radial-gradient(
-      circle at 80% 3%,
-      rgb(217 236 225 / 65%),
-      transparent 28rem
-    ),
-    #f8fafc;
+  background: var(--color-background);
   color: var(--ink);
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.5;
 }
 
@@ -65,8 +160,9 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
+a:focus-visible,
 [tabindex]:focus-visible {
-  outline: 3px solid #10b981;
+  outline: var(--focus-ring);
   outline-offset: 3px;
 }
 
@@ -87,7 +183,6 @@ a {
 }
 
 a:focus-visible {
-  border-radius: 0.35rem;
-  outline: 3px solid #4e9f7a;
+  border-radius: var(--radius-sm);
   outline-offset: 4px;
 }

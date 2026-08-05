@@ -1,6 +1,7 @@
 'use client';
 
 import type { Role } from '@stockpilot/contracts';
+import { ArrowUpRight } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -62,11 +63,10 @@ export function DemoLoginCard({ initialRole }: { initialRole: Role }) {
   return (
     <div className="login-card">
       <div className="login-card-heading">
-        <p className="kicker">Shared sample workspace</p>
-        <h1>Enter StockPilot</h1>
+        <h2>Choose your role</h2>
         <p>
-          Choose a role to see how the same wholesale operation changes with
-          each permission boundary.
+          See how the same wholesale operation changes with each permission
+          boundary.
         </p>
       </div>
 
@@ -100,6 +100,7 @@ export function DemoLoginCard({ initialRole }: { initialRole: Role }) {
       ) : null}
 
       <button
+        aria-busy={isSubmitting}
         className="button button-primary login-submit"
         disabled={isSubmitting}
         onClick={() => void startDemo()}
@@ -108,7 +109,7 @@ export function DemoLoginCard({ initialRole }: { initialRole: Role }) {
         {isSubmitting
           ? 'Starting workspace…'
           : `Continue as ${selectedRole?.label ?? 'Manager'}`}
-        <span aria-hidden="true">→</span>
+        <ArrowUpRight size={18} weight="bold" aria-hidden="true" />
       </button>
 
       <p className="reset-note">

@@ -64,7 +64,7 @@ export function ImportsWorkspace({ role }: { role: Role }) {
   return (
     <section className="workspace-section-page">
       <PageHeader
-        description="Upload → Preview → Commit valid rows → Download errors."
+        description="Upload, preview, commit valid rows, then download errors."
         title="Product imports"
         action={
           <a

@@ -61,6 +61,9 @@ importers:
       argon2:
         specifier: ^0.44.0
         version: 0.44.0
+      cloudinary:
+        specifier: ^2.7.0
+        version: 2.10.0
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
@@ -82,6 +85,9 @@ importers:
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
+      sharp:
+        specifier: ^0.35.3
+        version: 0.35.3(@types/node@24.13.3)
       zod:
         specifier: ^4.0.0
         version: 4.4.3
@@ -95,6 +101,9 @@ importers:
       '@types/cookie-parser':
         specifier: ^1.4.9
         version: 1.4.10(@types/express@5.0.6)
+      '@types/multer':
+        specifier: ^2.0.0
+        version: 2.2.0
       '@types/node':
         specifier: ^24.0.0
         version: 24.13.3
@@ -2572,6 +2581,12 @@ packages:
         integrity: sha512-ymXWVrDiCxTBE3+RIrrP533E70eA+9qu7zdWoHuOmGujkYtzf4HQF96b8nwHLqhuf4ykX61IGRIB38CC6/sImQ==,
       }
 
+  '@types/multer@2.2.0':
+    resolution:
+      {
+        integrity: sha512-3U1troeqGV8Ntp7Q3klwf4zr23VEoqYVocYXaswm9+8z3O9UHDYAqLxjJ/h550iRADTjKdOdhhasXw6gD6kYtg==,
+      }
+
   '@types/node@24.13.3':
     resolution:
       {
@@ -3421,6 +3436,13 @@ packages:
         integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==,
       }
     engines: { node: '>=0.8' }
+
+  cloudinary@2.10.0:
+    resolution:
+      {
+        integrity: sha512-sY09kYg7wprkndAOjZBAYqFZqwL+SxnEGcAvksOvFA+5upnFn949UjkEkHKNSwkBtW/xRDd0p6NgbSXZcxkI3w==,
+      }
+    engines: { node: '>=9' }
 
   color-convert@2.0.1:
     resolution:
@@ -7138,8 +7160,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@img/colour@1.1.0':
-    optional: true
+  '@img/colour@1.1.0': {}
 
   '@img/sharp-darwin-arm64@0.35.3':
     optionalDependencies:
@@ -8139,6 +8160,10 @@ snapshots:
 
   '@types/methods@1.1.4': {}
 
+  '@types/multer@2.2.0':
+    dependencies:
+      '@types/express': 5.0.6
+
   '@types/node@24.13.3':
     dependencies:
       undici-types: 7.18.2
@@ -8744,6 +8769,10 @@ snapshots:
   client-only@0.0.1: {}
 
   clone@1.0.4: {}
+
+  cloudinary@2.10.0:
+    dependencies:
+      lodash: 4.18.1
 
   color-convert@2.0.1:
     dependencies:
@@ -10214,7 +10243,6 @@ snapshots:
       '@img/sharp-win32-ia32': 0.35.3
       '@img/sharp-win32-x64': 0.35.3
       '@types/node': 24.13.3
-    optional: true
 
   shebang-command@2.0.0:
     dependencies:

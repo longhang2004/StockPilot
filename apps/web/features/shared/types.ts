@@ -8,9 +8,16 @@ export interface ProductRecord {
   id: string;
   sku: string;
   name: string;
+  description: string | null;
   salePrice: string;
   reorderPoint: number;
   isActive: boolean;
+  image: {
+    url: string;
+    width: number;
+    height: number;
+    format: string;
+  } | null;
 }
 
 export interface PartnerRecord {

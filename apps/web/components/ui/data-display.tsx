@@ -1,10 +1,10 @@
 'use client';
 
-import { CaretLeft, CaretRight } from '@phosphor-icons/react';
+import { ArrowUpRight, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 
 export function PageHeader({
-  eyebrow = 'Operations workspace',
+  eyebrow,
   title,
   description,
   action,
@@ -17,7 +17,7 @@ export function PageHeader({
   return (
     <header className="page-header">
       <div>
-        <p className="eyebrow">{eyebrow}</p>
+        {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
         <h1>{title}</h1>
         {description ? <p className="page-description">{description}</p> : null}
       </div>
@@ -57,17 +57,33 @@ export function ResponsiveDataTable<T extends { id?: string }>({
   data,
   onRowClick,
   getRowLabel,
+  ariaLabel = 'Data table',
 }: {
   columns: TableColumn<T>[];
   data: T[];
   onRowClick?: ((record: T) => void) | undefined;
   getRowLabel?: ((record: T) => string) | undefined;
+  ariaLabel?: string;
 }) {
   if (data.length === 0) return null;
+  const hasRowAction = Boolean(onRowClick);
+  const rowLabel = (record: T, index: number) =>
+    getRowLabel?.(record) ?? `${columns[0]?.label ?? 'Record'} ${index + 1}`;
+  const primaryColumn = columns[0];
+  const primaryValue = (record: T) =>
+    primaryColumn?.render
+      ? primaryColumn.render(record)
+      : String((primaryColumn && record[primaryColumn.key as keyof T]) ?? '—');
+  const shouldShowPrimary = (record: T, index: number) => {
+    if (!primaryColumn) return false;
+    const rawValue = record[primaryColumn.key as keyof T];
+    return typeof rawValue !== 'string' || rawValue !== rowLabel(record, index);
+  };
+
   return (
-    <div className="data-surface">
+    <div className="data-surface" role="region" aria-label={ariaLabel}>
       <div className="responsive-table-wrap">
-        <table className="operations-table">
+        <table aria-label={ariaLabel} className="operations-table">
           <thead>
             <tr>
               {columns.map((column) => (
@@ -75,25 +91,12 @@ export function ResponsiveDataTable<T extends { id?: string }>({
                   {column.label}
                 </th>
               ))}
+              {hasRowAction ? <th scope="col">Action</th> : null}
             </tr>
           </thead>
           <tbody>
             {data.map((record, index) => (
-              <tr
-                className={onRowClick ? 'is-clickable' : undefined}
-                key={record.id ?? `record-${index}`}
-                onClick={() => onRowClick?.(record)}
-                onKeyDown={(event) => {
-                  if (
-                    onRowClick &&
-                    (event.key === 'Enter' || event.key === ' ')
-                  ) {
-                    event.preventDefault();
-                    onRowClick(record);
-                  }
-                }}
-                tabIndex={onRowClick ? 0 : undefined}
-              >
+              <tr key={record.id ?? `record-${index}`}>
                 {columns.map((column) => (
                   <td data-label={column.label} key={column.key}>
                     {column.render
@@ -101,6 +104,18 @@ export function ResponsiveDataTable<T extends { id?: string }>({
                       : String(record[column.key as keyof T] ?? '—')}
                   </td>
                 ))}
+                {onRowClick ? (
+                  <td className="table-action-cell">
+                    <button
+                      aria-label={`Open ${rowLabel(record, index)}`}
+                      className="table-row-action"
+                      onClick={() => onRowClick(record)}
+                      type="button"
+                    >
+                      Open <ArrowUpRight size={16} aria-hidden="true" />
+                    </button>
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
@@ -109,21 +124,17 @@ export function ResponsiveDataTable<T extends { id?: string }>({
       <div className="mobile-record-list">
         {data.map((record, index) => (
           <article
-            className={`mobile-record-card${onRowClick ? ' is-clickable' : ''}`}
+            aria-label={onRowClick ? rowLabel(record, index) : undefined}
+            className="mobile-record-card"
             key={record.id ?? `mobile-${index}`}
-            onClick={() => onRowClick?.(record)}
-            onKeyDown={(event) => {
-              if (onRowClick && (event.key === 'Enter' || event.key === ' ')) {
-                event.preventDefault();
-                onRowClick(record);
-              }
-            }}
-            role={onRowClick ? 'button' : undefined}
-            tabIndex={onRowClick ? 0 : undefined}
           >
             <div className="mobile-record-heading">
-              <strong>{getRowLabel?.(record) ?? columns[0]?.label}</strong>
-              {columns[0]?.render ? columns[0].render(record) : null}
+              <strong>{rowLabel(record, index)}</strong>
+              {shouldShowPrimary(record, index) ? (
+                <span className="mobile-record-primary">
+                  {primaryValue(record)}
+                </span>
+              ) : null}
             </div>
             <dl>
               {columns.slice(1).map((column) => (
@@ -137,6 +148,16 @@ export function ResponsiveDataTable<T extends { id?: string }>({
                 </div>
               ))}
             </dl>
+            {onRowClick ? (
+              <button
+                aria-label={`Open ${rowLabel(record, index)}`}
+                className="mobile-record-action"
+                onClick={() => onRowClick(record)}
+                type="button"
+              >
+                Open <ArrowUpRight size={16} aria-hidden="true" />
+              </button>
+            ) : null}
           </article>
         ))}
       </div>

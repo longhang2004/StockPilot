@@ -1,10 +1,10 @@
 'use client';
 
-import type { ProductInputSchema, Role } from '@stockpilot/contracts';
+import Image from 'next/image';
+import type { Role } from '@stockpilot/contracts';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from '@phosphor-icons/react';
 import { useState } from 'react';
-import type { z } from 'zod';
 
 import {
   EmptyState,
@@ -20,13 +20,29 @@ import {
 import { apiRequest } from '../../lib/api-client';
 import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
-import { ProductDrawer } from './components/product-drawer';
+import {
+  ProductDrawer,
+  type ProductFormValue,
+} from './components/product-drawer';
 import { type ProductRecord } from '../shared/types';
+
+class ProductImageSaveError extends Error {
+  constructor(
+    readonly product: ProductRecord,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'ProductImageSaveError';
+  }
+}
 
 export function ProductsWorkspace({ role }: { role: Role }) {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<ProductRecord | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
   const products = usePage<ProductRecord>(
@@ -34,25 +50,69 @@ export function ProductsWorkspace({ role }: { role: Role }) {
   );
   const canWrite = role === 'MANAGER' || role === 'OWNER';
   const mutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       id,
       value,
+      imageFile: pendingImage,
+      removeImage: shouldRemoveImage,
     }: {
       id: string | undefined;
-      value: z.infer<typeof ProductInputSchema> & { isActive?: boolean };
-    }) =>
-      apiRequest(id ? `/products/${id}` : '/products', {
-        body: JSON.stringify(value),
-        method: id ? 'PATCH' : 'POST',
-      }),
-    onError: (error) =>
+      value: ProductFormValue;
+      imageFile: File | null;
+      removeImage: boolean;
+    }) => {
+      const saved = await apiRequest<ProductRecord>(
+        id ? `/products/${id}` : '/products',
+        {
+          body: JSON.stringify(value),
+          method: id ? 'PATCH' : 'POST',
+        },
+      );
+      try {
+        if (pendingImage) {
+          const body = new FormData();
+          body.append('file', pendingImage);
+          return await apiRequest<ProductRecord>(
+            `/products/${saved.id}/image`,
+            { body, method: 'POST' },
+          );
+        }
+        if (shouldRemoveImage && saved.image) {
+          await apiRequest<void>(`/products/${saved.id}/image`, {
+            method: 'DELETE',
+          });
+          return { ...saved, image: null };
+        }
+        return saved;
+      } catch (error) {
+        throw new ProductImageSaveError(
+          saved,
+          error instanceof Error
+            ? error.message
+            : 'The product was saved, but the image change could not be completed.',
+        );
+      }
+    },
+    onError: (error) => {
+      if (error instanceof ProductImageSaveError) {
+        setEditing(error.product);
+        setFormOpen(true);
+        setImageError(error.message);
+        void invalidatePageQueries(queryClient, '/products');
+        push('Product saved, image not uploaded. You can retry.', 'error');
+        return;
+      }
       push(
         error instanceof Error ? error.message : 'Could not save product.',
         'error',
-      ),
+      );
+    },
     onSuccess: () => {
       setFormOpen(false);
       setEditing(null);
+      setImageFile(null);
+      setRemoveImage(false);
+      setImageError(null);
       void invalidatePageQueries(queryClient, '/products');
       push('Product saved.', 'success');
     },
@@ -68,6 +128,9 @@ export function ProductsWorkspace({ role }: { role: Role }) {
               className="button button-primary"
               onClick={() => {
                 setEditing(null);
+                setImageFile(null);
+                setRemoveImage(false);
+                setImageError(null);
                 setFormOpen(true);
               }}
               type="button"
@@ -87,6 +150,7 @@ export function ProductsWorkspace({ role }: { role: Role }) {
         />
       ) : products.data?.items.length ? (
         <ResponsiveDataTable
+          ariaLabel="Products"
           columns={productColumns}
           data={products.data.items}
           getRowLabel={(record) => record.sku}
@@ -94,6 +158,9 @@ export function ProductsWorkspace({ role }: { role: Role }) {
             canWrite
               ? (record) => {
                   setEditing(record);
+                  setImageFile(null);
+                  setRemoveImage(false);
+                  setImageError(null);
                   setFormOpen(true);
                 }
               : undefined
@@ -107,7 +174,13 @@ export function ProductsWorkspace({ role }: { role: Role }) {
             canWrite ? (
               <button
                 className="button button-primary"
-                onClick={() => setFormOpen(true)}
+                onClick={() => {
+                  setEditing(null);
+                  setImageFile(null);
+                  setRemoveImage(false);
+                  setImageError(null);
+                  setFormOpen(true);
+                }}
                 type="button"
               >
                 Add product
@@ -119,19 +192,65 @@ export function ProductsWorkspace({ role }: { role: Role }) {
       <ToastRegion toasts={toasts} />
       <ProductDrawer
         editing={editing}
+        imageError={imageError}
+        imageFile={imageFile}
         onClose={() => {
           setFormOpen(false);
           setEditing(null);
+          setImageFile(null);
+          setRemoveImage(false);
+          setImageError(null);
         }}
-        onSave={(value) => mutation.mutate({ id: editing?.id, value })}
+        onImageFileChange={(file) => {
+          setImageFile(file);
+          setImageError(null);
+        }}
+        onRemoveImage={() => {
+          setRemoveImage((value) => !value);
+          setImageError(null);
+        }}
+        onSave={(value) =>
+          mutation.mutate({
+            id: editing?.id,
+            imageFile,
+            removeImage,
+            value,
+          })
+        }
         open={formOpen}
         pending={mutation.isPending}
+        removeImage={removeImage}
       />
     </section>
   );
 }
 
 const productColumns: TableColumn<ProductRecord>[] = [
+  {
+    key: 'image',
+    label: 'Image',
+    render: (record) => (
+      <span className="product-thumbnail-frame">
+        {record.image ? (
+          <Image
+            alt={`${record.name} product image`}
+            className="product-thumbnail"
+            height={48}
+            sizes="48px"
+            src={record.image.url}
+            width={48}
+          />
+        ) : (
+          <span
+            aria-label="No product image"
+            className="product-thumbnail-placeholder"
+          >
+            —
+          </span>
+        )}
+      </span>
+    ),
+  },
   {
     key: 'sku',
     label: 'SKU',

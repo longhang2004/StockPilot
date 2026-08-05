@@ -28,7 +28,8 @@ describe('public contracts', () => {
   });
 
   it('normalizes product input and rejects invalid wholesale quantities', async () => {
-    const { ProductInputSchema } = await import('./index.js');
+    const { ProductImageSchema, ProductInputSchema } =
+      await import('./index.js');
 
     expect(
       ProductInputSchema.parse({
@@ -52,6 +53,14 @@ describe('public contracts', () => {
         sku: 'INVALID',
       }),
     ).toThrow();
+    expect(
+      ProductImageSchema.parse({
+        format: 'webp',
+        height: 320,
+        url: 'https://res.cloudinary.com/example/image.webp',
+        width: 320,
+      }),
+    ).toMatchObject({ format: 'webp', width: 320 });
   });
 
   it('validates minimal B2B customer and supplier records', async () => {
