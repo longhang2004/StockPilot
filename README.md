@@ -13,9 +13,11 @@ receiving stock, preventing overselling, and fulfilling customer orders.
 [Walkthrough](docs/walkthrough.md) ·
 [Architecture](docs/architecture.md)
 
-> **Portfolio demo:** the public deployment uses Vercel Hobby, Render Free,
-> Neon Free, and UptimeRobot. It is intentionally designed to demonstrate
-> product and engineering decisions, not to provide a production SLA.
+> **Portfolio demo:** the current deployment uses a temporary Vercel origin,
+> Render Free, Neon Free, and UptimeRobot. Before launch, replace the demo
+> links with the chosen custom domain and set the same origin as `SITE_URL`.
+> The project is intentionally designed to demonstrate product and engineering
+> decisions, not to provide a production SLA.
 
 ## Product at a glance
 
@@ -30,9 +32,8 @@ receiving stock, preventing overselling, and fulfilling customer orders.
 
 ## Screenshots
 
-These images were captured from the canonical Vercel deployment with seeded
-demo data on 4 August 2026. They are cropped to the application viewport so
-the UI, rather than browser chrome, is the focus.
+These images were captured from the current seeded demo deployment on 4 August 2026. They are cropped to the application viewport so the UI, rather than
+browser chrome, is the focus.
 
 | Overview · desktop                                                  | Orders · mobile                                                  |
 | ------------------------------------------------------------------- | ---------------------------------------------------------------- |

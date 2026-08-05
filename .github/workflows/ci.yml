@@ -29,6 +29,7 @@ jobs:
       DEMO_ORGANIZATION_SLUG: stockpilot-demo
       MIGRATION_DATABASE_URL: postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot_test
       NODE_ENV: test
+      SITE_URL: https://stockpilot.example
       QUEUE_REQUIRED: false
       WEB_ORIGIN: http://localhost:3000
       WEBHOOK_SIGNING_SECRET: ci-webhook-secret

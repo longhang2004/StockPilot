@@ -10,7 +10,10 @@ test.describe('axe smoke', () => {
     await page.goto('/');
     const results = await new AxeBuilder({ page }).analyze();
     expect(
-      results.violations.filter((violation) => violation.impact === 'critical'),
+      results.violations.filter(
+        (violation) =>
+          violation.impact === 'critical' || violation.impact === 'serious',
+      ),
     ).toEqual([]);
   });
 
@@ -21,7 +24,8 @@ test.describe('axe smoke', () => {
     const loginResults = await new AxeBuilder({ page }).analyze();
     expect(
       loginResults.violations.filter(
-        (violation) => violation.impact === 'critical',
+        (violation) =>
+          violation.impact === 'critical' || violation.impact === 'serious',
       ),
     ).toEqual([]);
     await loginAs(page, 'manager');
@@ -30,7 +34,8 @@ test.describe('axe smoke', () => {
       const results = await new AxeBuilder({ page }).analyze();
       expect(
         results.violations.filter(
-          (violation) => violation.impact === 'critical',
+          (violation) =>
+            violation.impact === 'critical' || violation.impact === 'serious',
         ),
       ).toEqual([]);
     }

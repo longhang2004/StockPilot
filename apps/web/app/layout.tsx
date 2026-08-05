@@ -1,7 +1,8 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import type { ReactNode } from 'react';
 
+import { siteName, siteUrl } from '../lib/site-config';
 import './globals.css';
 
 const ibmPlexSans = localFont({
@@ -56,12 +57,25 @@ const ibmPlexMono = localFont({
   ],
   variable: '--font-ibm-plex-mono',
   display: 'swap',
+  preload: false,
 });
 
 export const metadata: Metadata = {
-  title: 'StockPilot — Wholesale operations, under control',
-  description:
-    'A focused inventory and order operations workspace for small wholesale teams.',
+  metadataBase: siteUrl,
+  applicationName: siteName,
+  title: {
+    default: siteName,
+    template: '%s | StockPilot',
+  },
+  icons: {
+    icon: '/icon',
+    apple: '/apple-icon',
+  },
+  manifest: '/manifest.webmanifest',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#F2F0EA',
 };
 
 export default function RootLayout({

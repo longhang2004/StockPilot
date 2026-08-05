@@ -1,8 +1,10 @@
 # StockPilot two-minute walkthrough
 
-Use the canonical Vercel production origin for the public walkthrough.
+Use the canonical production origin configured in `SITE_URL` for the public
+walkthrough. Until the custom domain is attached, the temporary Vercel URL
+below is the current demo origin.
 
-**Production URL:** <https://stock-pilot-web-five.vercel.app>
+**Current demo URL:** <https://stock-pilot-web-five.vercel.app>
 
 **API docs:** <https://stockpilot-api-y1aw.onrender.com/docs>
 
@@ -12,9 +14,9 @@ mobile viewport for the final pass.
 
 ## Screenshot gallery
 
-The following checked-in captures are from the live Vercel origin with the
-canonical fixture. They are useful for a README preview, portfolio review, or
-recording storyboard; the browser chrome has been cropped out.
+The following checked-in captures are from the current live demo origin with
+the canonical fixture. They are useful for a README preview, portfolio review,
+or recording storyboard; the browser chrome has been cropped out.
 
 | Overview · desktop                                  | Orders · mobile                                  |
 | --------------------------------------------------- | ------------------------------------------------ |
@@ -70,6 +72,7 @@ fulfillment path with the bottom navigation: **Overview**, **Orders**,
 - `docs/assets/receipt-drawer-mobile.png` — receipt form and action drawer
 
 Do not capture credentials, cookies, provider dashboards, or a preview-domain
-URL. The final recording should link to the canonical Vercel origin and mention
-that the free demo keeps the core workflows online; automatic background retry
-and reconciliation are an optional queue-enabled acceptance profile.
+URL. The final recording should link to the canonical origin configured in
+`SITE_URL` and mention that the free demo keeps the core workflows online;
+automatic background retry and reconciliation are an optional queue-enabled
+acceptance profile.

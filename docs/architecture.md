@@ -6,7 +6,7 @@ RLS context, and the PostgreSQL ledger.
 
 ```mermaid
 flowchart LR
-  Browser[Canonical Vercel origin] -->|same-origin /api| Web[Next.js web]
+  Browser[Canonical SITE_URL origin] -->|same-origin /api| Web[Next.js web]
   Web -->|API_INTERNAL_URL| API[NestJS API on Render Free]
   Storefront[Signed storefront webhook] --> API
   API -->|tenant transaction + RLS| DB[(PostgreSQL)]

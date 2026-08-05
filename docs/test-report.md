@@ -33,8 +33,9 @@ domain threshold.
 - The API binds to `0.0.0.0:$PORT`, enables Nest shutdown hooks, stops pg-boss,
   and disconnects Prisma on SIGTERM.
 
-The live provider smoke run is available at the [Vercel production
-origin](https://stock-pilot-web-five.vercel.app), with API checks at
+The live provider smoke run is currently available at the [temporary Vercel
+origin](https://stock-pilot-web-five.vercel.app); replace this link with the
+custom `SITE_URL` origin at launch. API checks are at
 [Render readiness](https://stockpilot-api-y1aw.onrender.com/v1/health/ready),
 [Swagger UI](https://stockpilot-api-y1aw.onrender.com/docs), and
 [OpenAPI JSON](https://stockpilot-api-y1aw.onrender.com/openapi.json). The

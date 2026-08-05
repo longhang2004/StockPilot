@@ -4,15 +4,17 @@ This is the production-shaped portfolio topology:
 
 ```mermaid
 flowchart LR
-  Browser[Canonical Vercel origin] -->|same-origin /api rewrite| Web[Next.js web]
+  Browser[Canonical custom web domain] -->|same-origin /api rewrite| Web[Next.js web]
   Web -->|API_INTERNAL_URL| API[Render Free NestJS API]
   API -->|pooled app URL| DB[(Neon application database)]
   API -.->|optional direct queue URL| Queue[(Neon stockpilot_queue)]
 ```
 
-The public demo uses the default Vercel domain. Preview deployments are not
-functional demos because the API trusts one canonical `WEB_ORIGIN` for CSRF.
-Custom domains and Sentry are optional follow-up work.
+The public demo uses one custom production domain configured as Vercel's
+primary domain. Preview deployments are not functional demos because the API
+trusts one canonical `WEB_ORIGIN` for CSRF. Set the same hostname in Vercel's
+`SITE_URL` environment variable so metadata, JSON-LD, robots, and sitemap all
+use the production origin.
 
 ## Provider settings
 
@@ -26,9 +28,12 @@ Custom domains and Sentry are optional follow-up work.
 - The checked-in [`apps/web/vercel.json`](../apps/web/vercel.json) runs the
   contracts build before the web build and installs the workspace lockfile.
 - Set `API_INTERNAL_URL` to the Render public API URL and `NODE_ENV=production`.
+- Set `SITE_URL` to the chosen custom production origin, without a trailing
+  slash. Use the same value for Production and Preview environments so preview
+  builds keep production canonical URLs.
 - Do not expose `API_INTERNAL_URL` as a client-side variable. The rewrite keeps
-  browser requests on the Vercel origin so session cookies and CSRF checks are
-  same-origin.
+  browser requests on the canonical web origin so session cookies and CSRF
+  checks are same-origin.
 
 ### Render
 
@@ -95,21 +100,22 @@ Custom domains and Sentry are optional follow-up work.
 
 ## Environment matrix
 
-| Variable                 | Vercel            | Render                       | Notes                                                        |
-| ------------------------ | ----------------- | ---------------------------- | ------------------------------------------------------------ |
-| `API_INTERNAL_URL`       | Render public URL | —                            | Production-only rewrite target.                              |
-| `DATABASE_URL`           | —                 | pooled `stockpilot_app` URL  | Runtime queries only.                                        |
-| `MIGRATION_DATABASE_URL` | —                 | —                            | GitHub Actions only; direct migration URL.                   |
-| `QUEUE_DATABASE_URL`     | —                 | —                            | Unset on the free profile; opt-in short acceptance only.     |
-| `QUEUE_REQUIRED`         | —                 | `false`                      | Readiness allows `queue:not_configured` on the free profile. |
-| `WEB_ORIGIN`             | —                 | exact Vercel origin          | No trailing slash; one canonical origin.                     |
-| `NODE_ENV`               | `production`      | `production`                 | Enables secure cookies and production behavior.              |
-| `DEMO_MODE`              | —                 | `true`                       | Enables one-click demo accounts.                             |
-| `DEMO_ORGANIZATION_SLUG` | —                 | `stockpilot-demo`            | Canonical demo tenant.                                       |
-| `CSRF_SECRET`            | —                 | generated secret (32+ chars) | Generated once by the Render Blueprint.                      |
-| `WEBHOOK_SIGNING_SECRET` | —                 | generated secret (16+ chars) | Generated once by the Render Blueprint.                      |
-| `SESSION_COOKIE_NAME`    | —                 | `stockpilot_session`         | Change to expire all existing cookies.                       |
-| `SENTRY_DSN`             | —                 | optional                     | Leave empty when Sentry is not configured.                   |
+| Variable                 | Vercel               | Render                       | Notes                                                        |
+| ------------------------ | -------------------- | ---------------------------- | ------------------------------------------------------------ |
+| `API_INTERNAL_URL`       | Render public URL    | —                            | Production-only rewrite target.                              |
+| `DATABASE_URL`           | —                    | pooled `stockpilot_app` URL  | Runtime queries only.                                        |
+| `MIGRATION_DATABASE_URL` | —                    | —                            | GitHub Actions only; direct migration URL.                   |
+| `QUEUE_DATABASE_URL`     | —                    | —                            | Unset on the free profile; opt-in short acceptance only.     |
+| `QUEUE_REQUIRED`         | —                    | `false`                      | Readiness allows `queue:not_configured` on the free profile. |
+| `SITE_URL`               | chosen custom origin | —                            | Canonical metadata/sitemap origin; no trailing slash.        |
+| `WEB_ORIGIN`             | —                    | exact custom origin          | No trailing slash; one canonical origin for CSRF.            |
+| `NODE_ENV`               | `production`         | `production`                 | Enables secure cookies and production behavior.              |
+| `DEMO_MODE`              | —                    | `true`                       | Enables one-click demo accounts.                             |
+| `DEMO_ORGANIZATION_SLUG` | —                    | `stockpilot-demo`            | Canonical demo tenant.                                       |
+| `CSRF_SECRET`            | —                    | generated secret (32+ chars) | Generated once by the Render Blueprint.                      |
+| `WEBHOOK_SIGNING_SECRET` | —                    | generated secret (16+ chars) | Generated once by the Render Blueprint.                      |
+| `SESSION_COOKIE_NAME`    | —                    | `stockpilot_session`         | Change to expire all existing cookies.                       |
+| `SENTRY_DSN`             | —                    | optional                     | Leave empty when Sentry is not configured.                   |
 
 ### GitHub Actions secrets
 
@@ -123,7 +129,8 @@ never copied into the Render runtime:
 
 ## First deployment order
 
-1. Create the Vercel project and record its canonical production origin.
+1. Choose the custom domain, attach it to Vercel, and make it the primary
+   production domain. Record the exact origin without a trailing slash.
 2. Create the Neon project and provision the app and isolated queue roles with
    [`infra/postgres/provision-production.sql`](../infra/postgres/provision-production.sql).
    Leave the queue URL unset for the normal free profile; it is used only for a
@@ -138,11 +145,14 @@ never copied into the Render runtime:
    applies migrations and seeds the canonical fixture. Render's `main` branch
    auto-deploy builds the API; if the optional hook secret is set, the workflow
    can trigger the matching commit explicitly.
-5. Set Render's public URL as Vercel `API_INTERNAL_URL` and redeploy Vercel.
-6. Configure the live UptimeRobot monitor (and the optional readiness monitor
+5. Set Render's public URL as Vercel `API_INTERNAL_URL`, set Vercel `SITE_URL`
+   to the custom origin, and redeploy Vercel.
+6. Set Render `WEB_ORIGIN` to that same custom origin, redeploy the API, then
+   verify demo login, session cookies, and CSRF from the custom domain.
+7. Configure the live UptimeRobot monitor (and the optional readiness monitor
    only if its Neon CU cost is acceptable), then run the smoke checklist below
    from the demo origin.
-7. Keep CI required on `main`, block force-pushes and branch deletion, and keep
+8. Keep CI required on `main`, block force-pushes and branch deletion, and keep
    the default branch as `main`. Leave Render auto-deploy enabled for the normal
    free-demo path.
 
@@ -189,7 +199,7 @@ curl -fsS "$API_URL/docs" >/dev/null
 curl -fsS "$API_URL/openapi.json" >/dev/null
 ```
 
-Then verify through the canonical Vercel origin:
+Then verify through the canonical production origin configured in `SITE_URL`:
 
 - one-click Owner, Manager, and Staff login;
 - Manager receipt and order confirmation;
@@ -208,8 +218,8 @@ Then verify through the canonical Vercel origin:
 The selected path is intentionally free and demo-oriented. Review Render's
 750-hour allowance, UptimeRobot monitor status, and Neon CU-hour usage monthly;
 disable the optional readiness monitor and pause the public service if the
-demo is no longer needed. A paid Render instance, custom domain, Sentry DSN,
-and narrated video are optional follow-up work.
+demo is no longer needed. The custom domain remains a launch gate; a paid
+Render instance, Sentry DSN, and narrated video are optional follow-up work.
 
 Official provider references: [Render Blueprint spec](https://render.com/docs/blueprint-spec),
 [Render free services](https://render.com/docs/free),
