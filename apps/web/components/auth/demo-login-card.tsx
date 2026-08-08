@@ -116,6 +116,10 @@ export function DemoLoginCard({ initialRole }: { initialRole: Role }) {
         Demo data resets every six hours. No signup or personal details are
         required.
       </p>
+      <p className="reset-note">
+        Building something of your own? <a href="/signup">Create a workspace</a>
+        .
+      </p>
     </div>
   );
 }

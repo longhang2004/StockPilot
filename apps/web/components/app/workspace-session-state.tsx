@@ -35,3 +35,25 @@ export function WorkspaceSessionExpired() {
     </main>
   );
 }
+
+export function WorkspaceNoMembership() {
+  return (
+    <main className="session-expired">
+      <div>
+        <span className="brand-mark" aria-hidden="true">
+          SP
+        </span>
+        <p className="kicker">Almost there</p>
+        <h1>You are not in a workspace yet.</h1>
+        <p role="alert">
+          Create a workspace to become its Owner, or accept a teammate
+          invitation link.
+        </p>
+        <Link className="button button-primary" href="/create-workspace">
+          Create a workspace
+          <ArrowUpRight size={18} weight="bold" aria-hidden="true" />
+        </Link>
+      </div>
+    </main>
+  );
+}

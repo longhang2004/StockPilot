@@ -1,10 +1,25 @@
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 describe('health endpoints', () => {
   let app: INestApplication | undefined;
+
+  // The app bootstraps the full module graph, so the required configuration
+  // surface must be present (same minimal set as the other integration
+  // suites; the health endpoints themselves do not touch the database).
+  beforeAll(() => {
+    Object.assign(process.env, {
+      CSRF_SECRET: 'integration-csrf-secret-with-at-least-32-characters',
+      DATABASE_URL:
+        process.env.DATABASE_URL ??
+        'postgresql://stockpilot_app:stockpilot_app@localhost:5432/stockpilot',
+      NODE_ENV: 'test',
+      WEB_ORIGIN: 'http://localhost:3000',
+      WEBHOOK_SIGNING_SECRET: 'integration-webhook-secret',
+    });
+  });
 
   afterEach(async () => {
     await app?.close();

@@ -144,6 +144,49 @@
   padding: 0.8rem;
 }
 
+.demo-role-switcher {
+  background: var(--color-slate-900);
+  border: 1px dashed var(--color-slate-600);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-block: 0.9rem;
+  padding: 0.8rem;
+}
+
+.demo-role-switcher .demo-role-label {
+  color: var(--color-amber-300);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.demo-role-switcher label {
+  color: var(--color-slate-400);
+  display: grid;
+  font-size: var(--text-xs);
+  font-weight: 650;
+  gap: 0.3rem;
+}
+
+.demo-role-switcher select {
+  width: 100%;
+}
+
+.demo-role-compact {
+  background: var(--color-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  margin: 0 0 1.25rem;
+  padding: 0.8rem;
+}
+
+.demo-role-compact .demo-role-label {
+  color: var(--warning);
+}
+
 .workspace-nav-link {
   align-items: center;
   border-radius: var(--radius-sm);
@@ -722,6 +765,324 @@
 .form-field textarea {
   min-height: 5rem;
   resize: vertical;
+}
+
+/* Multi-line editors inside drawers (orders, receipts). */
+.line-editor {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.line-editor-header,
+.line-editor-row {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns:
+    minmax(0, 2.2fr) minmax(4rem, 0.55fr) minmax(5.5rem, 0.8fr)
+    minmax(5rem, 0.7fr) 2rem;
+}
+
+.line-editor-header {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: 750;
+}
+
+.line-editor-row {
+  align-items: start;
+}
+
+.line-editor-cell {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.line-editor-cell input,
+.line-editor-cell select {
+  width: 100%;
+}
+
+.line-editor-price,
+.line-editor-total {
+  align-content: center;
+  font-size: var(--text-sm);
+  min-height: 2.5rem;
+}
+
+.line-editor-remove {
+  justify-self: end;
+}
+
+.line-editor-add {
+  align-items: center;
+  background: none;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  display: inline-flex;
+  gap: 0.35rem;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+}
+
+.line-editor-add:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.line-editor-subtotal {
+  align-items: baseline;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  padding-top: 0.6rem;
+}
+
+.line-editor-subtotal span {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 750;
+}
+
+/* Audit detail drawer. */
+.audit-detail-stack {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.audit-detail-meta {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.audit-detail-meta > div,
+.audit-change-list > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.audit-detail-meta dt,
+.audit-change-list dt {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.audit-detail-meta dd {
+  font-weight: 650;
+}
+
+.audit-detail-heading {
+  font-size: var(--text-sm);
+  margin: 0 0 0.5rem;
+}
+
+.audit-change-list {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.7rem;
+}
+
+.audit-change-json {
+  background: var(--color-surface-muted, var(--color-surface));
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  margin: 0;
+  overflow-x: auto;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+}
+
+/* Overview movement chart and analytics panels. */
+.demo-guide {
+  margin-top: 1.25rem;
+}
+
+.demo-guide-steps {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+}
+
+.demo-guide-steps a {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  display: flex;
+  gap: 0.8rem;
+  justify-content: space-between;
+  padding: 0.65rem 0.8rem;
+}
+
+.demo-guide-steps a:hover {
+  border-color: var(--primary);
+}
+
+.demo-guide-steps span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.demo-guide-steps strong {
+  font-size: var(--text-xs);
+}
+
+.demo-guide-steps small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.movement-chart {
+  margin-block: 0.75rem;
+}
+
+.movement-chart svg {
+  display: block;
+  max-height: 190px;
+}
+
+.chart-axis {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.chart-bar {
+  transition: opacity 140ms ease;
+}
+
+.chart-bar-inbound {
+  fill: var(--success);
+}
+
+.chart-bar-outbound {
+  fill: var(--warning);
+}
+
+.movement-chart svg:hover .chart-bar {
+  opacity: 0.72;
+}
+
+.chart-label {
+  fill: var(--muted);
+  font-family: var(--font-ibm-plex-mono);
+  font-size: 8px;
+}
+
+.chart-table-details {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  margin-top: 0.4rem;
+}
+
+.chart-table-details summary {
+  cursor: pointer;
+}
+
+.analytics-grid {
+  display: grid;
+  gap: 1.1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.status-breakdown {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.status-breakdown-row {
+  align-items: center;
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: 7.5rem minmax(0, 1fr) 2.5rem;
+}
+
+.status-breakdown-bar {
+  background: var(--color-slate-200);
+  border-radius: 2px;
+  height: 0.55rem;
+  justify-self: start;
+  max-width: 100%;
+}
+
+.status-breakdown-row strong {
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.chart-kpis {
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem;
+  margin: 1.1rem 0 0;
+  padding-top: 0.8rem;
+}
+
+.chart-kpis span {
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  font-size: var(--text-xs);
+  gap: 0.15rem;
+}
+
+.chart-kpis strong {
+  color: var(--ink);
+  font-size: var(--text-md);
+}
+
+.top-products {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.top-product-row {
+  align-items: center;
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: 1.4rem minmax(0, 1fr) auto;
+}
+
+.top-product-rank {
+  background: var(--surface-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  padding: 0.2rem 0;
+  text-align: center;
+}
+
+.top-product-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.top-product-name strong {
+  font-size: var(--text-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-product-name small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.top-product-units {
+  color: var(--muted);
+  font-size: var(--text-xs);
 }
 
 .field-error,

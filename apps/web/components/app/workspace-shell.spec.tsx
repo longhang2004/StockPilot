@@ -59,4 +59,30 @@ describe('WorkspaceShell', () => {
     ).toHaveAttribute('href', '/login');
     view.unmount();
   });
+
+  it('routes membershipless sessions toward workspace creation', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            membership: null,
+            user: { displayName: 'Fresh Signup' },
+          }),
+          { headers: { 'Content-Type': 'application/json' }, status: 200 },
+        ),
+      ),
+    );
+    const { WorkspaceShell } = await import('./workspace-shell');
+
+    const view = render(<WorkspaceShell />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      /Create a workspace to become its Owner/i,
+    );
+    expect(
+      screen.getByRole('link', { name: /create a workspace/i }),
+    ).toHaveAttribute('href', '/create-workspace');
+    view.unmount();
+  });
 });

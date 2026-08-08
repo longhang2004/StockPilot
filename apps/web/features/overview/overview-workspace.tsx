@@ -19,10 +19,17 @@ import { formatDate, formatDateTime } from '../../lib/formatters';
 import {
   type OrderRecord,
   type OverviewResponse,
-  type SessionView,
+  type WorkspaceSessionView,
 } from '../shared/types';
+import { AnalyticsPanels } from './analytics-panels';
+import { DemoQuickGuide } from './demo-quick-guide';
+import { MovementChart } from './movement-chart';
 
-export function OverviewWorkspace({ session }: { session: SessionView }) {
+export function OverviewWorkspace({
+  session,
+}: {
+  session: WorkspaceSessionView;
+}) {
   const overview = useQuery({
     queryKey: ['dashboard-overview'],
     queryFn: () => apiRequest<OverviewResponse>('/dashboard/overview'),
@@ -59,20 +66,16 @@ export function OverviewWorkspace({ session }: { session: SessionView }) {
       ordersAwaitingApproval:
         overview.data?.exceptions?.ordersAwaitingApproval ?? 0,
     },
-    inboundOutbound14d: overview.data?.inboundOutbound14d ?? [],
     openOrderValue: overview.data?.openOrderValue ?? '0.00',
     recentMovements: overview.data?.recentMovements ?? [],
     recentOrders: overview.data?.recentOrders ?? [],
     fourteenDayMovements: overview.data?.fourteenDayMovements ?? [],
   };
-  const summaryRows =
-    data.inboundOutbound14d ??
-    data.fourteenDayMovements?.map((row) => ({
-      date: row.day,
-      inbound: row.inbound,
-      outbound: row.outbound,
-    })) ??
-    [];
+  const summaryRows = data.fourteenDayMovements.map((row) => ({
+    date: row.day,
+    inbound: row.inbound,
+    outbound: row.outbound,
+  }));
   return (
     <section
       className="workspace-section-page"
@@ -82,9 +85,16 @@ export function OverviewWorkspace({ session }: { session: SessionView }) {
         description={`One clear queue for ${session.membership.organization.name}. Keep exceptions moving and stock promises honest.`}
         title="Operations overview"
         action={
-          <Link className="button button-primary" href="/app/orders?new=1">
-            Create draft order <ArrowRight size={17} />
-          </Link>
+          <>
+            <span
+              className={`plan-badge plan-badge-${(overview.data?.plan ?? 'PRO').toLowerCase()}`}
+            >
+              {overview.data?.plan ?? 'PRO'}
+            </span>
+            <Link className="button button-primary" href="/app/orders?new=1">
+              Create draft order <ArrowRight size={17} />
+            </Link>
+          </>
         }
       />
       <div className="workspace-grid" aria-label="Operational summary">
@@ -113,6 +123,7 @@ export function OverviewWorkspace({ session }: { session: SessionView }) {
           value={data.exceptions.failedIntegrations}
         />
       </div>
+      {session.membership.organization.isDemo ? <DemoQuickGuide /> : null}
       <div className="workspace-panels">
         <article className="work-panel">
           <div className="panel-heading">
@@ -219,7 +230,8 @@ export function OverviewWorkspace({ session }: { session: SessionView }) {
           />
         )}
       </article>
-      <InboundOutboundSummary rows={summaryRows} />
+      <MovementChart rows={summaryRows} />
+      <AnalyticsPanels />
     </section>
   );
 }
@@ -247,50 +259,3 @@ const recentOrderColumns: TableColumn<OrderRecord>[] = [
     render: (record) => formatDate(record.createdAt),
   },
 ];
-
-function InboundOutboundSummary({
-  rows,
-}: {
-  rows: Array<{ date: string; inbound: number; outbound: number }>;
-}) {
-  return (
-    <article className="work-panel chart-panel">
-      <div className="panel-heading">
-        <div>
-          <p className="eyebrow">Last 14 days</p>
-          <h2>Inbound and outbound units</h2>
-        </div>
-        <span className="muted-note">Accessible table summary</span>
-      </div>
-      {rows.length ? (
-        <div className="responsive-table-wrap">
-          <table className="operations-table">
-            <thead>
-              <tr>
-                <th scope="col">Date</th>
-                <th scope="col">Inbound</th>
-                <th scope="col">Outbound</th>
-                <th scope="col">Net</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.date}>
-                  <td>{formatDate(row.date)}</td>
-                  <td className="mono">+{row.inbound}</td>
-                  <td className="mono">−{row.outbound}</td>
-                  <td className="mono">{row.inbound - row.outbound}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <EmptyState
-          description="Movements will create the 14-day summary automatically."
-          title="No movement window yet"
-        />
-      )}
-    </article>
-  );
-}

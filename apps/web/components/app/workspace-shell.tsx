@@ -11,8 +11,10 @@ import {
 } from './workspace-navigation';
 import {
   WorkspaceLoading,
+  WorkspaceNoMembership,
   WorkspaceSessionExpired,
 } from './workspace-session-state';
+import type { WorkspaceSessionView } from '../../features/shared/types';
 
 export type { WorkspaceSection };
 export type { SessionView } from './workspace-navigation';
@@ -23,9 +25,9 @@ export function WorkspaceShell({
   section?: WorkspaceSection;
 }) {
   const [session, setSession] = useState<SessionView | null>(null);
-  const [state, setState] = useState<'loading' | 'ready' | 'expired'>(
-    'loading',
-  );
+  const [state, setState] = useState<
+    'loading' | 'ready' | 'expired' | 'no-membership'
+  >('loading');
 
   useEffect(() => {
     let active = true;
@@ -35,7 +37,7 @@ export function WorkspaceShell({
         const body = (await response.json()) as SessionView;
         if (active) {
           setSession(body);
-          setState('ready');
+          setState(body.membership ? 'ready' : 'no-membership');
         }
       })
       .catch(() => {
@@ -48,17 +50,25 @@ export function WorkspaceShell({
 
   if (state === 'loading') return <WorkspaceLoading />;
   if (state === 'expired' || !session) return <WorkspaceSessionExpired />;
+  if (state === 'no-membership') return <WorkspaceNoMembership />;
 
+  const workspaceSession: WorkspaceSessionView = {
+    membership: session.membership!,
+    user: session.user,
+  };
+  const { organization } = workspaceSession.membership;
   return (
     <QueryProvider>
       <div className="workspace">
-        <WorkspaceSidebar section={section} session={session} />
+        <WorkspaceSidebar section={section} session={workspaceSession} />
         <main className="workspace-main">
-          <div className="demo-banner">
-            <span>Demo workspace</span>Data resets every six hours. Changes are
-            safe to explore.
-          </div>
-          <WorkspaceContent section={section} session={session} />
+          {organization.isDemo ? (
+            <div className="demo-banner">
+              <span>Demo workspace</span>Data resets every six hours. Changes
+              are safe to explore.
+            </div>
+          ) : null}
+          <WorkspaceContent section={section} session={workspaceSession} />
         </main>
         <MobileWorkspaceNavigation section={section} />
       </div>

@@ -12,6 +12,7 @@ import { SessionGuard } from './session.guard.js';
 
 @Module({
   controllers: [AuthController],
+  exports: [AuthService],
   imports: [EnvironmentModule, DatabaseModule],
   providers: [
     AuthService,

@@ -180,4 +180,24 @@
   .mobile-workspace-nav .mobile-nav-active {
     color: var(--success);
   }
+
+  .line-editor-header {
+    display: none;
+  }
+
+  .line-editor-row {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    gap: 0.45rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 0.6rem;
+  }
+
+  .line-editor-product {
+    grid-column: 1 / -1;
+  }
+
+  .line-editor-remove {
+    grid-column: 3;
+  }
 }

@@ -1,6 +1,12 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import type { Role } from '@stockpilot/contracts';
-import { verify } from 'argon2';
+import { hash, verify } from 'argon2';
 
 import { ENVIRONMENT } from '../config/environment.module.js';
 import type { Environment } from '../config/environment.js';
@@ -28,6 +34,30 @@ export class AuthService {
     @Inject(PrismaService) private readonly prisma: PrismaService,
   ) {}
 
+  async signup(input: {
+    displayName: string;
+    email: string;
+    password: string;
+  }) {
+    const email = input.email.toLowerCase();
+    const existing = await this.prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      throw new ConflictException({
+        code: 'EMAIL_ALREADY_REGISTERED',
+        message: 'An account with this email already exists.',
+      });
+    }
+    const passwordHash = await hash(input.password);
+    const user = await this.prisma.user.create({
+      data: {
+        displayName: input.displayName.trim(),
+        email,
+        passwordHash,
+      },
+    });
+    return this.issueSession(null, user);
+  }
+
   async login(email: string, password: string) {
     const user = await this.prisma.user.findUnique({
       include: {
@@ -39,15 +69,11 @@ export class AuthService {
       },
       where: { email: email.toLowerCase() },
     });
-    const membership = user?.memberships[0];
-    if (!user || !membership || !(await verify(user.passwordHash, password))) {
+    if (!user || !(await verify(user.passwordHash, password))) {
       throw new UnauthorizedException('Email or password is incorrect.');
     }
-
-    return this.createSession({
-      ...membership,
-      user,
-    });
+    const membership = user.memberships[0] ?? null;
+    return this.issueSession(membership ? { ...membership, user } : null, user);
   }
 
   async demoLogin(role: Role) {
@@ -70,7 +96,35 @@ export class AuthService {
       }
     }
 
-    return this.createSession(membership);
+    return this.issueSession(membership, membership.user);
+  }
+
+  /** Memberships the authenticated user holds across workspaces. */
+  listWorkspaces(auth: AuthContext) {
+    return this.prisma.membership.findMany({
+      include: { organization: true },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      where: { userId: auth.user.id },
+    });
+  }
+
+  /**
+   * Binds a fresh session to the requested workspace. The browser-supplied
+   * organization id is only a destination: membership is verified server-side
+   * before any session is created.
+   */
+  async switchWorkspace(auth: AuthContext, organizationId: string) {
+    const membership = await this.prisma.membership.findFirst({
+      include: { organization: true, user: true },
+      where: { organizationId, userId: auth.user.id },
+    });
+    if (!membership) {
+      throw new ForbiddenException({
+        code: 'INVALID_WORKSPACE_MEMBERSHIP',
+        message: 'You are not a member of this workspace.',
+      });
+    }
+    return this.issueSession(membership, membership.user);
   }
 
   async revokeSession(sessionId: string): Promise<void> {
@@ -152,29 +206,40 @@ export class AuthService {
     });
   }
 
-  private async createSession(membership: NonNullable<MembershipWithIdentity>) {
+  /**
+   * Creates a fresh session (and cookie payload) for a user, optionally bound
+   * to a workspace membership. Used by login, signup, demo login, workspace
+   * switching, invitation acceptance, and workspace creation.
+   */
+  async issueSession(
+    membership: MembershipWithIdentity | null,
+    user: { displayName: string; email: string; id: string },
+  ) {
     const credentials = createSessionCredentials();
     const session = await this.prisma.session.create({
       data: {
         expiresAt: new Date(
           Date.now() + this.environment.SESSION_TTL_HOURS * 60 * 60 * 1000,
         ),
-        membershipId: membership.id,
+        membershipId: membership?.id ?? null,
         tokenHash: credentials.tokenHash,
+        userId: user.id,
       },
     });
 
     return {
       context: {
-        membership: {
-          id: membership.id,
-          organization: membership.organization,
-          role: membership.role,
-        },
+        membership: membership
+          ? {
+              id: membership.id,
+              organization: membership.organization,
+              role: membership.role,
+            }
+          : null,
         user: {
-          displayName: membership.user.displayName,
-          email: membership.user.email,
-          id: membership.user.id,
+          displayName: user.displayName,
+          email: user.email,
+          id: user.id,
         },
       },
       csrfToken: deriveCsrfToken(

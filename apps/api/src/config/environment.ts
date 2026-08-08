@@ -26,6 +26,15 @@ const EnvironmentSchema = z.object({
   SENTRY_DSN: z.url().optional().or(z.literal('')),
   SESSION_COOKIE_NAME: z.string().min(1).default('stockpilot_session'),
   SESSION_TTL_HOURS: z.coerce.number().int().positive().default(12),
+  STRIPE_SECRET_KEY: z.string().trim().min(1).optional().or(z.literal('')),
+  STRIPE_STARTER_PRICE_ID: z
+    .string()
+    .trim()
+    .min(1)
+    .optional()
+    .or(z.literal('')),
+  STRIPE_PRO_PRICE_ID: z.string().trim().min(1).optional().or(z.literal('')),
+  STRIPE_WEBHOOK_SECRET: z.string().trim().min(1).optional().or(z.literal('')),
   WEB_ORIGIN: z.url(),
   WEBHOOK_SIGNING_SECRET: z.string().min(16),
 });

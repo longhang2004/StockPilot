@@ -205,13 +205,15 @@ reconciliation are opt-in queue-profile features.
 ## Scope
 
 Included: one warehouse, catalog and partners, receipts, inventory ledger,
-B2B orders, CSV imports, mock storefront webhooks, audit, RBAC, RLS, and
-responsive operations workflows.
+B2B orders, CSV imports, mock storefront webhooks, audit, RBAC, RLS, signup
+and workspace creation, invitation-based team management, workspace
+switching, Starter/Pro Stripe subscriptions with server-side entitlements,
+operational analytics, and responsive operations workflows.
 
-Out of scope: signup/invitations, payments, tax, debt, returns, purchase
-orders, partial receiving/fulfillment, variants, barcodes, lot/serial
-tracking, valuation, multiple warehouses, Redis, marketplace integrations,
-and production SLA commitments.
+Out of scope: tax, debt, returns, purchase orders, partial
+receiving/fulfillment, variants, barcodes, lot/serial tracking, valuation,
+multiple warehouses, Redis, marketplace integrations, and production SLA
+commitments.
 
 ## License
 

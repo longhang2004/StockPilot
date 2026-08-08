@@ -42,3 +42,14 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
+      # Optional SaaS billing: leave blank to run without Stripe (the demo
+      # workspace always shows its synthetic Demo Pro plan). Price IDs are
+      # per-environment Stripe test/live prices.
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_STARTER_PRICE_ID
+        sync: false
+      - key: STRIPE_PRO_PRICE_ID
+        sync: false

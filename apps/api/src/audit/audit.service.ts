@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type { AuthContext } from '../auth/auth-context.js';
+import { requireMembership, type AuthContext } from '../auth/auth-context.js';
 import { TenantDatabase } from '../database/tenant-database.js';
 
 export interface AuditListQuery {
@@ -16,7 +16,7 @@ export class AuditService {
   ) {}
 
   list(auth: AuthContext, query: AuditListQuery) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       async (transaction) => {
@@ -26,6 +26,7 @@ export class AuditService {
         if (query.entityType) where.entityType = query.entityType;
         const [items, total] = await Promise.all([
           transaction.auditEvent.findMany({
+            include: { actor: { select: { displayName: true } } },
             orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
             skip: (query.page - 1) * query.pageSize,
             take: query.pageSize,

@@ -18,4 +18,15 @@ describe('role permissions', () => {
     expect(can('MANAGER', 'organization:reset-demo')).toBe(false);
     expect(can('OWNER', 'organization:reset-demo')).toBe(true);
   });
+
+  it('keeps team administration Owner-only', async () => {
+    const { can } = await import('./rbac.js');
+
+    expect(can('OWNER', 'team:invite')).toBe(true);
+    expect(can('OWNER', 'team:read')).toBe(true);
+    expect(can('OWNER', 'team:write')).toBe(true);
+    expect(can('MANAGER', 'team:invite')).toBe(false);
+    expect(can('MANAGER', 'team:write')).toBe(false);
+    expect(can('STAFF', 'team:read')).toBe(false);
+  });
 });

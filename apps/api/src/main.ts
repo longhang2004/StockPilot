@@ -8,7 +8,8 @@ import { parseEnvironment } from './config/environment.js';
 
 async function bootstrap(): Promise<void> {
   const environment = parseEnvironment(process.env);
-  const app = await NestFactory.create(AppModule);
+  // rawBody preserves the untouched payload for Stripe webhook signatures.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   configureApplication(app);
   app.enableShutdownHooks();
 

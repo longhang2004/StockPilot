@@ -69,14 +69,15 @@ The matching UI evidence is checked in under
 [`docs/assets/`](assets/README.md): Overview desktop, Orders mobile, Inventory
 desktop, and the mobile receipt drawer.
 
-### Known presentation follow-up
+### Resolved presentation follow-up
 
-The Overview API returns three rows in `fourteenDayMovements`, while the
-current deployed web build still prefers the older `inboundOutbound14d` alias
-when rendering the movement-window chart. As a result, the chart can show its
-empty state even though the API and ledger data are correct. This is a
-presentation-only follow-up; it does not affect receipt, reservation,
-fulfillment, ledger, or balance invariants.
+The Overview movement chart previously preferred the legacy `inboundOutbound14d`
+alias over the API's `fourteenDayMovements`, which could render the chart's
+empty state. The contract was centralized in `packages/contracts`
+(`OverviewResponse`), the web build now renders `fourteenDayMovements`
+directly as an SVG chart with an accessible table disclosure, and the API and
+client types agree. This did not affect receipt, reservation, fulfillment,
+ledger, or balance invariants.
 
 The free demo tier intentionally permits wake-up latency: Render Free may spin
 down after inactivity, and Neon Free may suspend compute after five minutes.

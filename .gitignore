@@ -16,3 +16,8 @@ test-results/
 *.tsbuildinfo
 apps/api/src/generated/
 .worktrees/
+*.zip
+*.tar.gz
+*.tgz
+
+.reasonix/

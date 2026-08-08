@@ -39,12 +39,28 @@ enum IntegrationDeliveryStatus {
   FAILED
 }
 
+enum Plan {
+  STARTER
+  PRO
+}
+
+enum SubscriptionStatus {
+  INCOMPLETE
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  TRIALING
+}
+
 model User {
   id           String       @id @default(uuid()) @db.Uuid
   email        String       @unique @db.VarChar(320)
   passwordHash String       @map("password_hash") @db.Text
   displayName  String       @map("display_name") @db.VarChar(120)
   memberships  Membership[]
+  invitations  OrganizationInvitation[] @relation("InvitationCreator")
+  sessions     Session[]
   auditEvents  AuditEvent[] @relation("AuditActor")
   createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -74,12 +90,68 @@ model Organization {
   orderTransitions      OrderTransition[]
   integrationDeliveries IntegrationDelivery[]
   productImportRuns     ProductImportRun[]
+  invitations           OrganizationInvitation[]
+  subscription          OrganizationSubscription?
   auditEvents           AuditEvent[]
   idempotencyRecords    IdempotencyRecord[]
   createdAt             DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt             DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@map("organizations")
+}
+
+model OrganizationSubscription {
+  id                    String             @id @default(uuid()) @db.Uuid
+  organizationId        String             @unique @map("organization_id") @db.Uuid
+  plan                  Plan
+  status                SubscriptionStatus
+  stripeCustomerId      String?            @map("stripe_customer_id") @db.VarChar(80)
+  stripeSubscriptionId  String?            @map("stripe_subscription_id") @db.VarChar(80)
+  stripePriceId         String?            @map("stripe_price_id") @db.VarChar(80)
+  currentPeriodEnd      DateTime?          @map("current_period_end") @db.Timestamptz(3)
+  cancelAtPeriodEnd     Boolean            @default(false) @map("cancel_at_period_end")
+  organization          Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt             DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([stripeSubscriptionId])
+  @@map("organization_subscriptions")
+}
+
+/**
+ * Stripe event bookkeeping: exists so webhook deliveries can be deduplicated
+ * across retries. It holds no tenant data, so like the auth tables it is not
+ * RLS-protected; no API endpoint ever exposes it.
+ */
+model BillingWebhookEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  stripeEventId  String   @unique @map("stripe_event_id") @db.VarChar(160)
+  eventType      String   @map("event_type") @db.VarChar(120)
+  organizationId String?  @map("organization_id") @db.Uuid
+  processedAt    DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
+
+  @@index([organizationId])
+  @@map("billing_webhook_events")
+}
+
+model OrganizationInvitation {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @map("organization_id") @db.Uuid
+  email           String       @db.VarChar(320)
+  role            Role
+  tokenHash       String       @unique @map("token_hash") @db.Char(64)
+  invitedByUserId String       @map("invited_by_user_id") @db.Uuid
+  expiresAt       DateTime     @map("expires_at") @db.Timestamptz(3)
+  acceptedAt      DateTime?    @map("accepted_at") @db.Timestamptz(3)
+  revokedAt       DateTime?    @map("revoked_at") @db.Timestamptz(3)
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy       User         @relation("InvitationCreator", fields: [invitedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, email])
+  @@index([email])
+  @@index([expiresAt])
+  @@map("organization_invitations")
 }
 
 model Membership {
@@ -99,15 +171,18 @@ model Membership {
 }
 
 model Session {
-  id           String     @id @default(uuid()) @db.Uuid
-  tokenHash    String     @unique @map("token_hash") @db.Char(64)
-  membershipId String     @map("membership_id") @db.Uuid
-  expiresAt    DateTime   @map("expires_at") @db.Timestamptz(3)
-  revokedAt    DateTime?  @map("revoked_at") @db.Timestamptz(3)
-  lastSeenAt   DateTime   @default(now()) @map("last_seen_at") @db.Timestamptz(3)
-  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  id           String      @id @default(uuid()) @db.Uuid
+  tokenHash    String      @unique @map("token_hash") @db.Char(64)
+  userId       String      @map("user_id") @db.Uuid
+  membershipId String?     @map("membership_id") @db.Uuid
+  expiresAt    DateTime    @map("expires_at") @db.Timestamptz(3)
+  revokedAt    DateTime?   @map("revoked_at") @db.Timestamptz(3)
+  lastSeenAt   DateTime    @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership   Membership? @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
 
+  @@index([userId])
   @@index([membershipId])
   @@index([expiresAt])
   @@map("sessions")

@@ -17,6 +17,11 @@ export function formatDateTime(value: string | null | undefined): string {
       });
 }
 
+export function formatMoney(value: number | string | undefined | null): string {
+  const numeric = typeof value === 'number' ? value : Number(value ?? 0);
+  return Number.isFinite(numeric) ? `$${numeric.toFixed(2)}` : '$0.00';
+}
+
 export function closeFormSafely(
   dirty: boolean,
   onClose: () => void,

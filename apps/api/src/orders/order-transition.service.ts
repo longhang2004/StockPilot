@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import type { OrderStatus } from '@stockpilot/contracts';
 
-import type { AuthContext } from '../auth/auth-context.js';
+import { requireMembership, type AuthContext } from '../auth/auth-context.js';
 import { recordAudit } from '../audit/audit-record.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import {
@@ -22,7 +22,7 @@ export async function transitionOrder(
   id: string,
   to: Exclude<OrderStatus, 'DRAFT'>,
 ) {
-  const organizationId = auth.membership.organization.id;
+  const organizationId = requireMembership(auth).organization.id;
   const locked = await transaction.$queryRaw<
     Array<{ id: string; status: OrderStatus }>
   >`

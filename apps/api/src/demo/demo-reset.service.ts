@@ -1,6 +1,6 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 
-import type { AuthContext } from '../auth/auth-context.js';
+import { requireMembership, type AuthContext } from '../auth/auth-context.js';
 import { recordAudit } from '../audit/audit-record.js';
 import { TenantDatabase } from '../database/tenant-database.js';
 import { executeIdempotent } from '../idempotency/idempotency.js';
@@ -17,7 +17,7 @@ export class DemoResetService {
   ) {}
 
   reset(auth: AuthContext, idempotencyKey: string) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database
       .withTenant(
         { actorId: auth.user.id, organizationId },
@@ -29,7 +29,7 @@ export class DemoResetService {
             responseStatus: 200,
             scope: 'organization:demo-reset',
             work: async () => {
-              if (!auth.membership.organization.isDemo) {
+              if (!requireMembership(auth).organization.isDemo) {
                 throw new ConflictException(
                   'Only the demo organization can be reset.',
                 );

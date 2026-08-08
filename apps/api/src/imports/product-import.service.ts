@@ -1,8 +1,15 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { ProductInput } from '@stockpilot/contracts';
 
-import type { AuthContext } from '../auth/auth-context.js';
+import { requireMembership, type AuthContext } from '../auth/auth-context.js';
 import { recordAudit } from '../audit/audit-record.js';
+import { BillingStatusService } from '../billing/billing-status.service.js';
+import { entitlementsFor } from '../billing/plan-entitlements.js';
 import { TenantDatabase } from '../database/tenant-database.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { executeIdempotent } from '../idempotency/idempotency.js';
@@ -26,17 +33,20 @@ export type { ImportError } from './product-csv-parser.js';
 export class ProductImportService {
   constructor(
     @Inject(TenantDatabase) private readonly database: TenantDatabase,
+    @Inject(BillingStatusService)
+    private readonly billingStatus: BillingStatusService,
   ) {}
 
-  preview(auth: AuthContext, input: ProductImportPreviewInput) {
+  async preview(auth: AuthContext, input: ProductImportPreviewInput) {
+    await this.assertCsvImportEntitled(auth);
     const parsed = parseProductCsv(input.content);
     return this.database.withTenant(
       {
         actorId: auth.user.id,
-        organizationId: auth.membership.organization.id,
+        organizationId: requireMembership(auth).organization.id,
       },
       async (transaction) => {
-        const organizationId = auth.membership.organization.id;
+        const organizationId = requireMembership(auth).organization.id;
         const existing = await transaction.product.findMany({
           select: { sku: true },
           where: { organizationId },
@@ -99,8 +109,9 @@ export class ProductImportService {
     );
   }
 
-  commit(auth: AuthContext, id: string, idempotencyKey: string) {
-    const organizationId = auth.membership.organization.id;
+  async commit(auth: AuthContext, id: string, idempotencyKey: string) {
+    await this.assertCsvImportEntitled(auth);
+    const organizationId = requireMembership(auth).organization.id;
     return this.database
       .withTenant(
         { actorId: auth.user.id, organizationId },
@@ -122,11 +133,14 @@ export class ProductImportService {
     return this.database.withTenant(
       {
         actorId: auth.user.id,
-        organizationId: auth.membership.organization.id,
+        organizationId: requireMembership(auth).organization.id,
       },
       async (transaction) => {
         const run = await transaction.productImportRun.findFirst({
-          where: { id, organizationId: auth.membership.organization.id },
+          where: {
+            id,
+            organizationId: requireMembership(auth).organization.id,
+          },
         });
         if (!run) throw new NotFoundException('Product import not found.');
         const errors = parseErrors(run.errors);
@@ -146,10 +160,20 @@ export class ProductImportService {
     return this.database.withTenant(
       {
         actorId: auth.user.id,
-        organizationId: auth.membership.organization.id,
+        organizationId: requireMembership(auth).organization.id,
       },
       (transaction) =>
-        exportProductsCsv(transaction, auth.membership.organization.id),
+        exportProductsCsv(transaction, requireMembership(auth).organization.id),
     );
+  }
+
+  private async assertCsvImportEntitled(auth: AuthContext): Promise<void> {
+    const plan = await this.billingStatus.currentPlan(auth);
+    if (!entitlementsFor(plan).csvImport) {
+      throw new ForbiddenException({
+        code: 'PLAN_FEATURE_UNAVAILABLE',
+        message: 'CSV import is a PRO plan feature. Upgrade to enable it.',
+      });
+    }
   }
 }

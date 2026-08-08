@@ -13,23 +13,13 @@ import {
 } from '@phosphor-icons/react';
 import type { Role } from '@stockpilot/contracts';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
+import type { WorkspaceSessionView } from '../../features/shared/types';
+import { apiRequest, type WorkspaceSummary } from '../../lib/api-client';
 import type { WorkspaceSection } from './workspace-content';
 
-export interface SessionView {
-  membership: {
-    organization: {
-      currency: string;
-      name: string;
-      isDemo?: boolean;
-    };
-    role: Role;
-  };
-  user: {
-    displayName: string;
-    email?: string;
-  };
-}
+export type SessionView = WorkspaceSessionView;
 
 const navigation: Array<{
   label: string;
@@ -53,9 +43,121 @@ const roleLabels: Record<Role, string> = {
   STAFF: 'Staff',
 };
 
+const allRoles: Role[] = ['OWNER', 'MANAGER', 'STAFF'];
+
+/**
+ * Demo-only control that swaps the canonical demo membership server-side
+ * (POST /auth/demo-login) and reloads the workspace. Never rendered for
+ * non-demo organizations, so normal users get no impersonation surface.
+ */
+export function DemoRoleSwitcher({
+  currentRole,
+  compact = false,
+}: {
+  currentRole: Role;
+  compact?: boolean;
+}) {
+  const [pendingRole, setPendingRole] = useState<Role | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const switchRole = async (role: Role) => {
+    if (role === currentRole) return;
+    setPendingRole(role);
+    setError(null);
+    try {
+      await apiRequest('/auth/demo-login', {
+        body: JSON.stringify({ role }),
+        method: 'POST',
+      });
+      window.location.assign('/app');
+    } catch (cause) {
+      setPendingRole(null);
+      setError(
+        cause instanceof Error ? cause.message : 'Could not switch role.',
+      );
+    }
+  };
+  return (
+    <div className={`demo-role-switcher${compact ? ' demo-role-compact' : ''}`}>
+      <span className="demo-role-label">Demo workspace</span>
+      <label>
+        <span>Current role</span>
+        <select
+          aria-label="Switch demo role"
+          disabled={pendingRole !== null}
+          onChange={(event) => void switchRole(event.target.value as Role)}
+          value={pendingRole ?? currentRole}
+        >
+          {allRoles.map((role) => (
+            <option key={role} value={role}>
+              {roleLabels[role]}
+              {pendingRole === role ? ' (switching…)' : ''}
+            </option>
+          ))}
+        </select>
+      </label>
+      {error ? <small className="form-error">{error}</small> : null}
+    </div>
+  );
+}
+
 function isActive(href: string, section: WorkspaceSection): boolean {
   if (href === '/app') return section === 'overview';
   return href === `/app/${section}`;
+}
+
+/**
+ * Switches the active workspace through the server-side session endpoint.
+ * Membership is verified on the API; the selected organization id is only a
+ * requested destination. Hidden when the user belongs to a single workspace.
+ */
+function WorkspaceSwitcher({
+  currentOrganizationId,
+}: {
+  currentOrganizationId: string;
+}) {
+  const [workspaces, setWorkspaces] = useState<WorkspaceSummary[] | null>(null);
+  const [switching, setSwitching] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void apiRequest<WorkspaceSummary[]>('/auth/workspaces')
+      .then((items) => {
+        if (active) setWorkspaces(items);
+      })
+      .catch(() => {
+        if (active) setWorkspaces([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+  if (!workspaces || workspaces.length <= 1) return null;
+  const switchTo = async (organizationId: string) => {
+    if (organizationId === currentOrganizationId || switching) return;
+    setSwitching(true);
+    try {
+      await apiRequest('/auth/switch-workspace', {
+        body: JSON.stringify({ organizationId }),
+        method: 'POST',
+      });
+      window.location.assign('/app');
+    } catch {
+      setSwitching(false);
+    }
+  };
+  return (
+    <select
+      aria-label="Switch workspace"
+      disabled={switching}
+      onChange={(event) => void switchTo(event.target.value)}
+      value={currentOrganizationId}
+    >
+      {workspaces.map((workspace) => (
+        <option key={workspace.organizationId} value={workspace.organizationId}>
+          {workspace.organization.name} · {roleLabels[workspace.role]}
+        </option>
+      ))}
+    </select>
+  );
 }
 
 export function WorkspaceSidebar({
@@ -81,6 +183,9 @@ export function WorkspaceSidebar({
       </Link>
       <div className="organization-switcher">
         <span>Organization</span>
+        <WorkspaceSwitcher
+          currentOrganizationId={session.membership.organization.id}
+        />
         <strong>{session.membership.organization.name}</strong>
         <small>
           Main Warehouse · {session.membership.organization.currency}
@@ -99,6 +204,9 @@ export function WorkspaceSidebar({
           </Link>
         ))}
       </nav>
+      {session.membership.organization.isDemo ? (
+        <DemoRoleSwitcher currentRole={session.membership.role} />
+      ) : null}
       <div className="workspace-user">
         <span className="user-avatar" aria-hidden="true">
           {initials}

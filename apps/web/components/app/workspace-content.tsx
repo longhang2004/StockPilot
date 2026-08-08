@@ -2,7 +2,7 @@
 
 import type { Role } from '@stockpilot/contracts';
 
-import type { SessionResponse } from '../../lib/api-client';
+import type { WorkspaceSessionView } from '../../features/shared/types';
 import {
   AuditWorkspace,
   IntegrationsWorkspace,
@@ -30,14 +30,12 @@ export type WorkspaceSection =
   | 'settings'
   | 'overview';
 
-type SessionView = Pick<SessionResponse, 'membership' | 'user'>;
-
 export function WorkspaceContent({
   section,
   session,
 }: {
   section: WorkspaceSection;
-  session: SessionView;
+  session: WorkspaceSessionView;
 }) {
   const role: Role = session.membership.role;
   switch (section) {
@@ -62,6 +60,6 @@ export function WorkspaceContent({
     case 'settings':
       return <SettingsWorkspace role={role} />;
     case 'more':
-      return <MoreWorkspace />;
+      return <MoreWorkspace session={session} />;
   }
 }

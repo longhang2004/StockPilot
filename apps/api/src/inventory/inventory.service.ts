@@ -4,7 +4,7 @@ import type {
   ReceiptInput,
 } from '@stockpilot/contracts';
 
-import type { AuthContext } from '../auth/auth-context.js';
+import { requireMembership, type AuthContext } from '../auth/auth-context.js';
 import { TenantDatabase } from '../database/tenant-database.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { executeIdempotent } from '../idempotency/idempotency.js';
@@ -35,7 +35,7 @@ export class InventoryService {
   ) {}
 
   applyReceipt(auth: AuthContext, input: ReceiptInput, idempotencyKey: string) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database
       .withTenant(
         { actorId: auth.user.id, organizationId },
@@ -64,7 +64,7 @@ export class InventoryService {
     input: InventoryAdjustmentInput,
     idempotencyKey: string,
   ) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database
       .withTenant(
         { actorId: auth.user.id, organizationId },
@@ -116,7 +116,7 @@ export class InventoryService {
       organizationId: string,
     ) => Promise<T>,
   ) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       (transaction) => work(transaction, organizationId),

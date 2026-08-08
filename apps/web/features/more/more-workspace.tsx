@@ -3,9 +3,11 @@
 import { ArrowRight } from '@phosphor-icons/react';
 import Link from 'next/link';
 
+import { DemoRoleSwitcher } from '../../components/app/workspace-navigation';
 import { PageHeader } from '../../components/ui/operations-ui';
+import type { WorkspaceSessionView } from '../shared/types';
 
-export function MoreWorkspace() {
+export function MoreWorkspace({ session }: { session: WorkspaceSessionView }) {
   const links = [
     ['Products', '/app/products'],
     ['Partners', '/app/partners'],
@@ -21,6 +23,9 @@ export function MoreWorkspace() {
         description="Keep the mobile queue focused, then reach supporting workflows here."
         title="More operations"
       />
+      {session.membership.organization.isDemo ? (
+        <DemoRoleSwitcher compact currentRole={session.membership.role} />
+      ) : null}
       <div className="more-grid">
         {links.map(([label, href]) => (
           <Link className="more-link" href={href} key={href}>

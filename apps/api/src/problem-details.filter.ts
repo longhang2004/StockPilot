@@ -119,8 +119,16 @@ function toProblem(
         : typeof body === 'object' && body !== null && 'message' in body
           ? formatMessage(body.message)
           : exception.message;
+    const explicitCode =
+      typeof body === 'object' &&
+      body !== null &&
+      'code' in body &&
+      typeof body.code === 'string'
+        ? body.code
+        : null;
     const code =
-      status === 401
+      explicitCode ??
+      (status === 401
         ? 'UNAUTHENTICATED'
         : status === 403
           ? 'FORBIDDEN'
@@ -128,7 +136,7 @@ function toProblem(
             ? 'NOT_FOUND'
             : status === 409
               ? 'CONFLICT'
-              : 'HTTP_ERROR';
+              : 'HTTP_ERROR');
     return {
       code,
       detail,

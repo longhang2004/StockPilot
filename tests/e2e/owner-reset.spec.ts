@@ -10,7 +10,10 @@ test('Owner can inspect team visibility and reset the demo safely', async ({
   await expect(
     page.getByRole('heading', { name: /organization settings/i }),
   ).toBeVisible();
-  await expect(page.getByText(/canonical demo memberships/i)).toBeVisible();
+  // The demo team list is visible to the Owner.
+  await expect(
+    page.getByText('owner@stockpilot-demo.stockpilot.test'),
+  ).toBeVisible();
   await page
     .getByRole('button', { name: /reset demo data/i })
     .first()

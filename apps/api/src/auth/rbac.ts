@@ -1,7 +1,10 @@
 import type { Role } from '@stockpilot/contracts';
 
 export type Permission =
+  | 'analytics:read'
   | 'audit:read'
+  | 'billing:read'
+  | 'billing:write'
   | 'catalog:read'
   | 'catalog:write'
   | 'integration:retry'
@@ -16,9 +19,12 @@ export type Permission =
   | 'organization:reset-demo'
   | 'organization:settings:read'
   | 'organization:settings:write'
-  | 'team:read';
+  | 'team:invite'
+  | 'team:read'
+  | 'team:write';
 
 const staffPermissions = new Set<Permission>([
+  'analytics:read',
   'catalog:read',
   'inventory:read',
   'order:read',
@@ -39,10 +45,14 @@ const managerPermissions = new Set<Permission>([
 
 const ownerPermissions = new Set<Permission>([
   ...managerPermissions,
+  'billing:read',
+  'billing:write',
   'organization:reset-demo',
   'organization:settings:read',
   'organization:settings:write',
+  'team:invite',
   'team:read',
+  'team:write',
 ]);
 
 const permissionsByRole: Record<Role, ReadonlySet<Permission>> = {

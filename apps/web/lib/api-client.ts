@@ -11,6 +11,16 @@ export class ApiProblem extends Error {
     this.name = 'ApiProblem';
     this.problem = problem;
   }
+
+  get code(): string {
+    return this.problem.code;
+  }
+
+  /** Parses an unknown JSON body into an ApiProblem when it is one. */
+  static from(body: unknown): ApiProblem | null {
+    const parsed = ProblemDetailsSchema.safeParse(body);
+    return parsed.success ? new ApiProblem(parsed.data) : null;
+  }
 }
 
 let csrfToken: string | null = null;
@@ -27,24 +37,44 @@ export interface SessionResponse {
   membership: {
     organization: {
       currency: string;
+      id: string;
       isDemo?: boolean;
       name: string;
       nextDemoResetAt?: string | null;
       slug?: string;
     };
     role: 'OWNER' | 'MANAGER' | 'STAFF';
-  };
+  } | null;
   user: { displayName: string; email?: string };
   csrfToken?: string;
 }
 
-async function readCsrfToken(): Promise<string> {
+export interface WorkspaceSummary {
+  id: string;
+  organizationId: string;
+  role: 'OWNER' | 'MANAGER' | 'STAFF';
+  organization: {
+    id: string;
+    name: string;
+    slug: string;
+    isDemo: boolean;
+  };
+}
+
+async function readCsrfToken(): Promise<string | null> {
   if (csrfToken) return csrfToken;
   const response = await fetch('/api/v1/auth/csrf', { credentials: 'include' });
   const body = (await response.json()) as {
     csrfToken?: string;
     detail?: string;
   };
+  if (response.status === 401) {
+    // No session yet (e.g. the very first signup request): the CSRF guard
+    // only needs an Origin check for unauthenticated requests, so no token
+    // is required. Do not cache this state — the next request may be
+    // authenticated.
+    return null;
+  }
   if (!response.ok || !body.csrfToken) {
     throw new Error(
       body.detail ?? 'Session expired. Start a fresh demo session.',
@@ -76,7 +106,8 @@ export async function apiRequest<T>(
     headers.set('Idempotency-Key', options.idempotencyKey);
   }
   if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
-    headers.set('X-CSRF-Token', await readCsrfToken());
+    const token = await readCsrfToken();
+    if (token) headers.set('X-CSRF-Token', token);
   }
 
   const response = await fetch(`/api/v1${path}`, {

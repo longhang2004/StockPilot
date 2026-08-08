@@ -44,6 +44,7 @@ export class SessionGuard implements CanActivate {
         membership: {
           include: { organization: true, user: true },
         },
+        user: true,
       },
       where: { tokenHash },
     });
@@ -57,24 +58,26 @@ export class SessionGuard implements CanActivate {
 
     const { membership } = session;
     request.auth = {
-      membership: {
-        id: membership.id,
-        organization: {
-          currency: membership.organization.currency,
-          id: membership.organization.id,
-          isDemo: membership.organization.isDemo,
-          name: membership.organization.name,
-          nextDemoResetAt: membership.organization.nextDemoResetAt,
-          slug: membership.organization.slug,
-        },
-        role: RoleSchema.parse(membership.role),
-      },
+      membership: membership
+        ? {
+            id: membership.id,
+            organization: {
+              currency: membership.organization.currency,
+              id: membership.organization.id,
+              isDemo: membership.organization.isDemo,
+              name: membership.organization.name,
+              nextDemoResetAt: membership.organization.nextDemoResetAt,
+              slug: membership.organization.slug,
+            },
+            role: RoleSchema.parse(membership.role),
+          }
+        : null,
       sessionId: session.id,
       sessionTokenHash: tokenHash,
       user: {
-        displayName: membership.user.displayName,
-        email: membership.user.email,
-        id: membership.user.id,
+        displayName: session.user.displayName,
+        email: session.user.email,
+        id: session.user.id,
       },
     };
 

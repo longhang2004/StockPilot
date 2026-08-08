@@ -1,8 +1,18 @@
-import type { Role } from '@stockpilot/contracts';
+import type { OverviewResponse, Role } from '@stockpilot/contracts';
 
 import type { SessionResponse } from '../../lib/api-client';
 
 export type SessionView = Pick<SessionResponse, 'membership' | 'user'>;
+
+/**
+ * Session guaranteed to hold a membership: the workspace shell only renders
+ * workspace content after resolving a membership, so screens can rely on it.
+ */
+export type WorkspaceSessionView = SessionView & {
+  membership: NonNullable<SessionView['membership']>;
+};
+
+export type { OverviewResponse, Role };
 
 export interface ProductRecord {
   id: string;
@@ -104,27 +114,27 @@ export interface AuditRecord {
   entityId: string;
   createdAt: string;
   actor?: { displayName: string } | null;
+  before?: Record<string, unknown> | null;
+  after?: Record<string, unknown> | null;
 }
 
-export interface OverviewResponse {
-  exceptions: {
-    ordersAwaitingApproval: number;
-    openLowStockAlerts: number;
-    failedIntegrations: number;
+export interface BillingStatusView {
+  cancelAtPeriodEnd: boolean;
+  currentPeriodEnd: string | null;
+  entitlements: {
+    csvImport: boolean;
+    integrations: boolean;
+    maxTeamMembers: number;
   };
-  openOrderValue: string;
-  recentOrders: OrderRecord[];
-  recentMovements: MovementRecord[];
-  inboundOutbound14d?: Array<{
-    date: string;
-    inbound: number;
-    outbound: number;
-  }>;
-  fourteenDayMovements?: Array<{
-    day: string;
-    inbound: number;
-    outbound: number;
-  }>;
+  isDemoBilling: boolean;
+  plan: 'STARTER' | 'PRO';
+  status:
+    | 'ACTIVE'
+    | 'CANCELED'
+    | 'INCOMPLETE'
+    | 'PAST_DUE'
+    | 'TRIALING'
+    | 'UNPAID'
+    | null;
+  teamUsage: { limit: number; members: number };
 }
-
-export type { Role };

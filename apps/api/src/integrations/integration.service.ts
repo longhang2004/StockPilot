@@ -1,10 +1,18 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
-import type { AuthContext } from '../auth/auth-context.js';
+import { requireMembership, type AuthContext } from '../auth/auth-context.js';
+import { BillingStatusService } from '../billing/billing-status.service.js';
+import { entitlementsFor } from '../billing/plan-entitlements.js';
 import { ENVIRONMENT } from '../config/environment.module.js';
 import type { Environment } from '../config/environment.js';
 import { TenantDatabase } from '../database/tenant-database.js';
 import { PrismaService } from '../database/prisma.service.js';
+import type { Prisma } from '../generated/prisma/client.js';
 import { executeIdempotent } from '../idempotency/idempotency.js';
 import { JobRunnerService } from '../jobs/job-runner.service.js';
 import {
@@ -33,6 +41,8 @@ export class IntegrationService {
     @Inject(TenantDatabase) private readonly database: TenantDatabase,
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(JobRunnerService) private readonly jobs: JobRunnerService,
+    @Inject(BillingStatusService)
+    private readonly billingStatus: BillingStatusService,
   ) {
     registerIntegrationRetry(this.jobs, this.database);
   }
@@ -82,10 +92,11 @@ export class IntegrationService {
   }
 
   list(auth: AuthContext, query: IntegrationListQuery) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       async (transaction) => {
+        await this.assertIntegrationsEntitled(transaction, organizationId);
         const where = {
           organizationId,
           ...(query.status ? { status: query.status } : {}),
@@ -111,12 +122,13 @@ export class IntegrationService {
   }
 
   retry(auth: AuthContext, id: string, idempotencyKey: string) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database
       .withTenant(
         { actorId: auth.user.id, organizationId },
-        async (transaction) =>
-          executeIdempotent(transaction, {
+        async (transaction) => {
+          await this.assertIntegrationsEntitled(transaction, organizationId);
+          return executeIdempotent(transaction, {
             key: idempotencyKey,
             organizationId,
             payload: { id },
@@ -129,8 +141,25 @@ export class IntegrationService {
                 auth.user.id,
                 id,
               ),
-          }),
+          });
+        },
       )
       .then((result) => result.body);
+  }
+
+  private async assertIntegrationsEntitled(
+    transaction: Prisma.TransactionClient,
+    organizationId: string,
+  ): Promise<void> {
+    const plan = await this.billingStatus.effectivePlanInTransaction(
+      transaction,
+      organizationId,
+    );
+    if (!entitlementsFor(plan).integrations) {
+      throw new ForbiddenException({
+        code: 'PLAN_FEATURE_UNAVAILABLE',
+        message: 'Integrations are a PRO plan feature. Upgrade to enable them.',
+      });
+    }
   }
 }

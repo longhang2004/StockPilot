@@ -3,9 +3,9 @@
 import { ReceiptInputSchema } from '@stockpilot/contracts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus } from '@phosphor-icons/react';
+import { Plus, Trash } from '@phosphor-icons/react';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import type { z } from 'zod';
 
 import {
@@ -23,7 +23,11 @@ import {
   type ToastMessage,
 } from '../../components/ui/operations-ui';
 import { apiRequest, newIdempotencyKey } from '../../lib/api-client';
-import { closeFormSafely, formatDateTime } from '../../lib/formatters';
+import {
+  closeFormSafely,
+  formatDateTime,
+  formatMoney,
+} from '../../lib/formatters';
 import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
 import {
@@ -152,6 +156,21 @@ function ReceiptDrawer({
       supplierId: '',
     },
   });
+  const { append, fields, remove } = useFieldArray({
+    control: form.control,
+    name: 'lines',
+  });
+  const lines = useWatch({ control: form.control, name: 'lines' }) ?? [];
+  const productById = new Map(
+    (products.data?.items ?? []).map((product) => [product.id, product]),
+  );
+  const totalCost = lines.reduce((sum, line) => {
+    const product = line?.productId
+      ? productById.get(line.productId)
+      : undefined;
+    if (!product || !line?.quantity || !line?.unitCost) return sum;
+    return sum + line.quantity * Number(line.unitCost);
+  }, 0);
   const mutation = useMutation({
     mutationFn: (value: z.infer<typeof ReceiptInputSchema>) =>
       apiRequest('/receipts', {
@@ -172,6 +191,7 @@ function ReceiptDrawer({
       description="Receipt, ledger movement, balance update, and alert reconciliation commit together."
       onClose={close}
       open={open}
+      size="wide"
       title="Receive stock"
     >
       <UnsavedChangesGuard dirty={form.formState.isDirty} />
@@ -181,69 +201,172 @@ function ReceiptDrawer({
           void form.handleSubmit((value) => mutation.mutate(value))(event)
         }
       >
-        <FormField
-          error={form.formState.errors.receiptNumber?.message}
-          htmlFor="receipt-number"
-          label="Receipt number"
-        >
-          <input id="receipt-number" {...form.register('receiptNumber')} />
-        </FormField>
-        <FormField
-          error={form.formState.errors.supplierId?.message}
-          htmlFor="receipt-supplier"
-          label="Supplier"
-        >
-          <select id="receipt-supplier" {...form.register('supplierId')}>
-            <option value="">Choose supplier</option>
-            {suppliers.data?.items
-              .filter((supplier) => supplier.isActive)
-              .map((supplier) => (
-                <option key={supplier.id} value={supplier.id}>
-                  {supplier.companyName}
-                </option>
-              ))}
-          </select>
-        </FormField>
-        <FormField
-          error={form.formState.errors.lines?.[0]?.productId?.message}
-          htmlFor="receipt-product"
-          label="Product"
-        >
-          <select id="receipt-product" {...form.register('lines.0.productId')}>
-            <option value="">Choose product</option>
-            {products.data?.items
-              .filter((product) => product.isActive)
-              .map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.sku} · {product.name}
-                </option>
-              ))}
-          </select>
-        </FormField>
         <div className="form-grid">
           <FormField
-            error={form.formState.errors.lines?.[0]?.quantity?.message}
-            htmlFor="receipt-quantity"
-            label="Quantity"
+            error={form.formState.errors.receiptNumber?.message}
+            htmlFor="receipt-number"
+            label="Receipt number"
           >
-            <input
-              id="receipt-quantity"
-              min="1"
-              type="number"
-              {...form.register('lines.0.quantity', { valueAsNumber: true })}
-            />
+            <input id="receipt-number" {...form.register('receiptNumber')} />
           </FormField>
           <FormField
-            error={form.formState.errors.lines?.[0]?.unitCost?.message}
-            htmlFor="receipt-cost"
-            label="Unit cost"
+            error={form.formState.errors.supplierId?.message}
+            htmlFor="receipt-supplier"
+            label="Supplier"
           >
-            <input
-              id="receipt-cost"
-              placeholder="0.00"
-              {...form.register('lines.0.unitCost')}
-            />
+            <select id="receipt-supplier" {...form.register('supplierId')}>
+              <option value="">Choose supplier</option>
+              {suppliers.data?.items
+                .filter((supplier) => supplier.isActive)
+                .map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.companyName}
+                  </option>
+                ))}
+            </select>
           </FormField>
+        </div>
+        <div className="line-editor" aria-label="Receipt lines">
+          <div className="line-editor-header" aria-hidden="true">
+            <span>Product</span>
+            <span>Qty</span>
+            <span>Unit cost</span>
+            <span>Total</span>
+            <span />
+          </div>
+          {fields.map((field, index) => {
+            const line = lines[index];
+            const product = line?.productId
+              ? productById.get(line.productId)
+              : undefined;
+            const lineTotal =
+              product && line?.quantity && line?.unitCost
+                ? line.quantity * Number(line.unitCost)
+                : 0;
+            const selectedElsewhere = (candidateId: string) =>
+              lines.some(
+                (candidate, otherIndex) =>
+                  otherIndex !== index && candidate?.productId === candidateId,
+              );
+            const availableProducts =
+              products.data?.items.filter(
+                (candidate) =>
+                  candidate.isActive && !selectedElsewhere(candidate.id),
+              ) ?? [];
+            return (
+              <div className="line-editor-row" key={field.id}>
+                <div className="line-editor-cell line-editor-product">
+                  <Controller
+                    control={form.control}
+                    name={`lines.${index}.productId`}
+                    render={({ field: productField }) => (
+                      <select
+                        aria-label={`Product for line ${index + 1}`}
+                        {...productField}
+                      >
+                        <option value="">Choose product</option>
+                        {availableProducts.map((candidate) => (
+                          <option key={candidate.id} value={candidate.id}>
+                            {candidate.sku} · {candidate.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  />
+                  {form.formState.errors.lines?.[index]?.productId?.message && (
+                    <span className="form-error">
+                      {form.formState.errors.lines?.[index]?.productId?.message}
+                    </span>
+                  )}
+                </div>
+                <div className="line-editor-cell line-editor-qty">
+                  <Controller
+                    control={form.control}
+                    name={`lines.${index}.quantity`}
+                    render={({ field: quantityField }) => (
+                      <input
+                        aria-label={`Quantity for line ${index + 1}`}
+                        min="1"
+                        type="number"
+                        {...quantityField}
+                        onChange={(event) =>
+                          quantityField.onChange(
+                            event.target.value === ''
+                              ? 1
+                              : Number(event.target.value),
+                          )
+                        }
+                      />
+                    )}
+                  />
+                  {form.formState.errors.lines?.[index]?.quantity?.message && (
+                    <span className="form-error">
+                      {form.formState.errors.lines?.[index]?.quantity?.message}
+                    </span>
+                  )}
+                </div>
+                <div className="line-editor-cell line-editor-qty">
+                  <Controller
+                    control={form.control}
+                    name={`lines.${index}.unitCost`}
+                    render={({ field: costField }) => (
+                      <input
+                        aria-label={`Unit cost for line ${index + 1}`}
+                        placeholder="0.00"
+                        {...costField}
+                        value={costField.value ?? ''}
+                        onChange={(event) =>
+                          costField.onChange(
+                            event.target.value === ''
+                              ? null
+                              : event.target.value,
+                          )
+                        }
+                      />
+                    )}
+                  />
+                  {form.formState.errors.lines?.[index]?.unitCost?.message && (
+                    <span className="form-error">
+                      {form.formState.errors.lines?.[index]?.unitCost?.message}
+                    </span>
+                  )}
+                </div>
+                <div className="line-editor-cell line-editor-total mono">
+                  {formatMoney(lineTotal)}
+                </div>
+                <div className="line-editor-cell line-editor-remove">
+                  {fields.length > 1 && (
+                    <button
+                      aria-label={`Remove line ${index + 1}`}
+                      className="button icon-button"
+                      onClick={() => remove(index)}
+                      type="button"
+                    >
+                      <Trash size={16} aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          <button
+            className="line-editor-add"
+            onClick={() =>
+              append({ productId: '', quantity: 1, unitCost: null })
+            }
+            type="button"
+          >
+            <Plus size={16} aria-hidden="true" /> Add line
+          </button>
+          {form.formState.errors.lines?.root?.message && (
+            <p className="form-error">
+              {form.formState.errors.lines.root.message}
+            </p>
+          )}
+          <div className="line-editor-subtotal">
+            <span>Total cost</span>
+            <strong className="mono">{formatMoney(totalCost)}</strong>
+          </div>
         </div>
         <FormField
           error={form.formState.errors.note?.message}

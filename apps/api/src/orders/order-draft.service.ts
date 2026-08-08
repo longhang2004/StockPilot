@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { NotFoundException } from '@nestjs/common';
 import type { SalesOrderInput } from '@stockpilot/contracts';
 
-import type { AuthContext } from '../auth/auth-context.js';
+import { requireMembership, type AuthContext } from '../auth/auth-context.js';
 import { recordAudit } from '../audit/audit-record.js';
 import type { Prisma, Product } from '../generated/prisma/client.js';
 
@@ -12,7 +12,7 @@ export async function createDraftOrder(
   auth: AuthContext,
   input: SalesOrderInput,
 ) {
-  const organizationId = auth.membership.organization.id;
+  const organizationId = requireMembership(auth).organization.id;
   const [warehouse, customer, products] = await Promise.all([
     transaction.warehouse.findUnique({ where: { organizationId } }),
     transaction.customer.findFirst({

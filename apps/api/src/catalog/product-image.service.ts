@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import type { AuthContext } from '../auth/auth-context.js';
+import { requireMembership, type AuthContext } from '../auth/auth-context.js';
 import { recordAudit } from '../audit/audit-record.js';
 import { TenantDatabase } from '../database/tenant-database.js';
 import type { Product } from '../generated/prisma/client.js';
@@ -41,7 +41,7 @@ export class ProductImageService {
       throw new BadRequestException('An image file is required.');
     }
 
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     const existing = await this.findProduct(auth, productId);
     const sanitized = await sanitizeProductImage(file.buffer);
     let uploaded: StoredProductImage | undefined;
@@ -101,7 +101,7 @@ export class ProductImageService {
   }
 
   async deleteProductImage(auth: AuthContext, productId: string) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     const existing = await this.findProduct(auth, productId);
     if (!existing.imagePublicId) return serializeProduct(existing);
 
@@ -139,7 +139,7 @@ export class ProductImageService {
   }
 
   private findProduct(auth: AuthContext, productId: string): Promise<Product> {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       async (transaction) => {

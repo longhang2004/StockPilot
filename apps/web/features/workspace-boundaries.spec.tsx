@@ -100,9 +100,10 @@ describe('workspace feature boundaries', () => {
       screen.getByRole('dialog', { name: 'New draft order' }),
     ).toBeVisible();
     expect(screen.getByLabelText('Customer')).toBeVisible();
-    expect(screen.getByLabelText('Product')).toBeVisible();
-    expect(screen.getByLabelText('Quantity')).toBeVisible();
+    expect(screen.getByLabelText('Product for line 1')).toBeVisible();
+    expect(screen.getByLabelText('Quantity for line 1')).toBeVisible();
     expect(screen.getByLabelText('Note')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Add line' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Save draft' })).toBeVisible();
   });
 });

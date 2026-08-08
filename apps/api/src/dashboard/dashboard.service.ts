@@ -1,16 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
+import type { OverviewResponse } from '@stockpilot/contracts';
 
-import type { AuthContext } from '../auth/auth-context.js';
+import { requireMembership, type AuthContext } from '../auth/auth-context.js';
+import { BillingStatusService } from '../billing/billing-status.service.js';
 import { TenantDatabase } from '../database/tenant-database.js';
 
 @Injectable()
 export class DashboardService {
   constructor(
     @Inject(TenantDatabase) private readonly database: TenantDatabase,
+    @Inject(BillingStatusService)
+    private readonly billingStatus: BillingStatusService,
   ) {}
 
-  overview(auth: AuthContext) {
-    const organizationId = auth.membership.organization.id;
+  async overview(auth: AuthContext): Promise<OverviewResponse> {
+    const plan = await this.billingStatus.currentPlan(auth);
+    const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       async (transaction) => {
@@ -79,9 +84,14 @@ export class DashboardService {
             openLowStockAlerts,
             ordersAwaitingApproval,
           },
-          recentMovements,
+          plan,
+          recentMovements: recentMovements.map((movement) => ({
+            ...movement,
+            createdAt: movement.createdAt.toISOString(),
+          })),
           recentOrders: recentOrders.map((order) => ({
             ...order,
+            createdAt: order.createdAt.toISOString(),
             subtotal: order.subtotal.toFixed(2),
           })),
           fourteenDayMovements: fourteenDayMovements.map((row) => ({

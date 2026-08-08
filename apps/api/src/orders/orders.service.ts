@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import type { SalesOrderInput, OrderStatus } from '@stockpilot/contracts';
 
-import type { AuthContext } from '../auth/auth-context.js';
+import { requireMembership, type AuthContext } from '../auth/auth-context.js';
 import { recordAudit } from '../audit/audit-record.js';
 import { TenantDatabase } from '../database/tenant-database.js';
 import { executeIdempotent } from '../idempotency/idempotency.js';
@@ -27,7 +27,7 @@ export class OrdersService {
   ) {}
 
   create(auth: AuthContext, input: SalesOrderInput) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       async (transaction) => {
@@ -38,7 +38,7 @@ export class OrdersService {
   }
 
   list(auth: AuthContext, query: OrderListQuery) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       (transaction) => listOrders(transaction, organizationId, query),
@@ -46,7 +46,7 @@ export class OrdersService {
   }
 
   get(auth: AuthContext, id: string) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       (transaction) => findOrderDetail(transaction, organizationId, id),
@@ -54,7 +54,7 @@ export class OrdersService {
   }
 
   updateDraft(auth: AuthContext, id: string, input: SalesOrderInput) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       async (transaction) => {
@@ -109,7 +109,7 @@ export class OrdersService {
     to: Exclude<OrderStatus, 'DRAFT'>,
     idempotencyKey: string,
   ) {
-    const organizationId = auth.membership.organization.id;
+    const organizationId = requireMembership(auth).organization.id;
     return this.database
       .withTenant(
         { actorId: auth.user.id, organizationId },

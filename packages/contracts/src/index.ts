@@ -3,6 +3,9 @@ import { z } from 'zod';
 export const RoleSchema = z.enum(['OWNER', 'MANAGER', 'STAFF']);
 export type Role = z.infer<typeof RoleSchema>;
 
+export const PlanSchema = z.enum(['STARTER', 'PRO']);
+export type Plan = z.infer<typeof PlanSchema>;
+
 export const OrderStatusSchema = z.enum([
   'DRAFT',
   'CONFIRMED',
@@ -47,6 +50,47 @@ export const ProblemDetailsSchema = z.object({
     .optional(),
 });
 export type ProblemDetails = z.infer<typeof ProblemDetailsSchema>;
+
+/**
+ * Response contracts shared by the API and web client. These are plain
+ * interfaces (not Zod schemas): the API is the single producer and the web
+ * client consumes them read-only.
+ */
+export interface OverviewMovementRow {
+  day: string;
+  inbound: number;
+  outbound: number;
+}
+
+export interface OverviewRecentOrder {
+  createdAt: string;
+  customerCompanyName: string;
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  subtotal: string;
+}
+
+export interface OverviewRecentMovement {
+  createdAt: string;
+  id: string;
+  product?: { name: string; sku: string };
+  quantityDelta: number;
+  type: StockMovementType;
+}
+
+export interface OverviewResponse {
+  exceptions: {
+    failedIntegrations: number;
+    openLowStockAlerts: number;
+    ordersAwaitingApproval: number;
+  };
+  fourteenDayMovements: OverviewMovementRow[];
+  openOrderValue: string;
+  plan: Plan;
+  recentMovements: OverviewRecentMovement[];
+  recentOrders: OverviewRecentOrder[];
+}
 
 const OptionalContactSchema = z
   .string()
