@@ -53,6 +53,10 @@ jobs:
       - run: pnpm db:generate
       - run: pnpm --filter @stockpilot/api exec prisma migrate deploy
       - run: pnpm db:seed
+      # Dependabot lockfile updates arrive unformatted; the formatter is
+      # deterministic, so normalizing the generated lockfile still enforces
+      # the repo style without failing tool-generated PRs.
+      - run: pnpm exec prettier --write pnpm-lock.yaml
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
