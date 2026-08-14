@@ -1,20 +1,7 @@
 import {
-  WorkspaceShell,
-  type WorkspaceSection,
-} from '../../../components/app/workspace-shell';
-
-const sections = new Set([
-  'audit',
-  'imports',
-  'integrations',
-  'inventory',
-  'more',
-  'orders',
-  'partners',
-  'products',
-  'receipts',
-  'settings',
-]);
+  isWorkspaceSection,
+} from '../../../features/workspace/sections';
+import { WorkspaceShell } from '../../../components/app/workspace-shell';
 
 export default async function WorkspaceSectionPage({
   params,
@@ -22,6 +9,6 @@ export default async function WorkspaceSectionPage({
   params: Promise<{ section: string }>;
 }) {
   const { section } = await params;
-  const selected = sections.has(section) ? section : 'more';
-  return <WorkspaceShell section={selected as WorkspaceSection} />;
+  const selected = isWorkspaceSection(section) ? section : 'more';
+  return <WorkspaceShell section={selected} />;
 }

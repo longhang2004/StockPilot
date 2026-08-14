@@ -1,69 +1,47 @@
 import { randomUUID } from 'node:crypto';
 
 import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import request, { type Agent } from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { createTestAgent, demoLogin } from './support/agent.js';
+import {
+  adminDatabaseUrl,
+  setTestEnvironment,
+  TEST_WEB_ORIGIN,
+} from './support/environment.js';
+import {
+  createAdminClient,
+  createTestApplication,
+} from './support/test-app.js';
+
 describe('catalog and partners API', () => {
-  const adminDatabaseUrl =
-    process.env.MIGRATION_DATABASE_URL ??
-    'postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot';
-  const appDatabaseUrl =
-    process.env.DATABASE_URL ??
-    'postgresql://stockpilot_app:stockpilot_app@localhost:5432/stockpilot';
-  const webOrigin = 'http://localhost:3000';
   const demoSlug = `catalog-test-${randomUUID()}`;
   let app: INestApplication;
   let admin: Awaited<ReturnType<typeof createAdminClient>>;
-  let manager: Agent;
+  let manager: Awaited<ReturnType<typeof createTestAgent>>;
   let managerCsrf: string;
-  let staff: Agent;
+  let staff: Awaited<ReturnType<typeof createTestAgent>>;
   let staffCsrf: string;
 
-  async function createAdminClient() {
-    const { createPrismaClient } =
-      await import('../src/database/prisma-client.js');
-    return createPrismaClient(adminDatabaseUrl);
-  }
-
-  async function loginAs(role: 'MANAGER' | 'STAFF') {
-    const agent = request.agent(app.getHttpServer());
-    const response = await agent
-      .post('/v1/auth/demo-login')
-      .set('Origin', webOrigin)
-      .send({ role });
-    return { agent, csrfToken: response.body.csrfToken as string };
-  }
-
   beforeAll(async () => {
-    Object.assign(process.env, {
+    setTestEnvironment({
       CSRF_SECRET: 'catalog-csrf-secret-with-at-least-32-characters',
-      DATABASE_URL: appDatabaseUrl,
-      DEMO_MODE: 'true',
       DEMO_ORGANIZATION_SLUG: demoSlug,
-      NODE_ENV: 'test',
-      WEB_ORIGIN: webOrigin,
       WEBHOOK_SIGNING_SECRET: 'catalog-webhook-secret',
     });
 
-    admin = await createAdminClient();
+    admin = await createAdminClient(adminDatabaseUrl());
     const { seedDemoIdentity } = await import('../prisma/seed.js');
     await seedDemoIdentity(admin, { seedFixture: false, slug: demoSlug });
 
-    const [{ AppModule }, { configureApplication }] = await Promise.all([
-      import('../src/app.module.js'),
-      import('../src/configure-application.js'),
-    ]);
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleRef.createNestApplication();
-    configureApplication(app);
-    await app.init();
+    ({ app } = await createTestApplication());
 
-    ({ agent: manager, csrfToken: managerCsrf } = await loginAs('MANAGER'));
-    ({ agent: staff, csrfToken: staffCsrf } = await loginAs('STAFF'));
+    const managerAgent = createTestAgent(app);
+    ({ csrfToken: managerCsrf } = await demoLogin(managerAgent, 'MANAGER'));
+    manager = managerAgent;
+    const staffAgent = createTestAgent(app);
+    ({ csrfToken: staffCsrf } = await demoLogin(staffAgent, 'STAFF'));
+    staff = staffAgent;
   });
 
   afterAll(async () => {
@@ -80,7 +58,7 @@ describe('catalog and partners API', () => {
   it('lets a Manager create and list a normalized product', async () => {
     const created = await manager
       .post('/v1/products')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .send({
         name: '  Organic Oat Milk  ',
@@ -116,7 +94,7 @@ describe('catalog and partners API', () => {
   it('returns RFC 9457 problem details for invalid input', async () => {
     const response = await manager
       .post('/v1/products')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .set('X-Request-Id', 'catalog-validation-trace')
       .send({ name: 'x' });
@@ -139,7 +117,7 @@ describe('catalog and partners API', () => {
   it('prevents Staff from mutating catalog data', async () => {
     const response = await staff
       .post('/v1/products')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', staffCsrf)
       .send({
         name: 'Restricted Product',
@@ -155,7 +133,7 @@ describe('catalog and partners API', () => {
   it('creates minimal customer and supplier records in the active organization', async () => {
     const customer = await manager
       .post('/v1/customers')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .send({
         companyName: 'Northstar Market',
@@ -164,7 +142,7 @@ describe('catalog and partners API', () => {
       });
     const supplier = await manager
       .post('/v1/suppliers')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .send({
         companyName: 'Greenway Foods',
@@ -203,7 +181,7 @@ describe('catalog and partners API', () => {
   it('previews and commits valid product CSV rows without blocking invalid rows', async () => {
     const preview = await manager
       .post('/v1/product-imports/preview')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .send({
         fileName: 'catalog.csv',
@@ -232,7 +210,7 @@ describe('catalog and partners API', () => {
 
     const committed = await manager
       .post(`/v1/product-imports/${preview.body.id}/commit`)
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .set('Idempotency-Key', 'catalog-import-commit-1');
 
@@ -244,7 +222,7 @@ describe('catalog and partners API', () => {
 
     const replay = await manager
       .post(`/v1/product-imports/${preview.body.id}/commit`)
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .set('Idempotency-Key', 'catalog-import-commit-1');
     expect(replay.status).toBe(200);

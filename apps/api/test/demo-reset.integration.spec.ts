@@ -1,68 +1,44 @@
 import { randomUUID } from 'node:crypto';
 
 import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import request, { type Agent } from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { DEMO_FIXTURE_COUNTS } from '../src/demo/demo-fixture.js';
+import { createTestAgent, demoLogin } from './support/agent.js';
+import {
+  adminDatabaseUrl,
+  setTestEnvironment,
+} from './support/environment.js';
+import {
+  createAdminClient,
+  createTestApplication,
+} from './support/test-app.js';
 
 describe('demo reset API', () => {
-  const adminDatabaseUrl =
-    process.env.MIGRATION_DATABASE_URL ??
-    'postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot';
-  const appDatabaseUrl =
-    process.env.DATABASE_URL ??
-    'postgresql://stockpilot_app:stockpilot_app@localhost:5432/stockpilot';
-  const webOrigin = 'http://localhost:3000';
   const demoSlug = `reset-test-${randomUUID()}`;
   let app: INestApplication;
   let admin: Awaited<ReturnType<typeof createAdminClient>>;
-  let owner: Agent;
+  let owner: Awaited<ReturnType<typeof createTestAgent>>;
   let ownerCsrf: string;
-  let manager: Agent;
+  let manager: Awaited<ReturnType<typeof createTestAgent>>;
   let managerCsrf: string;
 
-  async function createAdminClient() {
-    const { createPrismaClient } =
-      await import('../src/database/prisma-client.js');
-    return createPrismaClient(adminDatabaseUrl);
-  }
-
-  async function login(role: 'OWNER' | 'MANAGER') {
-    const agent = request.agent(app.getHttpServer());
-    const response = await agent
-      .post('/v1/auth/demo-login')
-      .set('Origin', webOrigin)
-      .send({ role });
-    return { agent, csrfToken: response.body.csrfToken as string };
-  }
-
   beforeAll(async () => {
-    Object.assign(process.env, {
+    setTestEnvironment({
       CSRF_SECRET: 'demo-reset-csrf-secret-with-at-least-32-characters',
-      DATABASE_URL: appDatabaseUrl,
-      DEMO_MODE: 'true',
       DEMO_ORGANIZATION_SLUG: demoSlug,
-      NODE_ENV: 'test',
-      WEB_ORIGIN: webOrigin,
       WEBHOOK_SIGNING_SECRET: 'demo-reset-webhook-secret',
     });
-    admin = await createAdminClient();
+    admin = await createAdminClient(adminDatabaseUrl());
     const { seedDemoIdentity } = await import('../prisma/seed.js');
     await seedDemoIdentity(admin, { slug: demoSlug });
-    const [{ AppModule }, { configureApplication }] = await Promise.all([
-      import('../src/app.module.js'),
-      import('../src/configure-application.js'),
-    ]);
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleRef.createNestApplication();
-    configureApplication(app);
-    await app.init();
-    ({ agent: owner, csrfToken: ownerCsrf } = await login('OWNER'));
-    ({ agent: manager, csrfToken: managerCsrf } = await login('MANAGER'));
+    ({ app } = await createTestApplication());
+    const ownerAgent = createTestAgent(app);
+    ({ csrfToken: ownerCsrf } = await demoLogin(ownerAgent, 'OWNER'));
+    owner = ownerAgent;
+    const managerAgent = createTestAgent(app);
+    ({ csrfToken: managerCsrf } = await demoLogin(managerAgent, 'MANAGER'));
+    manager = managerAgent;
   });
 
   afterAll(async () => {
@@ -79,7 +55,7 @@ describe('demo reset API', () => {
   it('lets Owner reset demo operational data atomically and idempotently', async () => {
     const product = await manager
       .post('/v1/products')
-      .set('Origin', webOrigin)
+      .set('Origin', 'http://localhost:3000')
       .set('X-CSRF-Token', managerCsrf)
       .send({
         name: 'Reset Me Product',
@@ -90,18 +66,18 @@ describe('demo reset API', () => {
     expect(product.status).toBe(201);
     const customer = await manager
       .post('/v1/customers')
-      .set('Origin', webOrigin)
+      .set('Origin', 'http://localhost:3000')
       .set('X-CSRF-Token', managerCsrf)
       .send({ companyName: 'Reset Me Customer' });
     expect(customer.status).toBe(201);
     const supplier = await manager
       .post('/v1/suppliers')
-      .set('Origin', webOrigin)
+      .set('Origin', 'http://localhost:3000')
       .set('X-CSRF-Token', managerCsrf)
       .send({ companyName: 'Reset Me Supplier' });
     const receipt = await manager
       .post('/v1/receipts')
-      .set('Origin', webOrigin)
+      .set('Origin', 'http://localhost:3000')
       .set('X-CSRF-Token', managerCsrf)
       .set('Idempotency-Key', 'reset-receipt-1')
       .send({
@@ -114,7 +90,7 @@ describe('demo reset API', () => {
 
     const reset = await owner
       .post('/v1/organization/demo-reset')
-      .set('Origin', webOrigin)
+      .set('Origin', 'http://localhost:3000')
       .set('X-CSRF-Token', ownerCsrf)
       .set('Idempotency-Key', 'demo-reset-1')
       .send();
@@ -126,7 +102,7 @@ describe('demo reset API', () => {
 
     const replay = await owner
       .post('/v1/organization/demo-reset')
-      .set('Origin', webOrigin)
+      .set('Origin', 'http://localhost:3000')
       .set('X-CSRF-Token', ownerCsrf)
       .set('Idempotency-Key', 'demo-reset-1')
       .send();
@@ -156,7 +132,7 @@ describe('demo reset API', () => {
     });
     const product = await manager
       .post('/v1/products')
-      .set('Origin', webOrigin)
+      .set('Origin', 'http://localhost:3000')
       .set('X-CSRF-Token', managerCsrf)
       .send({
         name: 'Auto Reset Product',
@@ -166,10 +142,10 @@ describe('demo reset API', () => {
       });
     expect(product.status).toBe(201);
 
-    const freshSession = request.agent(app.getHttpServer());
+    const freshSession = createTestAgent(app);
     const login = await freshSession
       .post('/v1/auth/demo-login')
-      .set('Origin', webOrigin)
+      .set('Origin', 'http://localhost:3000')
       .send({ role: 'STAFF' });
     expect(login.status).toBe(200);
     expect((await manager.get('/v1/products')).body.total).toBe(

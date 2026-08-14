@@ -3,22 +3,15 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { DEMO_FIXTURE_COUNTS } from '../src/demo/demo-fixture.js';
+import { adminDatabaseUrl } from './support/environment.js';
+import { createAdminClient } from './support/test-app.js';
 
 describe('demo identity seed', () => {
-  const databaseUrl =
-    process.env.MIGRATION_DATABASE_URL ??
-    'postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot';
   const slug = `seed-test-${randomUUID()}`;
   let admin: Awaited<ReturnType<typeof createAdminClient>>;
 
-  async function createAdminClient() {
-    const { createPrismaClient } =
-      await import('../src/database/prisma-client.js');
-    return createPrismaClient(databaseUrl);
-  }
-
   beforeAll(async () => {
-    admin = await createAdminClient();
+    admin = await createAdminClient(adminDatabaseUrl());
   });
 
   afterAll(async () => {

@@ -1,31 +1,28 @@
 import { createHmac, randomUUID } from 'node:crypto';
 
 import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import request, { type Agent } from 'supertest';
+import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { createTestAgent, demoLogin } from './support/agent.js';
+import {
+  adminDatabaseUrl,
+  setTestEnvironment,
+  TEST_WEB_ORIGIN,
+} from './support/environment.js';
+import {
+  createAdminClient,
+  createTestApplication,
+} from './support/test-app.js';
+
 describe('storefront integrations API', () => {
-  const adminDatabaseUrl =
-    process.env.MIGRATION_DATABASE_URL ??
-    'postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot';
-  const appDatabaseUrl =
-    process.env.DATABASE_URL ??
-    'postgresql://stockpilot_app:stockpilot_app@localhost:5432/stockpilot';
-  const webOrigin = 'http://localhost:3000';
   const webhookSecret = 'integrations-webhook-secret';
   const demoSlug = `integrations-test-${randomUUID()}`;
   let app: INestApplication;
   let admin: Awaited<ReturnType<typeof createAdminClient>>;
-  let manager: Agent;
+  let manager: Awaited<ReturnType<typeof createTestAgent>>;
   let managerCsrf: string;
   let productSku: string;
-
-  async function createAdminClient() {
-    const { createPrismaClient } =
-      await import('../src/database/prisma-client.js');
-    return createPrismaClient(adminDatabaseUrl);
-  }
 
   function sign(payload: unknown) {
     return createHmac('sha256', webhookSecret)
@@ -34,39 +31,22 @@ describe('storefront integrations API', () => {
   }
 
   beforeAll(async () => {
-    Object.assign(process.env, {
+    setTestEnvironment({
       CSRF_SECRET: 'integrations-csrf-secret-with-at-least-32-characters',
-      DATABASE_URL: appDatabaseUrl,
-      DEMO_MODE: 'true',
       DEMO_ORGANIZATION_SLUG: demoSlug,
-      NODE_ENV: 'test',
-      WEB_ORIGIN: webOrigin,
       WEBHOOK_SIGNING_SECRET: webhookSecret,
     });
-    admin = await createAdminClient();
+    admin = await createAdminClient(adminDatabaseUrl());
     const { seedDemoIdentity } = await import('../prisma/seed.js');
     await seedDemoIdentity(admin, { seedFixture: false, slug: demoSlug });
-    const [{ AppModule }, { configureApplication }] = await Promise.all([
-      import('../src/app.module.js'),
-      import('../src/configure-application.js'),
-    ]);
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleRef.createNestApplication();
-    configureApplication(app);
-    await app.init();
+    ({ app } = await createTestApplication());
 
-    manager = request.agent(app.getHttpServer());
-    const login = await manager
-      .post('/v1/auth/demo-login')
-      .set('Origin', webOrigin)
-      .send({ role: 'MANAGER' });
-    managerCsrf = login.body.csrfToken as string;
+    manager = createTestAgent(app);
+    ({ csrfToken: managerCsrf } = await demoLogin(manager, 'MANAGER'));
     productSku = `WEB-${randomUUID().slice(0, 8)}`;
     await manager
       .post('/v1/products')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .send({
         name: 'Webhook Product',
@@ -148,7 +128,7 @@ describe('storefront integrations API', () => {
 
     const product = await manager
       .post('/v1/products')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .send({
         name: 'Retry Product',
@@ -166,7 +146,7 @@ describe('storefront integrations API', () => {
     );
     const retried = await manager
       .post(`/v1/integration-deliveries/${delivery.id}/retry`)
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .set('Idempotency-Key', 'integration-retry-1')
       .send();

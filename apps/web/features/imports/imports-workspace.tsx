@@ -10,7 +10,7 @@ import {
   PageHeader,
   ToastRegion,
 } from '../../components/ui/operations-ui';
-import { apiRequest, newIdempotencyKey } from '../../lib/api-client';
+import { commitImport, previewImport } from './api';
 import { useToasts } from '../../hooks/use-toasts';
 
 export function ImportsWorkspace({ role }: { role: Role }) {
@@ -19,21 +19,13 @@ export function ImportsWorkspace({ role }: { role: Role }) {
   const [preview, setPreview] = useState<ImportPreviewResult | null>(null);
   const { push, toasts } = useToasts();
   const previewMutation = useMutation({
-    mutationFn: () =>
-      apiRequest<ImportPreviewResult>('/product-imports/preview', {
-        body: JSON.stringify({ content, fileName }),
-        method: 'POST',
-      }),
+    mutationFn: () => previewImport({ content, fileName }),
     onError: (error) =>
       push(error instanceof Error ? error.message : 'Preview failed.', 'error'),
     onSuccess: setPreview,
   });
   const commitMutation = useMutation({
-    mutationFn: () =>
-      apiRequest(`/product-imports/${preview?.id}/commit`, {
-        idempotencyKey: newIdempotencyKey('import'),
-        method: 'POST',
-      }),
+    mutationFn: () => commitImport(preview?.id ?? ''),
     onError: (error) =>
       push(error instanceof Error ? error.message : 'Commit failed.', 'error'),
     onSuccess: () => push('Valid product rows committed.', 'success'),

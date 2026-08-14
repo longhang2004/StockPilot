@@ -3,9 +3,14 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, Check, X } from '@phosphor-icons/react';
 import { useState } from 'react';
 
-import { ApiProblem, apiRequest } from '../../lib/api-client';
+import { ApiProblem } from '../../lib/api-client';
+import {
+  createCheckoutSession,
+  createPortalSession,
+  fetchBillingStatus,
+  settingsKeys,
+} from './api';
 import { formatDateTime } from '../../lib/formatters';
-import type { BillingStatusView } from '../shared/types';
 
 const friendlyErrors: Record<string, string> = {
   BILLING_DISABLED_FOR_DEMO:
@@ -47,18 +52,14 @@ function EntitlementRow({
 
 export function BillingCard() {
   const billing = useQuery({
-    queryKey: ['billing-status'],
-    queryFn: () => apiRequest<BillingStatusView>('/billing'),
+    queryKey: settingsKeys.billing,
+    queryFn: fetchBillingStatus,
   });
   const [selectedPlan, setSelectedPlan] = useState<Plan>('PRO');
   const [error, setError] = useState<string | null>(null);
 
   const checkout = useMutation({
-    mutationFn: () =>
-      apiRequest<{ url: string }>('/billing/checkout', {
-        body: JSON.stringify({ plan: selectedPlan }),
-        method: 'POST',
-      }),
+    mutationFn: () => createCheckoutSession(selectedPlan),
     onError: (cause) => setError(errorMessage(cause, 'Checkout failed.')),
     onSuccess: (result) => {
       window.location.assign(result.url);
@@ -66,8 +67,7 @@ export function BillingCard() {
   });
 
   const portal = useMutation({
-    mutationFn: () =>
-      apiRequest<{ url: string }>('/billing/portal', { method: 'POST' }),
+    mutationFn: createPortalSession,
     onError: (cause) => setError(errorMessage(cause, 'Billing portal failed.')),
     onSuccess: (result) => {
       window.location.assign(result.url);

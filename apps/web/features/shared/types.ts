@@ -1,6 +1,5 @@
 import type {
   AuditRecord,
-  BillingStatusView,
   Customer,
   IntegrationDeliveryRecord,
   InventoryBalance,
@@ -44,4 +43,4 @@ export type MovementRecord = StockMovementItem;
 export type OrderRecord = SalesOrder;
 export type OrderDetail = SalesOrderDetail;
 export type IntegrationRecord = IntegrationDeliveryRecord;
-export type { AuditRecord, BillingStatusView };
+export type { AuditRecord };

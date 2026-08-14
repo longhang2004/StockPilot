@@ -1,7 +1,9 @@
 import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+
+import { setTestEnvironment } from './support/environment.js';
+import { createTestApplication } from './support/test-app.js';
 
 /**
  * Contract regression test for the generated OpenAPI document.
@@ -50,15 +52,7 @@ describe('OpenAPI contract surface', () => {
   let app: INestApplication | undefined;
 
   beforeAll(() => {
-    Object.assign(process.env, {
-      CSRF_SECRET: 'integration-csrf-secret-with-at-least-32-characters',
-      DATABASE_URL:
-        process.env.DATABASE_URL ??
-        'postgresql://stockpilot_app:***@localhost:5432/stockpilot',
-      NODE_ENV: 'test',
-      WEB_ORIGIN: 'http://localhost:3000',
-      WEBHOOK_SIGNING_SECRET: 'integration-webhook-secret',
-    });
+    setTestEnvironment();
   });
 
   afterEach(async () => {
@@ -66,15 +60,7 @@ describe('OpenAPI contract surface', () => {
   });
 
   async function getDocument(): Promise<OpenApiDocument> {
-    const { AppModule } = await import('../src/app.module.js');
-    const { configureApplication } =
-      await import('../src/configure-application.js');
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleRef.createNestApplication();
-    configureApplication(app);
-    await app.init();
+    ({ app } = await createTestApplication());
     const response = await request(app.getHttpServer()).get('/openapi.json');
     expect(response.status).toBe(200);
     return response.body as OpenApiDocument;

@@ -21,6 +21,7 @@ import {
 import { formatDate, formatDateTime } from '../../lib/formatters';
 import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
+import { ALERTS_RESOURCE, BALANCES_RESOURCE } from './api';
 import { AdjustmentDrawer } from './components/adjustment-drawer';
 import { type AlertRecord, type BalanceRecord } from '../shared/types';
 
@@ -30,12 +31,15 @@ export function InventoryWorkspace({ role }: { role: Role }) {
   const [adjustOpen, setAdjustOpen] = useState(false);
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
-  const balances = usePage<BalanceRecord>(
-    '/inventory/balances?page=1&pageSize=100',
-  );
-  const alerts = usePage<AlertRecord>(
-    `/alerts?page=1&pageSize=100&status=${alertStatus}`,
-  );
+  const balances = usePage<BalanceRecord>(BALANCES_RESOURCE, {
+    page: 1,
+    pageSize: 100,
+  });
+  const alerts = usePage<AlertRecord>(ALERTS_RESOURCE, {
+    page: 1,
+    pageSize: 100,
+    status: alertStatus,
+  });
   const filtered = useMemo(
     () =>
       (balances.data?.items ?? []).filter((item) =>
@@ -174,8 +178,8 @@ export function InventoryWorkspace({ role }: { role: Role }) {
         onClose={() => setAdjustOpen(false)}
         onSaved={() => {
           setAdjustOpen(false);
-          void invalidatePageQueries(queryClient, '/inventory/balances');
-          void invalidatePageQueries(queryClient, '/alerts');
+          void invalidatePageQueries(queryClient, BALANCES_RESOURCE);
+          void invalidatePageQueries(queryClient, ALERTS_RESOURCE);
           push('Stock adjustment applied.', 'success');
         }}
         push={push}

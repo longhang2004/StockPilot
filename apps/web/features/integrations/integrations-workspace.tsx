@@ -15,7 +15,7 @@ import {
   ToastRegion,
   type TableColumn,
 } from '../../components/ui/operations-ui';
-import { apiRequest, newIdempotencyKey } from '../../lib/api-client';
+import { DELIVERIES_RESOURCE, retryDelivery } from './api';
 import { formatDate, formatDateTime } from '../../lib/formatters';
 import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
@@ -25,19 +25,16 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
   const [selected, setSelected] = useState<IntegrationRecord | null>(null);
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
-  const deliveries = usePage<IntegrationRecord>(
-    '/integration-deliveries?page=1&pageSize=100',
-  );
+  const deliveries = usePage<IntegrationRecord>('/integration-deliveries', {
+    page: 1,
+    pageSize: 100,
+  });
   const retry = useMutation({
-    mutationFn: (id: string) =>
-      apiRequest(`/integration-deliveries/${id}/retry`, {
-        idempotencyKey: newIdempotencyKey('integration-retry'),
-        method: 'POST',
-      }),
+    mutationFn: retryDelivery,
     onError: (error) =>
       push(error instanceof Error ? error.message : 'Retry failed.', 'error'),
     onSuccess: () => {
-      void invalidatePageQueries(queryClient, '/integration-deliveries');
+      void invalidatePageQueries(queryClient, DELIVERIES_RESOURCE);
       push('Delivery retry queued.', 'success');
     },
   });

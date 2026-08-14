@@ -16,25 +16,29 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import type { WorkspaceSessionView } from '../../features/shared/types';
+import {
+  workspaceSectionHref,
+  WORKSPACE_SECTION_LABELS,
+  type WorkspaceSection,
+} from '../../features/workspace/sections';
 import { apiRequest, type WorkspaceSummary } from '../../lib/api-client';
-import type { WorkspaceSection } from './workspace-content';
 
 export type SessionView = WorkspaceSessionView;
 
 const navigation: Array<{
   label: string;
-  href: string;
+  section: WorkspaceSection;
   icon: typeof House;
 }> = [
-  { label: 'Overview', href: '/app', icon: House },
-  { label: 'Orders', href: '/app/orders', icon: ClipboardText },
-  { label: 'Inventory', href: '/app/inventory', icon: Cube },
-  { label: 'Products', href: '/app/products', icon: Package },
-  { label: 'Partners', href: '/app/partners', icon: UsersThree },
-  { label: 'Receipts', href: '/app/receipts', icon: Receipt },
-  { label: 'Imports', href: '/app/imports', icon: Archive },
-  { label: 'Integrations', href: '/app/integrations', icon: PlugsConnected },
-  { label: 'Audit', href: '/app/audit', icon: GearSix },
+  { label: WORKSPACE_SECTION_LABELS.overview, section: 'overview', icon: House },
+  { label: WORKSPACE_SECTION_LABELS.orders, section: 'orders', icon: ClipboardText },
+  { label: WORKSPACE_SECTION_LABELS.inventory, section: 'inventory', icon: Cube },
+  { label: WORKSPACE_SECTION_LABELS.products, section: 'products', icon: Package },
+  { label: WORKSPACE_SECTION_LABELS.partners, section: 'partners', icon: UsersThree },
+  { label: WORKSPACE_SECTION_LABELS.receipts, section: 'receipts', icon: Receipt },
+  { label: WORKSPACE_SECTION_LABELS.imports, section: 'imports', icon: Archive },
+  { label: WORKSPACE_SECTION_LABELS.integrations, section: 'integrations', icon: PlugsConnected },
+  { label: WORKSPACE_SECTION_LABELS.audit, section: 'audit', icon: GearSix },
 ];
 
 const roleLabels: Record<Role, string> = {
@@ -101,8 +105,7 @@ export function DemoRoleSwitcher({
 }
 
 function isActive(href: string, section: WorkspaceSection): boolean {
-  if (href === '/app') return section === 'overview';
-  return href === `/app/${section}`;
+  return href === workspaceSectionHref(section);
 }
 
 /**
@@ -192,17 +195,20 @@ export function WorkspaceSidebar({
         </small>
       </div>
       <nav aria-label="Workspace navigation">
-        {navigation.map(({ href, icon: Icon, label }) => (
-          <Link
-            aria-current={isActive(href, section) ? 'page' : undefined}
-            className={`workspace-nav-link${isActive(href, section) ? ' workspace-nav-active' : ''}`}
-            href={href}
-            key={href}
-          >
-            <Icon size={18} weight="regular" aria-hidden="true" />
-            <span>{label}</span>
-          </Link>
-        ))}
+        {navigation.map(({ section: navSection, icon: Icon, label }) => {
+          const href = workspaceSectionHref(navSection);
+          return (
+            <Link
+              aria-current={isActive(href, section) ? 'page' : undefined}
+              className={`workspace-nav-link${isActive(href, section) ? ' workspace-nav-active' : ''}`}
+              href={href}
+              key={href}
+            >
+              <Icon size={18} weight="regular" aria-hidden="true" />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
       </nav>
       {session.membership.organization.isDemo ? (
         <DemoRoleSwitcher currentRole={session.membership.role} />
@@ -230,17 +236,20 @@ export function MobileWorkspaceNavigation({
       className="mobile-workspace-nav"
       aria-label="Mobile workspace navigation"
     >
-      {navigation.slice(0, 3).map(({ href, icon: Icon, label }) => (
-        <Link
-          aria-current={isActive(href, section) ? 'page' : undefined}
-          className={isActive(href, section) ? 'mobile-nav-active' : undefined}
-          href={href}
-          key={href}
-        >
-          <Icon size={19} aria-hidden="true" />
-          <span>{label}</span>
-        </Link>
-      ))}
+      {navigation.slice(0, 3).map(({ section: navSection, icon: Icon, label }) => {
+        const href = workspaceSectionHref(navSection);
+        return (
+          <Link
+            aria-current={isActive(href, section) ? 'page' : undefined}
+            className={isActive(href, section) ? 'mobile-nav-active' : undefined}
+            href={href}
+            key={href}
+          >
+            <Icon size={19} aria-hidden="true" />
+            <span>{label}</span>
+          </Link>
+        );
+      })}
       <Link
         aria-current={section === 'more' ? 'page' : undefined}
         href="/app/more"

@@ -14,13 +14,12 @@ import {
   StatusBadge,
   type TableColumn,
 } from '../../components/ui/operations-ui';
-import { apiRequest } from '../../lib/api-client';
 import { formatDate, formatDateTime } from '../../lib/formatters';
 import {
   type OverviewRecentOrder,
-  type OverviewResponse,
   type WorkspaceSessionView,
 } from '../shared/types';
+import { fetchOverview, overviewKeys } from './api';
 import { AnalyticsPanels } from './analytics-panels';
 import { DemoQuickGuide } from './demo-quick-guide';
 import { MovementChart } from './movement-chart';
@@ -31,8 +30,8 @@ export function OverviewWorkspace({
   session: WorkspaceSessionView;
 }) {
   const overview = useQuery({
-    queryKey: ['dashboard-overview'],
-    queryFn: () => apiRequest<OverviewResponse>('/dashboard/overview'),
+    queryKey: overviewKeys.overview,
+    queryFn: fetchOverview,
   });
   if (overview.isLoading) {
     return (

@@ -3,6 +3,7 @@
 import type { Role } from '@stockpilot/contracts';
 
 import type { WorkspaceSessionView } from '../../features/shared/types';
+import type { WorkspaceSection } from '../../features/workspace/sections';
 import {
   AuditWorkspace,
   IntegrationsWorkspace,
@@ -17,18 +18,7 @@ import {
   SettingsWorkspace,
 } from '../workflows/operations-workspaces';
 
-export type WorkspaceSection =
-  | 'audit'
-  | 'imports'
-  | 'integrations'
-  | 'inventory'
-  | 'more'
-  | 'orders'
-  | 'partners'
-  | 'products'
-  | 'receipts'
-  | 'settings'
-  | 'overview';
+export type { WorkspaceSection };
 
 export function WorkspaceContent({
   section,

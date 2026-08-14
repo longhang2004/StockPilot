@@ -1,6 +1,6 @@
 'use client';
 
-import { SalesOrderInputSchema } from '@stockpilot/contracts';
+import { ReceiptInputSchema } from '@stockpilot/contracts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Plus, Trash } from '@phosphor-icons/react';
@@ -12,19 +12,23 @@ import {
   FormField,
   UnsavedChangesGuard,
   type ToastMessage,
-} from '../../../components/ui/operations-ui';
-import { closeFormSafely, formatMoney } from '../../../lib/formatters';
-import { usePage } from '../../../hooks/use-page-query';
-import { availableLineProducts } from '../../shared/line-selection';
-import { createDraftOrder } from '../api';
+} from '../../components/ui/operations-ui';
+import { closeFormSafely, formatMoney } from '../../lib/formatters';
+import { usePage } from '../../hooks/use-page-query';
+import { availableLineProducts } from '../shared/line-selection';
 import {
   type PartnerRecord,
   type ProductRecord,
-} from '../../shared/types';
+} from '../shared/types';
+import { createReceipt } from './api';
 
-type OrderFormValues = z.infer<typeof SalesOrderInputSchema>;
-
-export function OrderFormDrawer({
+/**
+ * Multi-line goods receipt form: supplier and product selection, per-line
+ * quantity/unit cost with duplicate-product prevention, idempotent submit,
+ * and unsaved-changes protection. Owns its form state and the create
+ * mutation; the receipts page supplies open/close/saved orchestration.
+ */
+export function ReceiptDrawer({
   open,
   onClose,
   onSaved,
@@ -35,14 +39,16 @@ export function OrderFormDrawer({
   onSaved: () => void;
   push: (message: string, tone?: ToastMessage['tone']) => void;
 }) {
-  const customers = usePage<PartnerRecord>('/customers', { page: 1, pageSize: 100 });
   const products = usePage<ProductRecord>('/products', { page: 1, pageSize: 100 });
-  const form = useForm<OrderFormValues>({
-    resolver: zodResolver(SalesOrderInputSchema) as never,
+  const suppliers = usePage<PartnerRecord>('/suppliers', { page: 1, pageSize: 100 });
+  const form = useForm<z.infer<typeof ReceiptInputSchema>>({
+    resolver: zodResolver(ReceiptInputSchema) as never,
     defaultValues: {
-      customerId: '',
-      lines: [{ productId: '', quantity: 1 }],
+      lines: [{ productId: '', quantity: 1, unitCost: null }],
       note: null,
+      receiptNumber: `WEB-${Date.now()}`,
+      receivedAt: new Date().toISOString(),
+      supplierId: '',
     },
   });
   const { append, fields, remove } = useFieldArray({
@@ -53,20 +59,18 @@ export function OrderFormDrawer({
   const productById = new Map(
     (products.data?.items ?? []).map((product) => [product.id, product]),
   );
-  const subtotal = lines.reduce((sum, line) => {
+  const totalCost = lines.reduce((sum, line) => {
     const product = line?.productId
       ? productById.get(line.productId)
       : undefined;
-    if (!product || !line?.quantity) return sum;
-    return sum + Number(product.salePrice) * line.quantity;
+    if (!product || !line?.quantity || !line?.unitCost) return sum;
+    return sum + line.quantity * Number(line.unitCost);
   }, 0);
   const mutation = useMutation({
-    mutationFn: createDraftOrder,
+    mutationFn: createReceipt,
     onError: (error) =>
       push(
-        error instanceof Error
-          ? error.message
-          : 'Could not create the draft order.',
+        error instanceof Error ? error.message : 'Could not apply the receipt.',
         'error',
       ),
     onSuccess: onSaved,
@@ -74,11 +78,11 @@ export function OrderFormDrawer({
   const close = closeFormSafely(form.formState.isDirty, onClose);
   return (
     <Drawer
-      description="A draft does not reserve stock until a Manager confirms it."
+      description="Receipt, ledger movement, balance update, and alert reconciliation commit together."
       onClose={close}
       open={open}
       size="wide"
-      title="New draft order"
+      title="Receive stock"
     >
       <UnsavedChangesGuard dirty={form.formState.isDirty} />
       <form
@@ -87,25 +91,36 @@ export function OrderFormDrawer({
           void form.handleSubmit((value) => mutation.mutate(value))(event)
         }
       >
-        <FormField
-          error={form.formState.errors.customerId?.message}
-          htmlFor="order-customer"
-          label="Customer"
-        >
-          <select id="order-customer" {...form.register('customerId')}>
-            <option value="">Choose customer</option>
-            {customers.data?.items.map((customer) => (
-              <option key={customer.id} value={customer.id}>
-                {customer.companyName}
-              </option>
-            ))}
-          </select>
-        </FormField>
-        <div className="line-editor" aria-label="Order lines">
+        <div className="form-grid">
+          <FormField
+            error={form.formState.errors.receiptNumber?.message}
+            htmlFor="receipt-number"
+            label="Receipt number"
+          >
+            <input id="receipt-number" {...form.register('receiptNumber')} />
+          </FormField>
+          <FormField
+            error={form.formState.errors.supplierId?.message}
+            htmlFor="receipt-supplier"
+            label="Supplier"
+          >
+            <select id="receipt-supplier" {...form.register('supplierId')}>
+              <option value="">Choose supplier</option>
+              {suppliers.data?.items
+                .filter((supplier) => supplier.isActive)
+                .map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.companyName}
+                  </option>
+                ))}
+            </select>
+          </FormField>
+        </div>
+        <div className="line-editor" aria-label="Receipt lines">
           <div className="line-editor-header" aria-hidden="true">
             <span>Product</span>
             <span>Qty</span>
-            <span>Unit price</span>
+            <span>Unit cost</span>
             <span>Total</span>
             <span />
           </div>
@@ -114,9 +129,10 @@ export function OrderFormDrawer({
             const product = line?.productId
               ? productById.get(line.productId)
               : undefined;
-            const lineTotal = product
-              ? Number(product.salePrice) * (line?.quantity ?? 0)
-              : 0;
+            const lineTotal =
+              product && line?.quantity && line?.unitCost
+                ? line.quantity * Number(line.unitCost)
+                : 0;
             const availableProducts = availableLineProducts(
               products.data?.items ?? [],
               lines,
@@ -174,8 +190,31 @@ export function OrderFormDrawer({
                     </span>
                   )}
                 </div>
-                <div className="line-editor-cell line-editor-price">
-                  {product ? formatMoney(product.salePrice) : '—'}
+                <div className="line-editor-cell line-editor-qty">
+                  <Controller
+                    control={form.control}
+                    name={`lines.${index}.unitCost`}
+                    render={({ field: costField }) => (
+                      <input
+                        aria-label={`Unit cost for line ${index + 1}`}
+                        placeholder="0.00"
+                        {...costField}
+                        value={costField.value ?? ''}
+                        onChange={(event) =>
+                          costField.onChange(
+                            event.target.value === ''
+                              ? null
+                              : event.target.value,
+                          )
+                        }
+                      />
+                    )}
+                  />
+                  {form.formState.errors.lines?.[index]?.unitCost?.message && (
+                    <span className="form-error">
+                      {form.formState.errors.lines?.[index]?.unitCost?.message}
+                    </span>
+                  )}
                 </div>
                 <div className="line-editor-cell line-editor-total mono">
                   {formatMoney(lineTotal)}
@@ -197,7 +236,9 @@ export function OrderFormDrawer({
           })}
           <button
             className="line-editor-add"
-            onClick={() => append({ productId: '', quantity: 1 })}
+            onClick={() =>
+              append({ productId: '', quantity: 1, unitCost: null })
+            }
             type="button"
           >
             <Plus size={16} aria-hidden="true" /> Add line
@@ -208,16 +249,16 @@ export function OrderFormDrawer({
             </p>
           )}
           <div className="line-editor-subtotal">
-            <span>Subtotal</span>
-            <strong className="mono">{formatMoney(subtotal)}</strong>
+            <span>Total cost</span>
+            <strong className="mono">{formatMoney(totalCost)}</strong>
           </div>
         </div>
         <FormField
           error={form.formState.errors.note?.message}
-          htmlFor="order-note"
+          htmlFor="receipt-note"
           label="Note"
         >
-          <textarea id="order-note" {...form.register('note')} />
+          <textarea id="receipt-note" {...form.register('note')} />
         </FormField>
         <div className="drawer-action-row">
           <button
@@ -232,7 +273,7 @@ export function OrderFormDrawer({
             disabled={mutation.isPending}
             type="submit"
           >
-            {mutation.isPending ? 'Saving…' : 'Save draft'}
+            {mutation.isPending ? 'Applying…' : 'Apply receipt'}
           </button>
         </div>
       </form>

@@ -16,8 +16,8 @@ import {
   ToastRegion,
   type TableColumn,
 } from '../../components/ui/operations-ui';
-import { apiRequest } from '../../lib/api-client';
 import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
+import { savePartner } from './api';
 import { useToasts } from '../../hooks/use-toasts';
 import { PartnerDrawer } from './components/partner-drawer';
 import { type PartnerRecord } from '../shared/types';
@@ -28,7 +28,7 @@ export function PartnersWorkspace({ role }: { role: Role }) {
   const [editing, setEditing] = useState<PartnerRecord | null>(null);
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
-  const partners = usePage<PartnerRecord>(`/${kind}?page=1&pageSize=100`);
+  const partners = usePage<PartnerRecord>(`/${kind}`, { page: 1, pageSize: 100 });
   const canWrite = role === 'MANAGER' || role === 'OWNER';
   const mutation = useMutation({
     mutationFn: ({
@@ -38,10 +38,7 @@ export function PartnersWorkspace({ role }: { role: Role }) {
       id: string | undefined;
       value: z.infer<typeof CustomerInputSchema>;
     }) =>
-      apiRequest(id ? `/${kind}/${id}` : `/${kind}`, {
-        body: JSON.stringify(value),
-        method: id ? 'PATCH' : 'POST',
-      }),
+      savePartner(kind, id, value),
     onError: (error) =>
       push(
         error instanceof Error ? error.message : 'Could not save partner.',

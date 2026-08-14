@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 
 import { EmptyState, StatusBadge } from '../../components/ui/operations-ui';
-import { apiRequest } from '../../lib/api-client';
+import { fetchAnalytics, overviewKeys } from './api';
 
 export interface AnalyticsView {
   averageFulfilledOrderValue: string;
@@ -21,8 +21,8 @@ export interface AnalyticsView {
 
 export function AnalyticsPanels() {
   const analytics = useQuery({
-    queryKey: ['analytics'],
-    queryFn: () => apiRequest<AnalyticsView>('/analytics'),
+    queryKey: overviewKeys.analytics,
+    queryFn: fetchAnalytics,
   });
   if (analytics.isLoading || analytics.isError || !analytics.data) return null;
   const data = analytics.data;

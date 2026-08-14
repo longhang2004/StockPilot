@@ -17,8 +17,14 @@ import {
   ToastRegion,
   type TableColumn,
 } from '../../components/ui/operations-ui';
-import { apiRequest } from '../../lib/api-client';
 import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
+import {
+  createProduct,
+  deleteProductImage,
+  PRODUCTS_RESOURCE,
+  updateProduct,
+  uploadProductImage,
+} from './api';
 import { useToasts } from '../../hooks/use-toasts';
 import {
   ProductDrawer,
@@ -45,9 +51,11 @@ export function ProductsWorkspace({ role }: { role: Role }) {
   const [imageError, setImageError] = useState<string | null>(null);
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
-  const products = usePage<ProductRecord>(
-    `/products?page=1&pageSize=100&search=${encodeURIComponent(search)}`,
-  );
+  const products = usePage<ProductRecord>('/products', {
+    page: 1,
+    pageSize: 100,
+    search,
+  });
   const canWrite = role === 'MANAGER' || role === 'OWNER';
   const mutation = useMutation({
     mutationFn: async ({
@@ -61,26 +69,15 @@ export function ProductsWorkspace({ role }: { role: Role }) {
       imageFile: File | null;
       removeImage: boolean;
     }) => {
-      const saved = await apiRequest<ProductRecord>(
-        id ? `/products/${id}` : '/products',
-        {
-          body: JSON.stringify(value),
-          method: id ? 'PATCH' : 'POST',
-        },
-      );
+      const saved = id
+        ? await updateProduct(id, value)
+        : await createProduct(value);
       try {
         if (pendingImage) {
-          const body = new FormData();
-          body.append('file', pendingImage);
-          return await apiRequest<ProductRecord>(
-            `/products/${saved.id}/image`,
-            { body, method: 'POST' },
-          );
+          return await uploadProductImage(saved.id, pendingImage);
         }
         if (shouldRemoveImage && saved.image) {
-          await apiRequest<void>(`/products/${saved.id}/image`, {
-            method: 'DELETE',
-          });
+          await deleteProductImage(saved.id);
           return { ...saved, image: null };
         }
         return saved;
@@ -98,7 +95,7 @@ export function ProductsWorkspace({ role }: { role: Role }) {
         setEditing(error.product);
         setFormOpen(true);
         setImageError(error.message);
-        void invalidatePageQueries(queryClient, '/products');
+        void invalidatePageQueries(queryClient, PRODUCTS_RESOURCE);
         push('Product saved, image not uploaded. You can retry.', 'error');
         return;
       }
@@ -113,7 +110,7 @@ export function ProductsWorkspace({ role }: { role: Role }) {
       setImageFile(null);
       setRemoveImage(false);
       setImageError(null);
-      void invalidatePageQueries(queryClient, '/products');
+      void invalidatePageQueries(queryClient, PRODUCTS_RESOURCE);
       push('Product saved.', 'success');
     },
   });

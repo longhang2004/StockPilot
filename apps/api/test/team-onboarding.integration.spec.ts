@@ -1,20 +1,21 @@
 import { randomUUID } from 'node:crypto';
 
 import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { hashSessionToken } from '../src/auth/session-credentials.js';
+import {
+  adminDatabaseUrl,
+  setTestEnvironment,
+  TEST_WEB_ORIGIN,
+} from './support/environment.js';
+import {
+  createAdminClient,
+  createTestApplication,
+} from './support/test-app.js';
 
 describe('team onboarding and workspace control plane', () => {
-  const adminDatabaseUrl =
-    process.env.MIGRATION_DATABASE_URL ??
-    'postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot';
-  const appDatabaseUrl =
-    process.env.DATABASE_URL ??
-    'postgresql://stockpilot_app:stockpilot_app@localhost:5432/stockpilot';
-  const webOrigin = 'http://localhost:3000';
   const slug = `team-test-${randomUUID()}`;
   let app: INestApplication;
   let admin: Awaited<ReturnType<typeof createAdminClient>>;
@@ -28,12 +29,6 @@ describe('team onboarding and workspace control plane', () => {
     if (body?.csrfToken) csrfByAgent.set(agent, body.csrfToken);
   }
 
-  async function createAdminClient() {
-    const { createPrismaClient } =
-      await import('../src/database/prisma-client.js');
-    return createPrismaClient(adminDatabaseUrl);
-  }
-
   function api(
     agent: ReturnType<typeof request.agent>,
     method: 'delete' | 'get' | 'patch' | 'post',
@@ -41,7 +36,7 @@ describe('team onboarding and workspace control plane', () => {
   ) {
     const requestBuilder = agent[method](`/v1${path}`);
     if (method !== 'get') {
-      requestBuilder.set('Origin', webOrigin);
+      requestBuilder.set('Origin', TEST_WEB_ORIGIN);
       const csrfToken = csrfByAgent.get(agent);
       if (csrfToken) requestBuilder.set('X-CSRF-Token', csrfToken);
     }
@@ -49,30 +44,11 @@ describe('team onboarding and workspace control plane', () => {
   }
 
   beforeAll(async () => {
-    Object.assign(process.env, {
-      CSRF_SECRET: 'integration-csrf-secret-with-at-least-32-characters',
-      DATABASE_URL: appDatabaseUrl,
-      DEMO_MODE: 'true',
-      DEMO_ORGANIZATION_SLUG: slug,
-      NODE_ENV: 'test',
-      SESSION_COOKIE_NAME: 'stockpilot_session',
-      SESSION_TTL_HOURS: '12',
-      WEB_ORIGIN: webOrigin,
-      WEBHOOK_SIGNING_SECRET: 'integration-webhook-secret',
-    });
+    setTestEnvironment({ DEMO_ORGANIZATION_SLUG: slug });
 
-    admin = await createAdminClient();
+    admin = await createAdminClient(adminDatabaseUrl());
 
-    const [{ AppModule }, { configureApplication }] = await Promise.all([
-      import('../src/app.module.js'),
-      import('../src/configure-application.js'),
-    ]);
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleRef.createNestApplication();
-    configureApplication(app);
-    await app.init();
+    ({ app } = await createTestApplication());
 
     // Owner signs up their own workspace through the public API. The id is
     // captured from the signup response: pre-creating the same email through

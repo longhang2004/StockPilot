@@ -8,6 +8,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { StripeClient } from '../src/billing/stripe-client.js';
 import { createPrismaClient } from '../src/database/prisma-client.js';
+import {
+  adminDatabaseUrl,
+  setTestEnvironment,
+  TEST_WEB_ORIGIN,
+} from './support/environment.js';
 
 const webhookSecret = 'whsec_integration_webhook_secret';
 
@@ -52,13 +57,6 @@ function subscriptionEvent(overrides: {
 }
 
 describe('billing API', () => {
-  const adminDatabaseUrl =
-    process.env.MIGRATION_DATABASE_URL ??
-    'postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot';
-  const appDatabaseUrl =
-    process.env.DATABASE_URL ??
-    'postgresql://stockpilot_app:stockpilot_app@localhost:5432/stockpilot';
-  const webOrigin = 'http://localhost:3000';
   const slug = `billing-test-${randomUUID()}`;
   const starterPriceId = 'price_starter_test';
   const proPriceId = 'price_pro_test';
@@ -105,30 +103,22 @@ describe('billing API', () => {
   ) {
     const builder = agent[method](`/v1${path}`);
     if (method !== 'get') {
-      builder.set('Origin', webOrigin);
+      builder.set('Origin', TEST_WEB_ORIGIN);
       if (ownerCsrf) builder.set('X-CSRF-Token', ownerCsrf);
     }
     return builder;
   }
 
   beforeAll(async () => {
-    Object.assign(process.env, {
-      CSRF_SECRET: 'integration-csrf-secret-with-at-least-32-characters',
-      DATABASE_URL: appDatabaseUrl,
-      DEMO_MODE: 'true',
+    setTestEnvironment({
       DEMO_ORGANIZATION_SLUG: slug,
-      NODE_ENV: 'test',
-      SESSION_COOKIE_NAME: 'stockpilot_session',
-      SESSION_TTL_HOURS: '12',
       STRIPE_PRO_PRICE_ID: proPriceId,
       STRIPE_SECRET_KEY: 'sk_test_integration',
       STRIPE_STARTER_PRICE_ID: starterPriceId,
       STRIPE_WEBHOOK_SECRET: webhookSecret,
-      WEB_ORIGIN: webOrigin,
-      WEBHOOK_SIGNING_SECRET: 'integration-webhook-secret',
     });
 
-    admin = await createPrismaClient(adminDatabaseUrl);
+    admin = await createPrismaClient(adminDatabaseUrl());
     // Seed the canonical demo org so demo-login works in this suite.
     const { hash } = await import('argon2');
     const passwordHash = await hash('DemoPass123!');
@@ -207,7 +197,7 @@ describe('billing API', () => {
     const demo = await request
       .agent(app.getHttpServer())
       .post('/v1/auth/demo-login')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .send({ role: 'OWNER' })
       .expect(200);
     const status = await request
@@ -224,7 +214,7 @@ describe('billing API', () => {
     const demo = await request
       .agent(app.getHttpServer())
       .post('/v1/auth/demo-login')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .send({ role: 'OWNER' })
       .expect(200);
     const csrf = demo.body.csrfToken;
@@ -232,7 +222,7 @@ describe('billing API', () => {
       .agent(app.getHttpServer())
       .post('/v1/billing/checkout')
       .set('Cookie', demo.headers['set-cookie'])
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', csrf)
       .send({ plan: 'PRO' })
       .expect(409);
@@ -241,7 +231,7 @@ describe('billing API', () => {
       .agent(app.getHttpServer())
       .post('/v1/billing/portal')
       .set('Cookie', demo.headers['set-cookie'])
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', csrf)
       .expect(409);
     expect(portal.body.code).toBe('BILLING_DISABLED_FOR_DEMO');

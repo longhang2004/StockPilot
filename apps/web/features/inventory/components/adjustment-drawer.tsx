@@ -12,7 +12,7 @@ import {
   UnsavedChangesGuard,
   type ToastMessage,
 } from '../../../components/ui/operations-ui';
-import { apiRequest, newIdempotencyKey } from '../../../lib/api-client';
+import { createAdjustment } from '../api';
 import { closeFormSafely } from '../../../lib/formatters';
 import { usePage } from '../../../hooks/use-page-query';
 import { type ProductRecord } from '../../shared/types';
@@ -28,7 +28,7 @@ export function AdjustmentDrawer({
   onSaved: () => void;
   push: (message: string, tone?: ToastMessage['tone']) => void;
 }) {
-  const products = usePage<ProductRecord>('/products?page=1&pageSize=100');
+  const products = usePage<ProductRecord>('/products', { page: 1, pageSize: 100 });
   const form = useForm<z.infer<typeof InventoryAdjustmentInputSchema>>({
     resolver: zodResolver(InventoryAdjustmentInputSchema) as never,
     defaultValues: {
@@ -39,12 +39,7 @@ export function AdjustmentDrawer({
     },
   });
   const mutation = useMutation({
-    mutationFn: (value: z.infer<typeof InventoryAdjustmentInputSchema>) =>
-      apiRequest('/inventory/adjustments', {
-        body: JSON.stringify(value),
-        idempotencyKey: newIdempotencyKey('adjustment'),
-        method: 'POST',
-      }),
+    mutationFn: createAdjustment,
     onError: (error) =>
       push(
         error instanceof Error ? error.message : 'Could not adjust stock.',

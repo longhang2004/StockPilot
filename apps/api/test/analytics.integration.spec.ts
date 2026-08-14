@@ -1,23 +1,23 @@
 import { randomUUID } from 'node:crypto';
 
 import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { createPrismaClient } from '../src/database/prisma-client.js';
+import {
+  adminDatabaseUrl,
+  setTestEnvironment,
+  TEST_WEB_ORIGIN,
+} from './support/environment.js';
+import {
+  createAdminClient,
+  createTestApplication,
+} from './support/test-app.js';
 
 describe('analytics API', () => {
-  const adminDatabaseUrl =
-    process.env.MIGRATION_DATABASE_URL ??
-    'postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot';
-  const appDatabaseUrl =
-    process.env.DATABASE_URL ??
-    'postgresql://stockpilot_app:stockpilot_app@localhost:5432/stockpilot';
-  const webOrigin = 'http://localhost:3000';
   const slug = `analytics-test-${randomUUID()}`;
   let app: INestApplication;
-  let admin: Awaited<ReturnType<typeof createPrismaClient>>;
+  let admin: Awaited<ReturnType<typeof createAdminClient>>;
   let ownerAgent: ReturnType<typeof request.agent>;
   let ownerCsrf: string;
   let organizationId: string;
@@ -32,35 +32,17 @@ describe('analytics API', () => {
   ) {
     const builder = agent[method](`/v1${path}`);
     if (method !== 'get') {
-      builder.set('Origin', webOrigin);
+      builder.set('Origin', TEST_WEB_ORIGIN);
       if (ownerCsrf) builder.set('X-CSRF-Token', ownerCsrf);
     }
     return builder;
   }
 
   beforeAll(async () => {
-    Object.assign(process.env, {
-      CSRF_SECRET: 'integration-csrf-secret-with-at-least-32-characters',
-      DATABASE_URL: appDatabaseUrl,
-      DEMO_MODE: 'false',
-      NODE_ENV: 'test',
-      SESSION_COOKIE_NAME: 'stockpilot_session',
-      SESSION_TTL_HOURS: '12',
-      WEB_ORIGIN: webOrigin,
-      WEBHOOK_SIGNING_SECRET: 'integration-webhook-secret',
-    });
+    setTestEnvironment({ DEMO_MODE: 'false' });
 
-    admin = await createPrismaClient(adminDatabaseUrl);
-    const [{ AppModule }, { configureApplication }] = await Promise.all([
-      import('../src/app.module.js'),
-      import('../src/configure-application.js'),
-    ]);
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleRef.createNestApplication();
-    configureApplication(app);
-    await app.init();
+    admin = await createAdminClient(adminDatabaseUrl());
+    ({ app } = await createTestApplication());
 
     ownerAgent = request.agent(app.getHttpServer());
     const signup = await api(ownerAgent, 'post', '/auth/signup')

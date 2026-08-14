@@ -20,13 +20,18 @@ import {
   ToastRegion,
   type TableColumn,
 } from '../../components/ui/operations-ui';
-import { apiRequest, newIdempotencyKey } from '../../lib/api-client';
+import {
+  fetchOrderDetail,
+  ORDERS_RESOURCE,
+  orderKeys,
+  transitionOrder,
+} from './api';
 import { formatDate, formatDateTime } from '../../lib/formatters';
 import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
 import { OrderDetailView } from './components/order-detail-view';
 import { OrderFormDrawer } from './components/order-form-drawer';
-import { type OrderDetail, type OrderRecord } from '../shared/types';
+import { type OrderRecord } from '../shared/types';
 
 export function OrdersWorkspace({ role }: { role: Role }) {
   const searchParams = useSearchParams();
@@ -50,31 +55,30 @@ export function OrdersWorkspace({ role }: { role: Role }) {
       setStatus(requestedStatus);
     }
   }, [searchParams]);
-  const list = usePage<OrderRecord>(
-    `/orders?page=${page}&pageSize=25&search=${encodeURIComponent(search)}${status ? `&status=${status}` : ''}`,
-  );
+  const list = usePage<OrderRecord>('/orders', {
+    page,
+    pageSize: 25,
+    search,
+    status,
+  });
   const detail = useQuery({
-    queryKey: ['order', selectedId],
-    queryFn: () => apiRequest<OrderDetail>(`/orders/${selectedId}`),
+    queryKey: orderKeys.detail(selectedId!),
+    queryFn: () => fetchOrderDetail(selectedId!),
     enabled: Boolean(selectedId),
   });
   const transition = useMutation({
-    mutationFn: async (to: 'CONFIRMED' | 'FULFILLED' | 'CANCELLED') =>
-      apiRequest<OrderDetail>(
-        `/orders/${selectedId}/${transitionPathByStatus[to]}`,
-        {
-          method: 'POST',
-          idempotencyKey: newIdempotencyKey(`order-${to.toLowerCase()}`),
-        },
-      ),
+    mutationFn: (to: 'CONFIRMED' | 'FULFILLED' | 'CANCELLED') =>
+      transitionOrder(selectedId!, to),
     onError: (error) =>
       push(
         error instanceof Error ? error.message : 'Order transition failed.',
         'error',
       ),
     onSuccess: () => {
-      void invalidatePageQueries(queryClient, '/orders');
-      void queryClient.invalidateQueries({ queryKey: ['order', selectedId] });
+      void invalidatePageQueries(queryClient, ORDERS_RESOURCE);
+      void queryClient.invalidateQueries({
+        queryKey: orderKeys.detail(selectedId!),
+      });
       setConfirmAction(null);
       push('Order status updated.', 'success');
     },
@@ -160,7 +164,7 @@ export function OrdersWorkspace({ role }: { role: Role }) {
         onClose={() => setFormOpen(false)}
         onSaved={() => {
           setFormOpen(false);
-          void invalidatePageQueries(queryClient, '/orders');
+          void invalidatePageQueries(queryClient, ORDERS_RESOURCE);
           push('Draft order created.', 'success');
         }}
         push={push}
@@ -206,12 +210,6 @@ export function OrdersWorkspace({ role }: { role: Role }) {
     </section>
   );
 }
-
-const transitionPathByStatus = {
-  CANCELLED: 'cancel',
-  CONFIRMED: 'confirm',
-  FULFILLED: 'fulfill',
-} as const;
 
 const orderColumns: TableColumn<OrderRecord>[] = [
   {

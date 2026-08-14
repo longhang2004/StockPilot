@@ -1,87 +1,65 @@
 import { randomUUID } from 'node:crypto';
 
 import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import request, { type Agent } from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { createTestAgent, demoLogin } from './support/agent.js';
+import {
+  adminDatabaseUrl,
+  setTestEnvironment,
+  TEST_WEB_ORIGIN,
+} from './support/environment.js';
+import {
+  createAdminClient,
+  createTestApplication,
+} from './support/test-app.js';
+
 describe('sales orders API', () => {
-  const adminDatabaseUrl =
-    process.env.MIGRATION_DATABASE_URL ??
-    'postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot';
-  const appDatabaseUrl =
-    process.env.DATABASE_URL ??
-    'postgresql://stockpilot_app:stockpilot_app@localhost:5432/stockpilot';
-  const webOrigin = 'http://localhost:3000';
   const demoSlug = `orders-test-${randomUUID()}`;
   let app: INestApplication;
   let admin: Awaited<ReturnType<typeof createAdminClient>>;
-  let manager: Agent;
+  let manager: Awaited<ReturnType<typeof createTestAgent>>;
   let managerCsrf: string;
-  let staff: Agent;
+  let staff: Awaited<ReturnType<typeof createTestAgent>>;
   let staffCsrf: string;
   let productId: string;
   let customerId: string;
 
-  async function createAdminClient() {
-    const { createPrismaClient } =
-      await import('../src/database/prisma-client.js');
-    return createPrismaClient(adminDatabaseUrl);
-  }
-
-  async function loginAs(role: 'MANAGER' | 'STAFF') {
-    const agent = request.agent(app.getHttpServer());
-    const response = await agent
-      .post('/v1/auth/demo-login')
-      .set('Origin', webOrigin)
-      .send({ role });
-    return { agent, csrfToken: response.body.csrfToken as string };
-  }
-
   async function createOrder(
-    agent: Agent,
+    agent: Awaited<ReturnType<typeof createTestAgent>>,
     csrfToken: string,
     quantity: number,
   ) {
     return agent
       .post('/v1/orders')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', csrfToken)
       .send({ customerId, lines: [{ productId, quantity }] });
   }
 
   beforeAll(async () => {
-    Object.assign(process.env, {
+    setTestEnvironment({
       CSRF_SECRET: 'orders-csrf-secret-with-at-least-32-characters',
-      DATABASE_URL: appDatabaseUrl,
-      DEMO_MODE: 'true',
       DEMO_ORGANIZATION_SLUG: demoSlug,
-      NODE_ENV: 'test',
-      WEB_ORIGIN: webOrigin,
       WEBHOOK_SIGNING_SECRET: 'orders-webhook-secret',
     });
 
-    admin = await createAdminClient();
+    admin = await createAdminClient(adminDatabaseUrl());
     const { seedDemoIdentity } = await import('../prisma/seed.js');
     await seedDemoIdentity(admin, { seedFixture: false, slug: demoSlug });
 
-    const [{ AppModule }, { configureApplication }] = await Promise.all([
-      import('../src/app.module.js'),
-      import('../src/configure-application.js'),
-    ]);
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleRef.createNestApplication();
-    configureApplication(app);
-    await app.init();
+    ({ app } = await createTestApplication());
 
-    ({ agent: manager, csrfToken: managerCsrf } = await loginAs('MANAGER'));
-    ({ agent: staff, csrfToken: staffCsrf } = await loginAs('STAFF'));
+    const managerAgent = createTestAgent(app);
+    ({ csrfToken: managerCsrf } = await demoLogin(managerAgent, 'MANAGER'));
+    manager = managerAgent;
+    const staffAgent = createTestAgent(app);
+    ({ csrfToken: staffCsrf } = await demoLogin(staffAgent, 'STAFF'));
+    staff = staffAgent;
 
     const product = await manager
       .post('/v1/products')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .send({
         name: 'Order Test Product',
@@ -91,19 +69,19 @@ describe('sales orders API', () => {
       });
     const customer = await manager
       .post('/v1/customers')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .send({ companyName: 'Order Test Market', contactName: 'Casey Lee' });
     const supplier = await manager
       .post('/v1/suppliers')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .send({ companyName: 'Order Test Supplier' });
     productId = product.body.id as string;
     customerId = customer.body.id as string;
     await manager
       .post('/v1/receipts')
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .set('Idempotency-Key', `receipt-${randomUUID()}`)
       .send({
@@ -144,7 +122,7 @@ describe('sales orders API', () => {
 
     const staffConfirm = await staff
       .post(`/v1/orders/${draft.body.id}/confirm`)
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', staffCsrf)
       .set('Idempotency-Key', `confirm-${randomUUID()}`)
       .send();
@@ -153,13 +131,13 @@ describe('sales orders API', () => {
     const confirmKey = `confirm-${randomUUID()}`;
     const confirmed = await manager
       .post(`/v1/orders/${draft.body.id}/confirm`)
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .set('Idempotency-Key', confirmKey)
       .send();
     const replayed = await manager
       .post(`/v1/orders/${draft.body.id}/confirm`)
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .set('Idempotency-Key', confirmKey)
       .send();
@@ -176,7 +154,7 @@ describe('sales orders API', () => {
 
     const fulfilled = await staff
       .post(`/v1/orders/${draft.body.id}/fulfill`)
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', staffCsrf)
       .set('Idempotency-Key', `fulfill-${randomUUID()}`)
       .send();
@@ -202,7 +180,7 @@ describe('sales orders API', () => {
     const draft = await createOrder(staff, staffCsrf, 1);
     const confirmed = await manager
       .post(`/v1/orders/${draft.body.id}/confirm`)
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .set('Idempotency-Key', `confirm-${randomUUID()}`)
       .send();
@@ -210,7 +188,7 @@ describe('sales orders API', () => {
 
     const cancelled = await manager
       .post(`/v1/orders/${draft.body.id}/cancel`)
-      .set('Origin', webOrigin)
+      .set('Origin', TEST_WEB_ORIGIN)
       .set('X-CSRF-Token', managerCsrf)
       .set('Idempotency-Key', `cancel-${randomUUID()}`)
       .send();
@@ -226,13 +204,13 @@ describe('sales orders API', () => {
     const [firstResult, secondResult] = await Promise.all([
       manager
         .post(`/v1/orders/${first.body.id}/confirm`)
-        .set('Origin', webOrigin)
+        .set('Origin', TEST_WEB_ORIGIN)
         .set('X-CSRF-Token', managerCsrf)
         .set('Idempotency-Key', `confirm-${randomUUID()}`)
         .send(),
       manager
         .post(`/v1/orders/${second.body.id}/confirm`)
-        .set('Origin', webOrigin)
+        .set('Origin', TEST_WEB_ORIGIN)
         .set('X-CSRF-Token', managerCsrf)
         .set('Idempotency-Key', `confirm-${randomUUID()}`)
         .send(),

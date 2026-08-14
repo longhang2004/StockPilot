@@ -13,6 +13,7 @@ import {
 } from '../../components/ui/operations-ui';
 import { formatDateTime } from '../../lib/formatters';
 import { usePage } from '../../hooks/use-page-query';
+import { AUDIT_RESOURCE } from './api';
 import { type AuditRecord } from '../shared/types';
 
 export interface AuditChangeEntry {
@@ -47,7 +48,7 @@ export function auditChangeEntries(
 
 export function AuditWorkspace() {
   const [selected, setSelected] = useState<AuditRecord | null>(null);
-  const audit = usePage<AuditRecord>('/audit-events?page=1&pageSize=100');
+  const audit = usePage<AuditRecord>(AUDIT_RESOURCE, { page: 1, pageSize: 100 });
   return (
     <section className="workspace-section-page">
       <PageHeader
