@@ -10,7 +10,10 @@
 
 .loading-mark {
   align-items: center;
-  animation: pulse 1.2s ease-in-out infinite;
+  /* A scale-only pulse keeps foreground/background at full opacity so the
+     mark never drops below WCAG AA contrast mid-animation (axe color-contrast
+     samples the animated frame). */
+  animation: loading-pulse 1.2s ease-in-out infinite;
   background: var(--brand);
   border-radius: var(--radius-lg);
   color: var(--color-on-primary);
@@ -252,9 +255,9 @@
   color: var(--color-danger-foreground);
 }
 
-@keyframes pulse {
+@keyframes loading-pulse {
   50% {
-    opacity: 0.55;
+    transform: scale(1.06);
   }
 }
 

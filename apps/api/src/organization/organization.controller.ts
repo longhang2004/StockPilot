@@ -20,6 +20,10 @@ import {
   type SessionCookieResponse,
 } from '../auth/session-cookie.js';
 import { OrganizationService } from './organization.service.js';
+import {
+  SessionAuth,
+  SessionAuthWrite,
+} from '../openapi/security.decorator.js';
 
 const CreateWorkspaceSchema = z.object({
   name: z.string().trim().min(2).max(160),
@@ -27,6 +31,7 @@ const CreateWorkspaceSchema = z.object({
 
 @ApiTags('organization')
 @Controller()
+@SessionAuth()
 export class OrganizationController {
   constructor(
     @Inject(OrganizationService)
@@ -39,6 +44,7 @@ export class OrganizationController {
    * workspace yet (fresh signup) must be able to create their first one.
    */
   @Post('organizations')
+  @SessionAuthWrite()
   @HttpCode(201)
   async createWorkspace(
     @Body() body: unknown,

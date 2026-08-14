@@ -26,6 +26,9 @@ const EnvironmentSchema = z.object({
   SENTRY_DSN: z.url().optional().or(z.literal('')),
   SESSION_COOKIE_NAME: z.string().min(1).default('stockpilot_session'),
   SESSION_TTL_HOURS: z.coerce.number().int().positive().default(12),
+  // Comma-separated CIDRs of reverse proxies allowed to set X-Forwarded-For
+  // for rate limiting. Empty (default): trust only the socket peer address.
+  TRUSTED_PROXY_CIDRS: z.string().trim().optional().or(z.literal('')),
   STRIPE_SECRET_KEY: z.string().trim().min(1).optional().or(z.literal('')),
   STRIPE_STARTER_PRICE_ID: z
     .string()

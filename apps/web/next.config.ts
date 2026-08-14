@@ -7,6 +7,10 @@ const scriptSources = [
 ].join(' ');
 
 const nextConfig: NextConfig = {
+  // Standalone output lets the production container run a self-contained
+  // server (`node .next/standalone/server.js`) instead of shipping the full
+  // node_modules tree and dev tooling.
+  output: 'standalone',
   images: {
     remotePatterns: [
       {

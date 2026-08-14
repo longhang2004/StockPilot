@@ -25,6 +25,10 @@ import {
   type SessionCookieResponse,
 } from '../auth/session-cookie.js';
 import { TeamService } from './team.service.js';
+import {
+  SessionAuth,
+  SessionAuthWrite,
+} from '../openapi/security.decorator.js';
 
 const InviteSchema = z.object({
   email: z.email(),
@@ -39,6 +43,7 @@ const ChangeRoleSchema = z.object({ role: RoleSchema });
 
 @ApiTags('team')
 @Controller('team')
+@SessionAuth()
 export class TeamController {
   constructor(
     @Inject(TeamService) private readonly team: TeamService,
@@ -47,6 +52,7 @@ export class TeamController {
 
   @RequirePermission('team:invite')
   @Post('invitations')
+  @SessionAuthWrite()
   invite(@Body() body: unknown, @Req() request: AuthenticatedRequest) {
     return this.team.invite(request.auth, InviteSchema.parse(body));
   }
@@ -59,6 +65,7 @@ export class TeamController {
 
   @RequirePermission('team:invite')
   @Post('invitations/:id/revoke')
+  @SessionAuthWrite()
   @HttpCode(200)
   revoke(
     @Param('id', ParseUUIDPipe) invitationId: string,
@@ -73,6 +80,7 @@ export class TeamController {
    * workspace, mirroring the login response shape.
    */
   @Post('invitations/accept')
+  @SessionAuthWrite()
   @HttpCode(200)
   async accept(
     @Body() body: unknown,
@@ -87,6 +95,7 @@ export class TeamController {
 
   @RequirePermission('team:write')
   @Patch('members/:membershipId/role')
+  @SessionAuthWrite()
   changeRole(
     @Body() body: unknown,
     @Param('membershipId', ParseUUIDPipe) membershipId: string,
@@ -101,6 +110,7 @@ export class TeamController {
 
   @RequirePermission('team:write')
   @Delete('members/:membershipId')
+  @SessionAuthWrite()
   @HttpCode(200)
   remove(
     @Param('membershipId', ParseUUIDPipe) membershipId: string,

@@ -33,7 +33,52 @@ optional: repeated database probes can consume Neon Free compute hours.
 Render logs are structured JSON. Search by `traceId`, `organizationId`,
 `actorUserId`, route, or status. Cookies, authorization values, CSRF tokens,
 webhook signatures, credential-bearing URLs, and database connection strings
-must be redacted before they reach logs.
+must be redacted before they reach logs. Logged error statuses come from the
+same shared exception→status mapping the problem-details filter uses
+(`src/problem-status.ts`: ZodError 400, Prisma P2002 409, P2025 404,
+HttpException declared status, else 500), so structured logs always agree
+with the actual response status.
+
+## Public-write rate limiting
+
+`POST /v1/auth/signup`, `/v1/auth/login`, `/v1/auth/demo-login`, the
+storefront webhook, and other public writes are limited to 60 requests per
+minute per client per route (`apps/api/src/auth/rate-limit.guard.ts`).
+Exceeding the limit returns `429` with a `Retry-After` header.
+
+**Client identity.** The API never trusts `X-Forwarded-For` blindly. By
+default the bucket key is the immediate socket peer. Because browsers reach
+the API through Vercel's proxy (Browser → Vercel → Render), proxied public
+writes are therefore capped **per route in aggregate** — all demo users
+share the socket peer. Direct API callers are capped per IP. A deployment
+that wants per-client buckets can set `TRUSTED_PROXY_CIDRS` to the
+comma-separated CIDR list of its reverse proxies.
+
+When the socket peer is inside `TRUSTED_PROXY_CIDRS`, the forwarding chain
+is walked **right to left** — from the hop nearest the application toward
+the original client — because each trusted proxy appends the previous hop,
+so the rightmost entry is the nearest hop. Hops that are themselves trusted
+proxies are skipped; the **first untrusted hop** encountered is the
+effective client address. If every hop is trusted, the socket peer is used.
+This ordering matters: an attacker can only prepend entries to
+`X-Forwarded-For`, so walking from the right means a spoofed left-side value
+can never override a legitimate nearer untrusted address. Malformed entries
+are never trusted proxies, so the walk stops at them. Leaving the variable
+empty is the safe default: the socket peer is always used and the header is
+never inspected.
+
+**Memory is bounded.** Buckets expire lazily per key and an amortized sweep
+runs every 256 requests; a hard cap of 10 000 buckets evicts the oldest
+window under cardinality abuse (e.g. spoofed source addresses). Unit tests
+cover eviction, the cap, route isolation, and window expiry.
+
+**Single-instance limitation (explicit).** This limiter is in-memory, so it
+is per API process. The portfolio topology runs one API instance; if the API
+were horizontally scaled, each instance would carry its own counter and the
+aggregate limit would multiply by the instance count. The fix at that scale
+is a shared counter (Redis) with the same fixed-window semantics; it is
+deliberately not introduced while one instance is the architecture. See
+[`docs/performance.md`](performance.md) for the scaling threshold notes.
 
 When the opt-in queue profile is enabled, the worker creates these pg-boss
 queues:

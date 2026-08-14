@@ -9,6 +9,7 @@ import { randomUUID } from 'node:crypto';
 import { catchError, finalize, type Observable, throwError } from 'rxjs';
 
 import { redactRecord } from './redaction.js';
+import { errorStatusCode } from '../problem-status.js';
 
 interface RequestLike {
   auth?: {
@@ -65,7 +66,13 @@ export class RequestLoggingInterceptor implements NestInterceptor {
               organizationId:
                 request.auth?.membership?.organization?.id ?? null,
               path: request.originalUrl ?? request.url ?? '/',
-              status: response.statusCode,
+              // The exception filter sets the real status only after the
+              // interceptor's finalize runs, so the logged status is derived
+              // from the error via the same shared mapping the filter uses
+              // (ZodError 400, Prisma P2002 409, P2025 404, HttpException
+              // declared status, else 500) — logs and responses cannot
+              // disagree.
+              status: failure ? errorStatusCode(failure) : response.statusCode,
               traceId,
             }),
           ),

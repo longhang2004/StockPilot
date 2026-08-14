@@ -10,7 +10,7 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { Public } from '../auth/public.decorator.js';
 import { CsrfExempt } from '../auth/csrf-exempt.decorator.js';
 import type { AuthenticatedRequest } from '../auth/auth-context.js';
@@ -20,14 +20,16 @@ import {
   MockStorefrontOrderSchema,
 } from './integration.service.js';
 import { z } from 'zod';
+import { IDEMPOTENCY_KEY_HEADER } from '../openapi/schemas.js';
+import {
+  SessionAuth,
+  SessionAuthWrite,
+} from '../openapi/security.decorator.js';
 
-const IdentifierSchema = z.uuid();
-const IdempotencyKeySchema = z
-  .string()
-  .trim()
-  .min(8)
-  .max(255)
-  .regex(/^[A-Za-z0-9._:-]+$/);
+import {
+  IdentifierSchema,
+  IdempotencyKeySchema,
+} from '../validation/common-schemas.js';
 const ListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
@@ -70,12 +72,15 @@ export class IntegrationController {
 
   @RequirePermission('integration:retry')
   @Get('integration-deliveries')
+  @SessionAuth()
   list(@Req() request: AuthenticatedRequest, @Query() query: unknown) {
     return this.integrations.list(request.auth, ListQuerySchema.parse(query));
   }
 
   @RequirePermission('integration:retry')
   @Post('integration-deliveries/:id/retry')
+  @ApiHeader(IDEMPOTENCY_KEY_HEADER)
+  @SessionAuthWrite()
   @HttpCode(200)
   retry(
     @Req() request: AuthenticatedRequest,

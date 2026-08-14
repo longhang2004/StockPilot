@@ -10,27 +10,33 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { z } from 'zod';
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiHeader,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import type { AuthenticatedRequest } from '../auth/auth-context.js';
 import { RequirePermission } from '../auth/permission.decorator.js';
+import { IDEMPOTENCY_KEY_HEADER, schemaRef } from '../openapi/schemas.js';
+import {
+  IdentifierSchema,
+  IdempotencyKeySchema,
+  ImportPreviewInputSchema,
+} from './import-schemas.js';
 import { ProductImportService } from './product-import.service.js';
-
-const IdentifierSchema = z.uuid();
-const IdempotencyKeySchema = z
-  .string()
-  .trim()
-  .min(8)
-  .max(255)
-  .regex(/^[A-Za-z0-9._:-]+$/);
-const PreviewInputSchema = z.object({
-  content: z.string(),
-  fileName: z.string().trim().min(1).max(255),
-});
+import {
+  SessionAuth,
+  SessionAuthWrite,
+} from '../openapi/security.decorator.js';
 
 @ApiTags('product-imports')
 @Controller('product-imports')
+@SessionAuth()
 export class ProductImportController {
   constructor(
     @Inject(ProductImportService)
@@ -39,13 +45,39 @@ export class ProductImportController {
 
   @RequirePermission('catalog:write')
   @Post('preview')
+  @SessionAuthWrite()
+  @ApiOperation({
+    summary: 'Preview a product CSV import',
+    description:
+      'Parses the CSV client-side-style payload and returns row-level validation results without mutating data.',
+  })
+  @ApiCreatedResponse({
+    description: 'Import preview with row-level results.',
+    schema: schemaRef('ImportPreviewResult'),
+  })
+  @ApiBody({ schema: schemaRef('ImportPreviewInput') })
   preview(@Req() request: AuthenticatedRequest, @Body() body: unknown) {
-    return this.imports.preview(request.auth, PreviewInputSchema.parse(body));
+    return this.imports.preview(
+      request.auth,
+      ImportPreviewInputSchema.parse(body),
+    );
   }
 
   @RequirePermission('catalog:write')
   @Post(':id/commit')
+  @SessionAuthWrite()
   @HttpCode(200)
+  @ApiOperation({
+    summary: 'Commit a validated import',
+    description:
+      'Creates/updates the valid rows from a previously previewed import in one transaction; invalid rows are skipped.',
+  })
+  @ApiParam({ name: 'id', schema: { type: 'string', format: 'uuid' } })
+  @ApiHeader(IDEMPOTENCY_KEY_HEADER)
+  @ApiOkResponse({
+    description: 'Rows created and updated.',
+    schema: schemaRef('ImportCommitResult'),
+  })
   commit(
     @Req() request: AuthenticatedRequest,
     @Param('id') id: string,

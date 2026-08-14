@@ -6,22 +6,21 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { z } from 'zod';
+import { ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { AuthenticatedRequest } from '../auth/auth-context.js';
 import { RequirePermission } from '../auth/permission.decorator.js';
 import { DemoResetService } from './demo-reset.service.js';
-
-const IdempotencyKeySchema = z
-  .string()
-  .trim()
-  .min(8)
-  .max(255)
-  .regex(/^[A-Za-z0-9._:-]+$/);
+import { IDEMPOTENCY_KEY_HEADER } from '../openapi/schemas.js';
+import {
+  SessionAuth,
+  SessionAuthWrite,
+} from '../openapi/security.decorator.js';
+import { IdempotencyKeySchema } from '../validation/common-schemas.js';
 
 @ApiTags('organization')
 @Controller('organization')
+@SessionAuth()
 export class DemoResetController {
   constructor(
     @Inject(DemoResetService) private readonly demo: DemoResetService,
@@ -29,6 +28,13 @@ export class DemoResetController {
 
   @RequirePermission('organization:reset-demo')
   @Post('demo-reset')
+  @ApiOperation({
+    summary: 'Reset demo data',
+    description:
+      'Deletes and reseeds the canonical demo fixture in one tenant transaction. Idempotent: reusing an Idempotency-Key replays the original response.',
+  })
+  @ApiHeader(IDEMPOTENCY_KEY_HEADER)
+  @SessionAuthWrite()
   @HttpCode(200)
   reset(
     @Req() request: AuthenticatedRequest,

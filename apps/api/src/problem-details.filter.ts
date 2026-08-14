@@ -9,6 +9,7 @@ import {
 import { Prisma } from './generated/prisma/client.js';
 import { ZodError } from 'zod';
 import type { SentryReporter } from './observability/sentry-reporter.js';
+import { errorStatusCode } from './problem-status.js';
 
 interface RequestLike {
   get(name: string): string | undefined;
@@ -75,7 +76,8 @@ function toProblem(
         message: issue.message,
       })),
       instance,
-      status: 400,
+      // Status comes from the shared mapping so logs and responses agree.
+      status: errorStatusCode(exception),
       title: 'Validation failed',
       traceId,
       type: 'https://stockpilot.dev/problems/validation-error',
@@ -83,8 +85,7 @@ function toProblem(
   }
 
   if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-    const status =
-      exception.code === 'P2002' ? 409 : exception.code === 'P2025' ? 404 : 500;
+    const status = errorStatusCode(exception);
     const code =
       exception.code === 'P2002'
         ? 'CONFLICT'
@@ -111,7 +112,7 @@ function toProblem(
   }
 
   if (exception instanceof HttpException) {
-    const status = exception.getStatus();
+    const status = errorStatusCode(exception);
     const body = exception.getResponse();
     const detail =
       typeof body === 'string'

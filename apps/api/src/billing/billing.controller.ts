@@ -17,6 +17,10 @@ import { Public } from '../auth/public.decorator.js';
 import type { AuthenticatedRequest } from '../auth/auth-context.js';
 import { RequirePermission } from '../auth/permission.decorator.js';
 import { BillingService } from './billing.service.js';
+import {
+  SessionAuth,
+  SessionAuthWrite,
+} from '../openapi/security.decorator.js';
 
 const CheckoutSchema = z.object({ plan: PlanSchema });
 
@@ -29,12 +33,14 @@ export class BillingController {
 
   @RequirePermission('billing:read')
   @Get('billing')
+  @SessionAuth()
   status(@Req() request: AuthenticatedRequest) {
     return this.billing.status(request.auth);
   }
 
   @RequirePermission('billing:write')
   @Post('billing/checkout')
+  @SessionAuthWrite()
   @HttpCode(200)
   checkout(@Body() body: unknown, @Req() request: AuthenticatedRequest) {
     const { plan } = CheckoutSchema.parse(body);
@@ -43,6 +49,7 @@ export class BillingController {
 
   @RequirePermission('billing:write')
   @Post('billing/portal')
+  @SessionAuthWrite()
   @HttpCode(200)
   portal(@Req() request: AuthenticatedRequest) {
     return this.billing.createPortalSession(request.auth);

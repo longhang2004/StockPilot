@@ -1,0 +1,42 @@
+# Low-noise supply-chain automation: weekly dependency update PRs, grouped
+# by scope, with strict limits so CI never becomes a dependency treadmill.
+# Security updates for known-vulnerable versions are still opened
+# immediately by GitHub regardless of these schedules.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: 'Asia/Ho_Chi_Minh'
+    open-pull-requests-limit: 4
+    groups:
+      production-minor-patch:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      development-minor-patch:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+    # Keep the two intentional security overrides pinned so Dependabot
+    # does not "fix" them back into vulnerable ranges.
+    ignore:
+      - dependency-name: js-yaml
+        versions: ['<5.2.2']
+      - dependency-name: nanoid
+        versions: ['<3.3.18']
+
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: 'Asia/Ho_Chi_Minh'
+    open-pull-requests-limit: 2

@@ -100,22 +100,23 @@ use the production origin.
 
 ## Environment matrix
 
-| Variable                 | Vercel               | Render                       | Notes                                                        |
-| ------------------------ | -------------------- | ---------------------------- | ------------------------------------------------------------ |
-| `API_INTERNAL_URL`       | Render public URL    | —                            | Production-only rewrite target.                              |
-| `DATABASE_URL`           | —                    | pooled `stockpilot_app` URL  | Runtime queries only.                                        |
-| `MIGRATION_DATABASE_URL` | —                    | —                            | GitHub Actions only; direct migration URL.                   |
-| `QUEUE_DATABASE_URL`     | —                    | —                            | Unset on the free profile; opt-in short acceptance only.     |
-| `QUEUE_REQUIRED`         | —                    | `false`                      | Readiness allows `queue:not_configured` on the free profile. |
-| `SITE_URL`               | chosen custom origin | —                            | Canonical metadata/sitemap origin; no trailing slash.        |
-| `WEB_ORIGIN`             | —                    | exact custom origin          | No trailing slash; one canonical origin for CSRF.            |
-| `NODE_ENV`               | `production`         | `production`                 | Enables secure cookies and production behavior.              |
-| `DEMO_MODE`              | —                    | `true`                       | Enables one-click demo accounts.                             |
-| `DEMO_ORGANIZATION_SLUG` | —                    | `stockpilot-demo`            | Canonical demo tenant.                                       |
-| `CSRF_SECRET`            | —                    | generated secret (32+ chars) | Generated once by the Render Blueprint.                      |
-| `WEBHOOK_SIGNING_SECRET` | —                    | generated secret (16+ chars) | Generated once by the Render Blueprint.                      |
-| `SESSION_COOKIE_NAME`    | —                    | `stockpilot_session`         | Change to expire all existing cookies.                       |
-| `SENTRY_DSN`             | —                    | optional                     | Leave empty when Sentry is not configured.                   |
+| Variable                 | Vercel               | Render                       | Notes                                                                                                                    |
+| ------------------------ | -------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `API_INTERNAL_URL`       | Render public URL    | —                            | Production-only rewrite target.                                                                                          |
+| `DATABASE_URL`           | —                    | pooled `stockpilot_app` URL  | Runtime queries only.                                                                                                    |
+| `MIGRATION_DATABASE_URL` | —                    | —                            | GitHub Actions only; direct migration URL.                                                                               |
+| `QUEUE_DATABASE_URL`     | —                    | —                            | Unset on the free profile; opt-in short acceptance only.                                                                 |
+| `QUEUE_REQUIRED`         | —                    | `false`                      | Readiness allows `queue:not_configured` on the free profile.                                                             |
+| `SITE_URL`               | chosen custom origin | —                            | Canonical metadata/sitemap origin; no trailing slash.                                                                    |
+| `WEB_ORIGIN`             | —                    | exact custom origin          | No trailing slash; one canonical origin for CSRF.                                                                        |
+| `NODE_ENV`               | `production`         | `production`                 | Enables secure cookies and production behavior.                                                                          |
+| `DEMO_MODE`              | —                    | `true`                       | Enables one-click demo accounts.                                                                                         |
+| `DEMO_ORGANIZATION_SLUG` | —                    | `stockpilot-demo`            | Canonical demo tenant.                                                                                                   |
+| `CSRF_SECRET`            | —                    | generated secret (32+ chars) | Generated once by the Render Blueprint.                                                                                  |
+| `WEBHOOK_SIGNING_SECRET` | —                    | generated secret (16+ chars) | Generated once by the Render Blueprint.                                                                                  |
+| `SESSION_COOKIE_NAME`    | —                    | `stockpilot_session`         | Change to expire all existing cookies.                                                                                   |
+| `TRUSTED_PROXY_CIDRS`    | —                    | unset (safe default)         | Comma-separated reverse-proxy CIDRs allowed to set `X-Forwarded-For` for rate limiting; see [operations](operations.md). |
+| `SENTRY_DSN`             | —                    | optional                     | Leave empty when Sentry is not configured.                                                                               |
 
 ### GitHub Actions secrets
 

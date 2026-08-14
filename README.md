@@ -140,7 +140,15 @@ pnpm build
 
 The integration and browser gates need PostgreSQL. CI provisions a clean
 database, applies migrations, seeds the canonical fixture, and runs every
-gate. Without Docker, unit, lint, typecheck, and build gates can still run.
+gate, plus `pnpm audit --audit-level high`, CodeQL, Dependabot, an archive
+safety self-test (`scripts/compress.py --self-test`), and a `docker-build`
+job that builds both production images and verifies they run as the
+non-root `node` user. The developer-run performance probe is
+`pnpm perf:smoke` (reads by default; see
+[docs/performance.md](docs/performance.md)). The E2E suite runs with a
+single worker against a server supervisor that owns the API/web processes
+(no stale-server reuse, readiness-gated startup); see
+[docs/test-report.md](docs/test-report.md) for the evidence breakdown.
 
 ## API surface
 
@@ -161,6 +169,13 @@ State-changing receipts, adjustments, order transitions, import commits,
 integration retries, and demo resets require an `Idempotency-Key`. Reusing a
 key with the same payload replays the original response; a different payload
 returns `409`.
+
+The OpenAPI document (`/openapi.json`, UI at `/docs`) is generated from the
+Zod contracts via a small bridge (`apps/api/src/openapi/schemas.ts`), so the
+documented request/response shapes, pagination parameters, idempotency
+header requirements, and RFC 9457 error bodies never drift into a
+hand-maintained DTO layer. A contract test in the integration suite keeps
+the core workflows' documentation honest.
 
 ## Trust model
 

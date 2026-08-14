@@ -13,6 +13,8 @@ export default tseslint.config(
       '**/dist/**',
       '**/node_modules/**',
       'apps/api/src/generated/**',
+      'playwright-report/**',
+      'test-results/**',
     ],
   },
   eslint.configs.recommended,
@@ -32,6 +34,12 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+    },
+  },
+  {
+    files: ['**/*.mjs'],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 );
