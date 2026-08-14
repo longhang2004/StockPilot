@@ -1,4 +1,7 @@
-import type { AnalyticsResponse, OverviewResponse } from '@stockpilot/contracts';
+import type {
+  AnalyticsResponse,
+  OverviewResponse,
+} from '@stockpilot/contracts';
 
 import { apiRequest } from '../../lib/api-client';
 

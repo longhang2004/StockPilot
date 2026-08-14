@@ -28,7 +28,10 @@ export function AdjustmentDrawer({
   onSaved: () => void;
   push: (message: string, tone?: ToastMessage['tone']) => void;
 }) {
-  const products = usePage<ProductRecord>('/products', { page: 1, pageSize: 100 });
+  const products = usePage<ProductRecord>('/products', {
+    page: 1,
+    pageSize: 100,
+  });
   const form = useForm<z.infer<typeof InventoryAdjustmentInputSchema>>({
     resolver: zodResolver(InventoryAdjustmentInputSchema) as never,
     defaultValues: {

@@ -16,10 +16,7 @@ import {
 import { closeFormSafely, formatMoney } from '../../lib/formatters';
 import { usePage } from '../../hooks/use-page-query';
 import { availableLineProducts } from '../shared/line-selection';
-import {
-  type PartnerRecord,
-  type ProductRecord,
-} from '../shared/types';
+import { type PartnerRecord, type ProductRecord } from '../shared/types';
 import { createReceipt } from './api';
 
 /**
@@ -39,8 +36,14 @@ export function ReceiptDrawer({
   onSaved: () => void;
   push: (message: string, tone?: ToastMessage['tone']) => void;
 }) {
-  const products = usePage<ProductRecord>('/products', { page: 1, pageSize: 100 });
-  const suppliers = usePage<PartnerRecord>('/suppliers', { page: 1, pageSize: 100 });
+  const products = usePage<ProductRecord>('/products', {
+    page: 1,
+    pageSize: 100,
+  });
+  const suppliers = usePage<PartnerRecord>('/suppliers', {
+    page: 1,
+    pageSize: 100,
+  });
   const form = useForm<z.infer<typeof ReceiptInputSchema>>({
     resolver: zodResolver(ReceiptInputSchema) as never,
     defaultValues: {

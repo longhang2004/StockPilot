@@ -33,8 +33,11 @@ export function transitionOrder(
   id: string,
   to: OrderTransitionTarget,
 ): Promise<OrderDetail> {
-  return apiRequest<OrderDetail>(`/orders/${id}/${transitionPathByStatus[to]}`, {
-    idempotencyKey: newIdempotencyKey(`order-${to.toLowerCase()}`),
-    method: 'POST',
-  });
+  return apiRequest<OrderDetail>(
+    `/orders/${id}/${transitionPathByStatus[to]}`,
+    {
+      idempotencyKey: newIdempotencyKey(`order-${to.toLowerCase()}`),
+      method: 'POST',
+    },
+  );
 }

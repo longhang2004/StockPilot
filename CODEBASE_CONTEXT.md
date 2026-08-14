@@ -9,22 +9,22 @@ what exists today.
 
 ## 1. Tech stack and versions
 
-| Component            | Choice                                                                                                                                    | Evidence                                                                                                |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Package manager      | pnpm **10.13.1** monorepo (`pnpm-workspace.yaml` → `apps/*`, `packages/*`)                                                                | `package.json:5`, `pnpm-workspace.yaml`                                                                 |
-| Runtime              | Node.js **>=24 <25** (`.nvmrc` = 24; CI/Docker use Node 24)                                                                               | `package.json:6-8`, `.nvmrc`, `.github/workflows/ci.yml`                                                |
-| Web                  | Next.js **16** / React **19.2**, App Router, TypeScript 5.8                                                                               | `apps/web/package.json`, `apps/web/app/`                                                                 |
-| API                  | NestJS **11**, Express platform, Prisma **7** (`@prisma/client`, `@prisma/adapter-pg`), Zod **4**                                         | `apps/api/package.json`, `apps/api/src/`                                                                 |
-| DB                   | PostgreSQL **18** (local/CI via `postgres:18-alpine`), Neon (prod)                                                                        | `docker-compose.yml`, `render.yaml`                                                                     |
-| Auth/crypto          | argon2 (Argon2id), `crypto` (SHA-256, HMAC-SHA256, timingSafeEqual)                                                                       | `apps/api/src/auth/`                                                                                    |
-| Validation/contracts | Shared Zod schemas in modular `@stockpilot/contracts` (no codegen); response contracts are Zod schemas with `z.infer` types                | `packages/contracts/src/`                                                                               |
-| Queue                | pg-boss **12** (opt-in, disabled in default profile)                                                                                      | `apps/api/src/jobs/job-runner.service.ts`                                                               |
-| Images               | Sharp (resize/WebP) + Cloudinary SDK (storage)                                                                                            | `apps/api/src/catalog/product-image-storage.ts`                                                         |
-| Observability        | `@sentry/node` (optional), structured JSON request logging                                                                                | `apps/api/src/observability/`                                                                           |
-| UI styling           | Tailwind CSS v4 wired but effectively unused; hand-written CSS + design tokens; IBM Plex Sans/Mono (local fonts); `@phosphor-icons/react` | `apps/web/app/globals.css`, `apps/web/app/styles/foundation.css`                                        |
-| State (web)          | TanStack React Query v5 (server state), react-hook-form + zod resolvers                                                                   | `apps/web/package.json`, `apps/web/hooks/`                                                              |
-| Testing              | Vitest 3 (unit/integration), Playwright 1.54 (e2e + axe), Supertest                                                                       | root `package.json`, `apps/api/vitest.config.ts`, `playwright.config.ts`                                |
-| SaaS billing         | Stripe (checkout + billing portal + signed webhooks), optional (`STRIPE_*` env)                                                           | `apps/api/src/billing/`                                                                                 |
+| Component            | Choice                                                                                                                                    | Evidence                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Package manager      | pnpm **10.13.1** monorepo (`pnpm-workspace.yaml` → `apps/*`, `packages/*`)                                                                | `package.json:5`, `pnpm-workspace.yaml`                                  |
+| Runtime              | Node.js **>=24 <25** (`.nvmrc` = 24; CI/Docker use Node 24)                                                                               | `package.json:6-8`, `.nvmrc`, `.github/workflows/ci.yml`                 |
+| Web                  | Next.js **16** / React **19.2**, App Router, TypeScript 5.8                                                                               | `apps/web/package.json`, `apps/web/app/`                                 |
+| API                  | NestJS **11**, Express platform, Prisma **7** (`@prisma/client`, `@prisma/adapter-pg`), Zod **4**                                         | `apps/api/package.json`, `apps/api/src/`                                 |
+| DB                   | PostgreSQL **18** (local/CI via `postgres:18-alpine`), Neon (prod)                                                                        | `docker-compose.yml`, `render.yaml`                                      |
+| Auth/crypto          | argon2 (Argon2id), `crypto` (SHA-256, HMAC-SHA256, timingSafeEqual)                                                                       | `apps/api/src/auth/`                                                     |
+| Validation/contracts | Shared Zod schemas in modular `@stockpilot/contracts` (no codegen); response contracts are Zod schemas with `z.infer` types               | `packages/contracts/src/`                                                |
+| Queue                | pg-boss **12** (opt-in, disabled in default profile)                                                                                      | `apps/api/src/jobs/job-runner.service.ts`                                |
+| Images               | Sharp (resize/WebP) + Cloudinary SDK (storage)                                                                                            | `apps/api/src/catalog/product-image-storage.ts`                          |
+| Observability        | `@sentry/node` (optional), structured JSON request logging                                                                                | `apps/api/src/observability/`                                            |
+| UI styling           | Tailwind CSS v4 wired but effectively unused; hand-written CSS + design tokens; IBM Plex Sans/Mono (local fonts); `@phosphor-icons/react` | `apps/web/app/globals.css`, `apps/web/app/styles/foundation.css`         |
+| State (web)          | TanStack React Query v5 (server state), react-hook-form + zod resolvers                                                                   | `apps/web/package.json`, `apps/web/hooks/`                               |
+| Testing              | Vitest 3 (unit/integration), Playwright 1.54 (e2e + axe), Supertest                                                                       | root `package.json`, `apps/api/vitest.config.ts`, `playwright.config.ts` |
+| SaaS billing         | Stripe (checkout + billing portal + signed webhooks), optional (`STRIPE_*` env)                                                           | `apps/api/src/billing/`                                                  |
 
 ## 2. Directory / module structure
 
@@ -49,7 +49,7 @@ tests/e2e             Playwright specs + helpers
   `openapi` (Zod→OpenAPI projection registry), `validation`. Root wiring in `apps/api/src/app.module.ts`.
 - `apps/api/src/generated/prisma/` is generated output (gitignored; `prisma generate`).
 - `apps/web/features/` holds one folder per workspace screen: `overview, orders, inventory,
-  products, partners, receipts, imports, integrations, audit, settings, more` plus `shared/`
+products, partners, receipts, imports, integrations, audit, settings, more` plus `shared/`
   (contract aliases, line-selection helper) and `workspace/` (section registry).
   Each feature owns a small `api.ts` data module (fetchers/mutations/query keys).
 
@@ -99,7 +99,7 @@ tests/e2e             Playwright specs + helpers
   `API_INTERNAL_URL` in `apps/web/next.config.ts`; strict CSP + security headers set there.
 - Workspace sections are defined once in `features/workspace/sections.ts`:
   `overview, orders, inventory, products, partners, receipts, imports, integrations,
-  audit, settings, more` — the dynamic route whitelist, `WorkspaceSection` type, nav
+audit, settings, more` — the dynamic route whitelist, `WorkspaceSection` type, nav
   labels, and hrefs all derive from it.
 
 **API routes** — global prefix `v1` (`apps/api/src/configure-application.ts`); Swagger at
@@ -154,7 +154,7 @@ Only public routes: `POST /auth/login`, `POST /auth/signup`, `POST /auth/demo-lo
   (`credentials: true`, origin = `WEB_ORIGIN`), global `ProblemDetailsFilter`, global
   `RequestLoggingInterceptor`, Swagger.
 - `problem-details.filter.ts`: RFC 9457 bodies `{type,title,status,detail,instance,code,
-  traceId,errors?}`; Zod→400 `VALIDATION_ERROR`, Prisma P2002→409 / P2025→404,
+traceId,errors?}`; Zod→400 `VALIDATION_ERROR`, Prisma P2002→409 / P2025→404,
   HttpException→mapped codes, fallback 500.
 - `environment.ts`: zod-validated env (required `CSRF_SECRET` ≥32, `DATABASE_URL`,
   `WEB_ORIGIN`, `WEBHOOK_SIGNING_SECRET` ≥16; defaults `DEMO_MODE=true`,
@@ -282,7 +282,7 @@ attempts, lastError, optional `salesOrderId`); `ProductImportRun` (status, row c
 - **Adjustments**: `ADJUSTMENT_IN` adds / `ADJUSTMENT_OUT` subtracts with required
   `reason`; invariant violation → 409.
 - **Order state machine**: `DRAFT → {CANCELLED, CONFIRMED}`; `CONFIRMED → {CANCELLED,
-  FULFILLED}`; `CANCELLED`/`FULFILLED` terminal; invalid transitions → conflict.
+FULFILLED}`; `CANCELLED`/`FULFILLED` terminal; invalid transitions → conflict.
 - **Confirm**: row lock `FOR UPDATE`, require `onHand - reserved >= line.quantity` per
   line, increment `reserved`; **Fulfill**: decrement `onHand` and `reserved`, write
   `SALE` movement; **Cancel-from-CONFIRMED**: release reservation only; each transition
@@ -299,7 +299,7 @@ attempts, lastError, optional `salesOrderId`); `ProductImportRun` (status, row c
   product/partner POST/PATCH are intentionally NOT idempotency-keyed.
 - **Webhook dedup**: deliveries unique on `(organizationId, externalDeliveryId)`.
 - **CSV imports**: 2 MB / 5,000-row caps, required headers `sku,name,sale_price,
-  reorder_point`, custom quoting-aware parser, preview flags duplicate/existing SKUs,
+reorder_point`, custom quoting-aware parser, preview flags duplicate/existing SKUs,
   commit idempotent and requires PREVIEW status.
 - **Low-stock alerts**: opened/resolved within the same transaction as stock mutations;
   also reconciled by the optional scheduled job.
@@ -396,7 +396,7 @@ test:integration`, `pnpm test:e2e` (Playwright), plus `format:check`, `lint`,
   migrations) → Neon (Postgres); optional Neon queue DB for pg-boss; UptimeRobot
   keep-warm.
 - **Local**: `cp .env.example .env && pnpm install && docker compose up -d postgres &&
-  pnpm db:generate && pnpm db:migrate && pnpm db:seed && pnpm dev` — web on :3000,
+pnpm db:generate && pnpm db:migrate && pnpm db:seed && pnpm dev` — web on :3000,
   API + Swagger on :4000. `docker-compose.yml` runs api/web/postgres with
   `infra/postgres/init.sql` role bootstrap; the API container runs migrate → seed →
   start.
@@ -465,8 +465,8 @@ test:integration`, `pnpm test:e2e` (Playwright), plus `format:check`, `lint`,
   must follow to get RLS isolation.
 - **`ProblemDetailsFilter`** maps Zod/Prisma/HttpException errors globally.
 - **Demo fixture data** (`demo/demo-fixture-data.ts`) has counted fixture declarations
-  + deterministic IDs, wired into seed/reset/auto-reset; integration/e2e suites assert
-  the counts, so fixture changes must keep them in sync.
+  - deterministic IDs, wired into seed/reset/auto-reset; integration/e2e suites assert
+    the counts, so fixture changes must keep them in sync.
 - **Audit trail** is a generic JSONB before/after recorder (`audit/audit-record.ts`).
 - **OpenAPI registry** (`openapi/schemas.ts`) maps Zod schemas to named components;
   new endpoints reference them via `schemaRef(...)`.

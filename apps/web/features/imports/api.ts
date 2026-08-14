@@ -8,7 +8,9 @@ export interface ImportPreviewInput {
   fileName: string;
 }
 
-export function previewImport(input: ImportPreviewInput): Promise<ImportPreviewResult> {
+export function previewImport(
+  input: ImportPreviewInput,
+): Promise<ImportPreviewResult> {
   return apiRequest<ImportPreviewResult>('/product-imports/preview', {
     body: JSON.stringify(input),
     method: 'POST',

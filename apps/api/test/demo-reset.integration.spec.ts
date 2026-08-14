@@ -5,10 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { DEMO_FIXTURE_COUNTS } from '../src/demo/demo-fixture.js';
 import { createTestAgent, demoLogin } from './support/agent.js';
-import {
-  adminDatabaseUrl,
-  setTestEnvironment,
-} from './support/environment.js';
+import { adminDatabaseUrl, setTestEnvironment } from './support/environment.js';
 import {
   createAdminClient,
   createTestApplication,

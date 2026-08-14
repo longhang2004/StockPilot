@@ -30,14 +30,46 @@ const navigation: Array<{
   section: WorkspaceSection;
   icon: typeof House;
 }> = [
-  { label: WORKSPACE_SECTION_LABELS.overview, section: 'overview', icon: House },
-  { label: WORKSPACE_SECTION_LABELS.orders, section: 'orders', icon: ClipboardText },
-  { label: WORKSPACE_SECTION_LABELS.inventory, section: 'inventory', icon: Cube },
-  { label: WORKSPACE_SECTION_LABELS.products, section: 'products', icon: Package },
-  { label: WORKSPACE_SECTION_LABELS.partners, section: 'partners', icon: UsersThree },
-  { label: WORKSPACE_SECTION_LABELS.receipts, section: 'receipts', icon: Receipt },
-  { label: WORKSPACE_SECTION_LABELS.imports, section: 'imports', icon: Archive },
-  { label: WORKSPACE_SECTION_LABELS.integrations, section: 'integrations', icon: PlugsConnected },
+  {
+    label: WORKSPACE_SECTION_LABELS.overview,
+    section: 'overview',
+    icon: House,
+  },
+  {
+    label: WORKSPACE_SECTION_LABELS.orders,
+    section: 'orders',
+    icon: ClipboardText,
+  },
+  {
+    label: WORKSPACE_SECTION_LABELS.inventory,
+    section: 'inventory',
+    icon: Cube,
+  },
+  {
+    label: WORKSPACE_SECTION_LABELS.products,
+    section: 'products',
+    icon: Package,
+  },
+  {
+    label: WORKSPACE_SECTION_LABELS.partners,
+    section: 'partners',
+    icon: UsersThree,
+  },
+  {
+    label: WORKSPACE_SECTION_LABELS.receipts,
+    section: 'receipts',
+    icon: Receipt,
+  },
+  {
+    label: WORKSPACE_SECTION_LABELS.imports,
+    section: 'imports',
+    icon: Archive,
+  },
+  {
+    label: WORKSPACE_SECTION_LABELS.integrations,
+    section: 'integrations',
+    icon: PlugsConnected,
+  },
   { label: WORKSPACE_SECTION_LABELS.audit, section: 'audit', icon: GearSix },
 ];
 
@@ -236,20 +268,24 @@ export function MobileWorkspaceNavigation({
       className="mobile-workspace-nav"
       aria-label="Mobile workspace navigation"
     >
-      {navigation.slice(0, 3).map(({ section: navSection, icon: Icon, label }) => {
-        const href = workspaceSectionHref(navSection);
-        return (
-          <Link
-            aria-current={isActive(href, section) ? 'page' : undefined}
-            className={isActive(href, section) ? 'mobile-nav-active' : undefined}
-            href={href}
-            key={href}
-          >
-            <Icon size={19} aria-hidden="true" />
-            <span>{label}</span>
-          </Link>
-        );
-      })}
+      {navigation
+        .slice(0, 3)
+        .map(({ section: navSection, icon: Icon, label }) => {
+          const href = workspaceSectionHref(navSection);
+          return (
+            <Link
+              aria-current={isActive(href, section) ? 'page' : undefined}
+              className={
+                isActive(href, section) ? 'mobile-nav-active' : undefined
+              }
+              href={href}
+              key={href}
+            >
+              <Icon size={19} aria-hidden="true" />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
       <Link
         aria-current={section === 'more' ? 'page' : undefined}
         href="/app/more"

@@ -25,8 +25,7 @@ export async function createTestApplication(): Promise<{
 
 /** Admin Prisma client for provisioning/cleaning up suite fixtures. */
 export async function createAdminClient(databaseUrl: string) {
-  const { createPrismaClient } = await import(
-    '../../src/database/prisma-client.js'
-  );
+  const { createPrismaClient } =
+    await import('../../src/database/prisma-client.js');
   return createPrismaClient(databaseUrl);
 }

@@ -17,10 +17,7 @@ import { closeFormSafely, formatMoney } from '../../../lib/formatters';
 import { usePage } from '../../../hooks/use-page-query';
 import { availableLineProducts } from '../../shared/line-selection';
 import { createDraftOrder } from '../api';
-import {
-  type PartnerRecord,
-  type ProductRecord,
-} from '../../shared/types';
+import { type PartnerRecord, type ProductRecord } from '../../shared/types';
 
 type OrderFormValues = z.infer<typeof SalesOrderInputSchema>;
 
@@ -35,8 +32,14 @@ export function OrderFormDrawer({
   onSaved: () => void;
   push: (message: string, tone?: ToastMessage['tone']) => void;
 }) {
-  const customers = usePage<PartnerRecord>('/customers', { page: 1, pageSize: 100 });
-  const products = usePage<ProductRecord>('/products', { page: 1, pageSize: 100 });
+  const customers = usePage<PartnerRecord>('/customers', {
+    page: 1,
+    pageSize: 100,
+  });
+  const products = usePage<ProductRecord>('/products', {
+    page: 1,
+    pageSize: 100,
+  });
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(SalesOrderInputSchema) as never,
     defaultValues: {

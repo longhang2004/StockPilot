@@ -91,7 +91,9 @@ export function removeMember(membershipId: string): Promise<unknown> {
   return apiRequest(`/team/members/${membershipId}`, { method: 'DELETE' });
 }
 
-export function createCheckoutSession(plan: 'STARTER' | 'PRO'): Promise<{ url: string }> {
+export function createCheckoutSession(
+  plan: 'STARTER' | 'PRO',
+): Promise<{ url: string }> {
   return apiRequest<{ url: string }>('/billing/checkout', {
     body: JSON.stringify({ plan }),
     method: 'POST',

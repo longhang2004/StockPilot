@@ -48,7 +48,10 @@ export function auditChangeEntries(
 
 export function AuditWorkspace() {
   const [selected, setSelected] = useState<AuditRecord | null>(null);
-  const audit = usePage<AuditRecord>(AUDIT_RESOURCE, { page: 1, pageSize: 100 });
+  const audit = usePage<AuditRecord>(AUDIT_RESOURCE, {
+    page: 1,
+    pageSize: 100,
+  });
   return (
     <section className="workspace-section-page">
       <PageHeader

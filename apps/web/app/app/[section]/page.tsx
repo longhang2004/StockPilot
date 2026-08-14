@@ -1,6 +1,4 @@
-import {
-  isWorkspaceSection,
-} from '../../../features/workspace/sections';
+import { isWorkspaceSection } from '../../../features/workspace/sections';
 import { WorkspaceShell } from '../../../components/app/workspace-shell';
 
 export default async function WorkspaceSectionPage({

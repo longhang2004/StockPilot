@@ -13,7 +13,9 @@ export interface LineSelection {
  * Products a given line may still select: active products not already
  * chosen by another line.
  */
-export function availableLineProducts<T extends { id: string; isActive: boolean }>(
+export function availableLineProducts<
+  T extends { id: string; isActive: boolean },
+>(
   products: readonly T[],
   lines: ReadonlyArray<LineSelection>,
   lineIndex: number,

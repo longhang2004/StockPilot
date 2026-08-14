@@ -28,7 +28,10 @@ export function PartnersWorkspace({ role }: { role: Role }) {
   const [editing, setEditing] = useState<PartnerRecord | null>(null);
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
-  const partners = usePage<PartnerRecord>(`/${kind}`, { page: 1, pageSize: 100 });
+  const partners = usePage<PartnerRecord>(`/${kind}`, {
+    page: 1,
+    pageSize: 100,
+  });
   const canWrite = role === 'MANAGER' || role === 'OWNER';
   const mutation = useMutation({
     mutationFn: ({
@@ -37,8 +40,7 @@ export function PartnersWorkspace({ role }: { role: Role }) {
     }: {
       id: string | undefined;
       value: z.infer<typeof CustomerInputSchema>;
-    }) =>
-      savePartner(kind, id, value),
+    }) => savePartner(kind, id, value),
     onError: (error) =>
       push(
         error instanceof Error ? error.message : 'Could not save partner.',

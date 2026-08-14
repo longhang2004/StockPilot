@@ -20,12 +20,14 @@ describe('demo fixture data', () => {
   it('derives deterministic fixture ids that never change', () => {
     // Golden values: any change to the id algorithm or key namespace breaks
     // idempotent reseeding and any external reference to demo rows.
-    expect(
-      fixtureId('eb3d7274-745e-48e6-b82a-2d580b80e235', 'product-1'),
-    ).toBe('35bb4d3b-394c-5d94-a69d-2c51f083be4d');
+    expect(fixtureId('eb3d7274-745e-48e6-b82a-2d580b80e235', 'product-1')).toBe(
+      '35bb4d3b-394c-5d94-a69d-2c51f083be4d',
+    );
     expect(
       fixtureId('eb3d7274-745e-48e6-b82a-2d580b80e235', 'order-draft-1'),
-    ).not.toBe(fixtureId('eb3d7274-745e-48e6-b82a-2d580b80e235', 'order-draft-2'));
+    ).not.toBe(
+      fixtureId('eb3d7274-745e-48e6-b82a-2d580b80e235', 'order-draft-2'),
+    );
     // Same key in a different organization must not collide.
     expect(
       fixtureId('00000000-0000-4000-8000-000000000000', 'product-1'),

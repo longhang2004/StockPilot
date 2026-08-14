@@ -19,7 +19,10 @@ export function toListPath(resource: string, params: PageParams = {}): string {
   );
   if (entries.length === 0) return resource;
   const query = entries
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+    )
     .join('&');
   return `${resource}?${query}`;
 }

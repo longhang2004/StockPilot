@@ -58,7 +58,10 @@ export class TeamController {
   @Post('invitations')
   @SessionAuthWrite()
   invite(@Body() body: unknown, @Req() request: AuthenticatedRequest) {
-    return this.invitationService.invite(request.auth, InviteSchema.parse(body));
+    return this.invitationService.invite(
+      request.auth,
+      InviteSchema.parse(body),
+    );
   }
 
   @RequirePermission('team:read')
@@ -92,7 +95,10 @@ export class TeamController {
     @Res({ passthrough: true }) response: SessionCookieResponse,
   ) {
     const { token } = AcceptSchema.parse(body);
-    const result = await this.invitationService.acceptInvitation(request.auth, token);
+    const result = await this.invitationService.acceptInvitation(
+      request.auth,
+      token,
+    );
     setSessionCookie(this.environment, response, result.rawToken);
     return { ...result.context, csrfToken: result.csrfToken };
   }

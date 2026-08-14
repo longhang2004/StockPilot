@@ -69,7 +69,10 @@ describe('shared response contracts', () => {
     expect(result.membership?.role).toBe('MANAGER');
     // The session endpoint body has no CSRF token.
     expect(() =>
-      SessionInfoSchema.parse({ membership: result.membership, user: result.user }),
+      SessionInfoSchema.parse({
+        membership: result.membership,
+        user: result.user,
+      }),
     ).not.toThrow();
   });
 
@@ -79,9 +82,7 @@ describe('shared response contracts', () => {
     const productId = '1b7c2277-2adc-4277-bdb0-f584b0f764bf';
     const receipt = ReceiptResultSchema.parse({
       actorUserId: 'c0ffee00-0000-4000-8000-000000000001',
-      balances: [
-        { available: 21, onHand: 25, productId, reserved: 4 },
-      ],
+      balances: [{ available: 21, onHand: 25, productId, reserved: 4 }],
       createdAt: '2026-08-04T03:30:00.000Z',
       id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
       lines: [
@@ -181,7 +182,11 @@ describe('shared response contracts', () => {
       BillingStatusViewSchema.parse({
         cancelAtPeriodEnd: false,
         currentPeriodEnd: null,
-        entitlements: { csvImport: true, integrations: true, maxTeamMembers: 10 },
+        entitlements: {
+          csvImport: true,
+          integrations: true,
+          maxTeamMembers: 10,
+        },
         isDemoBilling: true,
         plan: 'PRO',
         status: 'ACTIVE',
