@@ -17,7 +17,7 @@ import {
 import { apiRequest } from '../../lib/api-client';
 import { formatDate, formatDateTime } from '../../lib/formatters';
 import {
-  type OrderRecord,
+  type OverviewRecentOrder,
   type OverviewResponse,
   type WorkspaceSessionView,
 } from '../shared/types';
@@ -236,7 +236,7 @@ export function OverviewWorkspace({
   );
 }
 
-const recentOrderColumns: TableColumn<OrderRecord>[] = [
+const recentOrderColumns: TableColumn<OverviewRecentOrder>[] = [
   {
     key: 'orderNumber',
     label: 'Order',

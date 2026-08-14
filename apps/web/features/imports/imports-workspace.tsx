@@ -1,6 +1,6 @@
 'use client';
 
-import { type Role } from '@stockpilot/contracts';
+import { type ImportPreviewResult, type Role } from '@stockpilot/contracts';
 import { useMutation } from '@tanstack/react-query';
 import { DownloadSimple, UploadSimple } from '@phosphor-icons/react';
 import { useState } from 'react';
@@ -16,21 +16,11 @@ import { useToasts } from '../../hooks/use-toasts';
 export function ImportsWorkspace({ role }: { role: Role }) {
   const [fileName, setFileName] = useState('');
   const [content, setContent] = useState('');
-  const [preview, setPreview] = useState<{
-    id: string;
-    validRows: number;
-    invalidRows: number;
-    errors: Array<{ row: number; errors: string[] }>;
-  } | null>(null);
+  const [preview, setPreview] = useState<ImportPreviewResult | null>(null);
   const { push, toasts } = useToasts();
   const previewMutation = useMutation({
     mutationFn: () =>
-      apiRequest<{
-        id: string;
-        validRows: number;
-        invalidRows: number;
-        errors: Array<{ row: number; errors: string[] }>;
-      }>('/product-imports/preview', {
+      apiRequest<ImportPreviewResult>('/product-imports/preview', {
         body: JSON.stringify({ content, fileName }),
         method: 'POST',
       }),
@@ -113,12 +103,12 @@ export function ImportsWorkspace({ role }: { role: Role }) {
             <div>
               <p className="eyebrow">Preview results</p>
               <h2>
-                {preview.validRows} valid rows · {preview.invalidRows} errors
+                {preview.rowsValid} valid rows · {preview.rowsInvalid} errors
               </h2>
             </div>
             <button
               className="button button-primary"
-              disabled={commitMutation.isPending || preview.validRows === 0}
+              disabled={commitMutation.isPending || preview.rowsValid === 0}
               onClick={() => commitMutation.mutate()}
               type="button"
             >
@@ -129,8 +119,11 @@ export function ImportsWorkspace({ role }: { role: Role }) {
             <div className="import-errors">
               {preview.errors.map((error) => (
                 <div key={error.row}>
-                  <strong>Row {error.row}</strong>
-                  <span>{error.errors.join('; ')}</span>
+                  <strong>
+                    Row {error.row}
+                    {error.field ? ` · ${error.field}` : ''}
+                  </strong>
+                  <span>{error.message}</span>
                 </div>
               ))}
               <a

@@ -7,14 +7,22 @@ import type { WorkspaceSessionView } from '../shared/types';
 
 const managerSession: WorkspaceSessionView = {
   membership: {
+    id: 'membership-1',
     organization: {
       currency: 'USD',
       id: 'org-1',
+      isDemo: true,
       name: 'Harbor & Pine Wholesale',
+      nextDemoResetAt: null,
+      slug: 'stockpilot-demo',
     },
     role: 'MANAGER',
   },
-  user: { displayName: 'Morgan Manager', email: 'manager@example.test' },
+  user: {
+    displayName: 'Morgan Manager',
+    email: 'manager@example.test',
+    id: 'user-1',
+  },
 };
 
 function stubFetch(overviewBody: unknown): void {

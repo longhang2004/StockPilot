@@ -1,6 +1,9 @@
 import {
   ProblemDetailsSchema,
+  type PageResponse,
   type ProblemDetails,
+  type SessionInfo,
+  type WorkspaceSummary,
 } from '@stockpilot/contracts';
 
 export class ApiProblem extends Error {
@@ -25,41 +28,18 @@ export class ApiProblem extends Error {
 
 let csrfToken: string | null = null;
 
-export interface PageResponse<T> {
-  items: T[];
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-}
+/**
+ * The session body returned by the API. The wire contract lives in
+ * `@stockpilot/contracts`; this re-export keeps the client's public surface
+ * stable for existing consumers.
+ */
+export type SessionResponse = SessionInfo;
 
-export interface SessionResponse {
-  membership: {
-    organization: {
-      currency: string;
-      id: string;
-      isDemo?: boolean;
-      name: string;
-      nextDemoResetAt?: string | null;
-      slug?: string;
-    };
-    role: 'OWNER' | 'MANAGER' | 'STAFF';
-  } | null;
-  user: { displayName: string; email?: string };
-  csrfToken?: string;
-}
+/** Re-exported pagination envelope for existing consumers. */
+export type { PageResponse };
 
-export interface WorkspaceSummary {
-  id: string;
-  organizationId: string;
-  role: 'OWNER' | 'MANAGER' | 'STAFF';
-  organization: {
-    id: string;
-    name: string;
-    slug: string;
-    isDemo: boolean;
-  };
-}
+/** Workspace summary from GET /v1/auth/workspaces (contract-owned). */
+export type { WorkspaceSummary };
 
 async function readCsrfToken(): Promise<string | null> {
   if (csrfToken) return csrfToken;

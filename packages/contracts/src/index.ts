@@ -1,212 +1,25 @@
-import { z } from 'zod';
-
-export const RoleSchema = z.enum(['OWNER', 'MANAGER', 'STAFF']);
-export type Role = z.infer<typeof RoleSchema>;
-
-export const PlanSchema = z.enum(['STARTER', 'PRO']);
-export type Plan = z.infer<typeof PlanSchema>;
-
-export const OrderStatusSchema = z.enum([
-  'DRAFT',
-  'CONFIRMED',
-  'FULFILLED',
-  'CANCELLED',
-]);
-export type OrderStatus = z.infer<typeof OrderStatusSchema>;
-
-export const StockMovementTypeSchema = z.enum([
-  'RECEIPT',
-  'SALE',
-  'ADJUSTMENT_IN',
-  'ADJUSTMENT_OUT',
-]);
-export type StockMovementType = z.infer<typeof StockMovementTypeSchema>;
-
-export const IntegrationDeliveryStatusSchema = z.enum([
-  'RECEIVED',
-  'PROCESSING',
-  'SUCCEEDED',
-  'FAILED',
-]);
-export type IntegrationDeliveryStatus = z.infer<
-  typeof IntegrationDeliveryStatusSchema
->;
-
-export const ProblemDetailsSchema = z.object({
-  type: z.url(),
-  title: z.string().min(1),
-  status: z.number().int().min(400).max(599),
-  detail: z.string().min(1),
-  instance: z.string().min(1),
-  code: z.string().min(1),
-  traceId: z.string().min(1),
-  errors: z
-    .array(
-      z.object({
-        field: z.string().min(1).optional(),
-        message: z.string().min(1),
-      }),
-    )
-    .optional(),
-});
-export type ProblemDetails = z.infer<typeof ProblemDetailsSchema>;
-
 /**
- * Response contracts shared by the API and web client. These are plain
- * interfaces (not Zod schemas): the API is the single producer and the web
- * client consumes them read-only.
+ * @stockpilot/contracts — the shared Zod contract boundary between the API
+ * and the web client.
+ *
+ * Domain modules (auth, catalog, inventory, orders, billing, integrations,
+ * audit, analytics) each own the schemas for their slice of the API. This
+ * barrel re-exports everything so `@stockpilot/contracts` root imports keep
+ * working without forcing callers onto deep imports.
+ *
+ * Response contracts are Zod schemas whose inferred types describe the
+ * JSON wire shape (dates and money serialized as strings). The web client
+ * consumes the inferred types read-only and does not parse responses at
+ * runtime; OpenAPI projects the same schemas for documentation.
  */
-export interface OverviewMovementRow {
-  day: string;
-  inbound: number;
-  outbound: number;
-}
-
-export interface OverviewRecentOrder {
-  createdAt: string;
-  customerCompanyName: string;
-  id: string;
-  orderNumber: string;
-  status: OrderStatus;
-  subtotal: string;
-}
-
-export interface OverviewRecentMovement {
-  createdAt: string;
-  id: string;
-  product?: { name: string; sku: string };
-  quantityDelta: number;
-  type: StockMovementType;
-}
-
-export interface OverviewResponse {
-  exceptions: {
-    failedIntegrations: number;
-    openLowStockAlerts: number;
-    ordersAwaitingApproval: number;
-  };
-  fourteenDayMovements: OverviewMovementRow[];
-  openOrderValue: string;
-  plan: Plan;
-  recentMovements: OverviewRecentMovement[];
-  recentOrders: OverviewRecentOrder[];
-}
-
-const OptionalContactSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(160)
-  .nullable()
-  .optional()
-  .default(null);
-
-const OptionalEmailSchema = z
-  .email()
-  .max(320)
-  .nullable()
-  .optional()
-  .default(null);
-
-const OptionalPhoneSchema = z
-  .string()
-  .trim()
-  .min(5)
-  .max(40)
-  .nullable()
-  .optional()
-  .default(null);
-
-export const ProductInputSchema = z.object({
-  description: z.string().trim().max(2_000).nullable().optional().default(null),
-  name: z.string().trim().min(2).max(160),
-  reorderPoint: z.number().int().min(0).max(1_000_000),
-  salePrice: z
-    .string()
-    .regex(/^\d{1,10}\.\d{2}$/)
-    .refine((value) => Number(value) >= 0, 'Sale price cannot be negative.'),
-  sku: z
-    .string()
-    .trim()
-    .min(2)
-    .max(64)
-    .regex(/^[A-Za-z0-9][A-Za-z0-9._-]*$/)
-    .transform((value) => value.toUpperCase()),
-});
-export type ProductInput = z.infer<typeof ProductInputSchema>;
-
-/** Public metadata returned after a product image is stored. */
-export const ProductImageSchema = z.object({
-  url: z.url(),
-  width: z.number().int().positive(),
-  height: z.number().int().positive(),
-  format: z.string().trim().min(1),
-});
-export type ProductImage = z.infer<typeof ProductImageSchema>;
-
-export const CustomerInputSchema = z.object({
-  companyName: z.string().trim().min(2).max(160),
-  contactName: OptionalContactSchema,
-  email: OptionalEmailSchema,
-  phone: OptionalPhoneSchema,
-});
-export type CustomerInput = z.infer<typeof CustomerInputSchema>;
-
-export const SupplierInputSchema = CustomerInputSchema;
-export type SupplierInput = z.infer<typeof SupplierInputSchema>;
-
-const MoneySchema = z
-  .string()
-  .regex(/^\d{1,10}\.\d{2}$/)
-  .refine((value) => Number(value) >= 0, 'Money cannot be negative.');
-
-const ReceiptLineInputSchema = z.object({
-  productId: z.uuid(),
-  quantity: z.number().int().positive().max(1_000_000),
-  unitCost: MoneySchema.nullable().optional().default(null),
-});
-
-export const ReceiptInputSchema = z
-  .object({
-    lines: z.array(ReceiptLineInputSchema).min(1).max(200),
-    note: z.string().trim().max(1_000).nullable().optional().default(null),
-    receiptNumber: z.string().trim().min(2).max(80),
-    receivedAt: z.iso.datetime({ offset: true }),
-    supplierId: z.uuid(),
-  })
-  .refine(
-    (value) =>
-      new Set(value.lines.map((line) => line.productId)).size ===
-      value.lines.length,
-    { message: 'A product can appear only once per receipt.', path: ['lines'] },
-  );
-export type ReceiptInput = z.infer<typeof ReceiptInputSchema>;
-
-export const InventoryAdjustmentInputSchema = z.object({
-  productId: z.uuid(),
-  quantity: z.number().int().positive().max(1_000_000),
-  reason: z.string().trim().min(3).max(500),
-  type: z.enum(['ADJUSTMENT_IN', 'ADJUSTMENT_OUT']),
-});
-export type InventoryAdjustmentInput = z.infer<
-  typeof InventoryAdjustmentInputSchema
->;
-
-const SalesOrderLineInputSchema = z.object({
-  productId: z.uuid(),
-  quantity: z.number().int().positive().max(1_000_000),
-});
-
-export const SalesOrderInputSchema = z
-  .object({
-    customerId: z.uuid(),
-    lines: z.array(SalesOrderLineInputSchema).min(1).max(200),
-    note: z.string().trim().max(1_000).nullable().optional().default(null),
-  })
-  .refine(
-    (value) =>
-      new Set(value.lines.map((line) => line.productId)).size ===
-      value.lines.length,
-    { message: 'A product can appear only once per order.', path: ['lines'] },
-  );
-export type SalesOrderInput = z.infer<typeof SalesOrderInputSchema>;
+export * from './common.js';
+export * from './problem-details.js';
+export * from './auth.js';
+export * from './catalog.js';
+export * from './inventory.js';
+export * from './orders.js';
+export * from './billing.js';
+export * from './integrations.js';
+export * from './imports.js';
+export * from './audit.js';
+export * from './analytics.js';
