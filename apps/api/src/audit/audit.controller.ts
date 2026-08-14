@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import type { AuthenticatedRequest } from '../auth/auth-context.js';
 import { RequirePermission } from '../auth/permission.decorator.js';
+import { SessionAuth } from '../openapi/security.decorator.js';
 import { AuditService } from './audit.service.js';
 
 const QuerySchema = z.object({
@@ -13,6 +14,7 @@ const QuerySchema = z.object({
 });
 
 @ApiTags('audit')
+@SessionAuth()
 @Controller('audit-events')
 export class AuditController {
   constructor(@Inject(AuditService) private readonly audit: AuditService) {}

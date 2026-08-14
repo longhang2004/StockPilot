@@ -55,6 +55,16 @@ changes described in the repository's CI and docs, with Node 24.19.0, pnpm
 10.13.1, and PostgreSQL 18 in Docker. The database was dropped, migrated,
 and seeded before the browser suite, mirroring CI.
 
+**Local vs GitHub-hosted CI:** the table below is local evidence. The same
+commit set was additionally verified by GitHub-hosted CI — the `verify` and
+`docker-build` jobs of run
+[31817920438](https://github.com/longhang2004/StockPilot/actions/runs/31817920438)
+(commit `0a2e535`, all gates incl. 28/28 E2E on Linux, `pnpm audit`
+clean, archive self-test, and both container builds) — plus CodeQL
+(success) and the Render deploy workflow (success). Local and CI results
+agree; where they cannot both run (platform-specific behavior), the
+difference is stated explicitly.
+
 | Gate                                               | Result                                                                              |
 | -------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `pnpm format:check`                                | Pass (0 files failing)                                                              |
@@ -63,7 +73,7 @@ and seeded before the browser suite, mirroring CI.
 | `pnpm typecheck:e2e`                               | Pass                                                                                |
 | `pnpm test:unit`                                   | Pass (contracts 6 + api 87 + web 30)                                                |
 | `pnpm --filter @stockpilot/api test:unit`          | Pass (rate-limiter, CIDR, client-address, and error-status mapping tests added)     |
-| `pnpm test:integration`                            | Pass (14 files, 67 tests, incl. OpenAPI contract suite)                             |
+| `pnpm --filter @stockpilot/api test:integration`   | Pass (14 files, 67 tests, incl. OpenAPI contract suite)                             |
 | `pnpm --filter @stockpilot/api test:unit:coverage` | Pass (branch threshold enforced per file)                                           |
 | `pnpm build`                                       | Pass (contracts, NestJS, Next standalone)                                           |
 | `pnpm test:e2e`                                    | Pass — 28/28 on the final corrected code, exit 0                                    |
@@ -71,12 +81,16 @@ and seeded before the browser suite, mirroring CI.
 | `docker build apps/web/Dockerfile`                 | Pass (see note below)                                                               |
 | `pnpm audit --audit-level high`                    | Pass (0 known vulnerabilities; two transitive advisories closed via pnpm overrides) |
 
-> **Container note:** the API image was built and inspected locally
-> (`Config.User = node`). The web image build was verified structurally
-> (standalone layout produced, server starts, routes 200) and the CI
-> `docker-build` job performs the full clean build of both images on every
-> pull request; a full local web image build was not repeated after the
-> final change set.
+> **Container evidence (local vs GitHub-hosted CI):** locally, both
+> production images were built from the final change set
+> (`docker build -f apps/api/Dockerfile .` and
+> `docker build -f apps/web/Dockerfile --build-arg API_INTERNAL_URL=... .`)
+> and inspected (`Config.User = node` for both); the API image was also
+> run in-container (health + corrected `/openapi.json` verified). The same
+> final commit set was built again by the GitHub-hosted CI `docker-build`
+> job (run
+> [31817920438](https://github.com/longhang2004/StockPilot/actions/runs/31817920438),
+> commit `0a2e535`), which also asserts both images run as `node`.
 
 ## Correction pass (14 August 2026, second review)
 

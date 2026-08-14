@@ -331,6 +331,11 @@ describe('OpenAPI contract surface', () => {
     ).toBe(true);
     expect(hasRequiredIdempotencyKey(receipt)).toBe(true);
 
+    // Audit reads are protected at runtime by the global session guard and
+    // the audit:read permission; the document must say so too.
+    const audit = operation(document, '/v1/audit-events', 'get');
+    expect(audit.security).toContainEqual({ sessionCookie: [] });
+
     // The security scheme is registered under the stable name with the
     // configured cookie name.
     expect(document.components?.securitySchemes?.sessionCookie).toMatchObject({

@@ -40,6 +40,10 @@ const API_URL = process.env.API_URL ?? 'http://localhost:4000';
 const WEB_ORIGIN = process.env.WEB_ORIGIN ?? 'http://localhost:3000';
 const DEFAULT_CONCURRENCY = 10;
 const DEFAULT_REQUESTS = 200;
+// The rate-limit check crosses the 60/min threshold by design; a dedicated,
+// smaller default keeps a single check run fast while still proving 429
+// enforcement.
+const RATE_LIMIT_CHECK_DEFAULT_REQUESTS = 100;
 const TIMEOUT_MS = 15_000;
 // Public-write limiter ceiling for /v1/auth/demo-login: 60/min per client.
 // The opt-in write workload stays below it so 429s never pollute latency
@@ -54,9 +58,16 @@ function argValue(name, fallback) {
     : fallback;
 }
 const concurrency = Number(argValue('--concurrency', DEFAULT_CONCURRENCY));
-const requests = Number(argValue('--requests', DEFAULT_REQUESTS));
 const includeWrites = args.includes('--include-writes');
 const rateLimitCheck = args.includes('--rate-limit-check');
+// The rate-limit check has its own smaller default (100) so normal perf
+// runs keep DEFAULT_REQUESTS=200 while a check stays quick and deliberate.
+const requests = Number(
+  argValue(
+    '--requests',
+    rateLimitCheck ? RATE_LIMIT_CHECK_DEFAULT_REQUESTS : DEFAULT_REQUESTS,
+  ),
+);
 const jsonOutput = args.includes('--json');
 const showHelp = args.includes('--help') || args.includes('-h');
 

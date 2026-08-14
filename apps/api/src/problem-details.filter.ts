@@ -62,7 +62,12 @@ export class ProblemDetailsFilter implements ExceptionFilter {
   }
 }
 
-function toProblem(
+/**
+ * Pure exception → RFC 9457 problem-details mapping. Exported for focused
+ * unit tests; the filter and the request-logging interceptor share the
+ * status derivation through `errorStatusCode`.
+ */
+export function toProblem(
   exception: unknown,
   instance: string,
   traceId: string,
@@ -83,7 +88,6 @@ function toProblem(
       type: 'https://stockpilot.dev/problems/validation-error',
     };
   }
-
   if (exception instanceof Prisma.PrismaClientKnownRequestError) {
     const status = errorStatusCode(exception);
     const code =
@@ -94,10 +98,14 @@ function toProblem(
           : 'DATABASE_ERROR';
     return {
       code,
+      // Semantically correct per status: a not-found must not read like a
+      // conflict, and an unknown database error must not blame the request.
       detail:
-        status === 500
-          ? 'The request could not be completed.'
-          : 'The requested resource conflicts with existing data.',
+        status === 404
+          ? 'The requested resource does not exist.'
+          : status === 409
+            ? 'The request conflicts with the current state of the resource.'
+            : 'The request could not be completed.',
       instance,
       status,
       title:
