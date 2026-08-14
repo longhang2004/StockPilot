@@ -11,12 +11,7 @@ import { hash, verify } from 'argon2';
 import { ENVIRONMENT } from '../config/environment.module.js';
 import type { Environment } from '../config/environment.js';
 import { PrismaService } from '../database/prisma.service.js';
-import { recordAudit } from '../audit/audit-record.js';
-import {
-  findDemoFixtureActors,
-  nextDemoResetAt,
-  seedDemoFixture,
-} from '../demo/demo-fixture.js';
+import { DemoResetService } from '../demo/demo-reset.service.js';
 import type { AuthContext } from './auth-context.js';
 import {
   createSessionCredentials,
@@ -32,6 +27,7 @@ export class AuthService {
   constructor(
     @Inject(ENVIRONMENT) private readonly environment: Environment,
     @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(DemoResetService) private readonly demoReset: DemoResetService,
   ) {}
 
   async signup(input: {
@@ -89,7 +85,9 @@ export class AuthService {
       membership.organization.nextDemoResetAt &&
       membership.organization.nextDemoResetAt.getTime() <= Date.now()
     ) {
-      await this.resetDueDemoOrganization(membership.organization.id);
+      // The demo domain owns reset mechanics; auth only checks whether a
+      // reset is due and continues the login flow once it is done.
+      await this.demoReset.resetIfDue(membership.organization.id);
       membership = await this.findDemoMembership(role);
       if (!membership) {
         throw new UnauthorizedException('Demo account is unavailable.');
@@ -151,58 +149,6 @@ export class AuthService {
         },
         role,
       },
-    });
-  }
-
-  private async resetDueDemoOrganization(
-    organizationId: string,
-  ): Promise<void> {
-    await this.prisma.$transaction(async (transaction) => {
-      await transaction.$executeRaw`
-        SELECT pg_advisory_xact_lock(hashtextextended(${`demo-reset:${organizationId}`}, 0))
-      `;
-      const organization = await transaction.organization.findUnique({
-        select: { isDemo: true, nextDemoResetAt: true },
-        where: { id: organizationId },
-      });
-      if (
-        !organization?.isDemo ||
-        !organization.nextDemoResetAt ||
-        organization.nextDemoResetAt.getTime() > Date.now()
-      ) {
-        return;
-      }
-      await transaction.$executeRaw`
-        SELECT set_config('app.current_org_id', ${organizationId}, true)
-      `;
-      await transaction.$executeRaw`
-        SELECT set_config('app.current_actor_id', '', true)
-      `;
-      await transaction.$executeRaw`
-        SELECT stockpilot_reset_demo_data(${organizationId}::uuid)
-      `;
-      const actors = await findDemoFixtureActors(transaction, organizationId);
-      await transaction.$executeRaw`
-        SELECT set_config('app.current_actor_id', ${actors.ownerUserId}, true)
-      `;
-      await seedDemoFixture(transaction, {
-        ...actors,
-        force: true,
-        organizationId,
-      });
-      const scheduledResetAt = nextDemoResetAt();
-      await recordAudit(transaction, {
-        action: 'DEMO_RESET_AUTOMATIC',
-        actorUserId: actors.ownerUserId,
-        after: { nextDemoResetAt: scheduledResetAt },
-        entityId: organizationId,
-        entityType: 'Organization',
-        organizationId,
-      });
-      await transaction.organization.update({
-        data: { nextDemoResetAt: scheduledResetAt },
-        where: { id: organizationId },
-      });
     });
   }
 

@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 
 import { EnvironmentModule } from '../config/environment.module.js';
 import { DatabaseModule } from '../database/database.module.js';
+import { DemoModule } from '../demo/demo.module.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { CsrfGuard } from './csrf.guard.js';
@@ -13,7 +14,7 @@ import { SessionGuard } from './session.guard.js';
 @Module({
   controllers: [AuthController],
   exports: [AuthService],
-  imports: [EnvironmentModule, DatabaseModule],
+  imports: [EnvironmentModule, DatabaseModule, DemoModule],
   providers: [
     AuthService,
     { provide: APP_GUARD, useClass: SessionGuard },

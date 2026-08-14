@@ -24,7 +24,8 @@ import {
   setSessionCookie,
   type SessionCookieResponse,
 } from '../auth/session-cookie.js';
-import { TeamService } from './team.service.js';
+import { InvitationService } from './invitation.service.js';
+import { MembershipService } from './membership.service.js';
 import {
   SessionAuth,
   SessionAuthWrite,
@@ -46,7 +47,10 @@ const ChangeRoleSchema = z.object({ role: RoleSchema });
 @SessionAuth()
 export class TeamController {
   constructor(
-    @Inject(TeamService) private readonly team: TeamService,
+    @Inject(InvitationService)
+    private readonly invitationService: InvitationService,
+    @Inject(MembershipService)
+    private readonly membershipService: MembershipService,
     @Inject(ENVIRONMENT) private readonly environment: Environment,
   ) {}
 
@@ -54,13 +58,13 @@ export class TeamController {
   @Post('invitations')
   @SessionAuthWrite()
   invite(@Body() body: unknown, @Req() request: AuthenticatedRequest) {
-    return this.team.invite(request.auth, InviteSchema.parse(body));
+    return this.invitationService.invite(request.auth, InviteSchema.parse(body));
   }
 
   @RequirePermission('team:read')
   @Get('invitations')
   invitations(@Req() request: AuthenticatedRequest) {
-    return this.team.listInvitations(request.auth);
+    return this.invitationService.listInvitations(request.auth);
   }
 
   @RequirePermission('team:invite')
@@ -71,7 +75,7 @@ export class TeamController {
     @Param('id', ParseUUIDPipe) invitationId: string,
     @Req() request: AuthenticatedRequest,
   ) {
-    return this.team.revokeInvitation(request.auth, invitationId);
+    return this.invitationService.revokeInvitation(request.auth, invitationId);
   }
 
   /**
@@ -88,7 +92,7 @@ export class TeamController {
     @Res({ passthrough: true }) response: SessionCookieResponse,
   ) {
     const { token } = AcceptSchema.parse(body);
-    const result = await this.team.acceptInvitation(request.auth, token);
+    const result = await this.invitationService.acceptInvitation(request.auth, token);
     setSessionCookie(this.environment, response, result.rawToken);
     return { ...result.context, csrfToken: result.csrfToken };
   }
@@ -101,7 +105,7 @@ export class TeamController {
     @Param('membershipId', ParseUUIDPipe) membershipId: string,
     @Req() request: AuthenticatedRequest,
   ) {
-    return this.team.changeMemberRole(
+    return this.membershipService.changeMemberRole(
       request.auth,
       membershipId,
       ChangeRoleSchema.parse(body).role,
@@ -116,6 +120,6 @@ export class TeamController {
     @Param('membershipId', ParseUUIDPipe) membershipId: string,
     @Req() request: AuthenticatedRequest,
   ) {
-    return this.team.removeMember(request.auth, membershipId);
+    return this.membershipService.removeMember(request.auth, membershipId);
   }
 }

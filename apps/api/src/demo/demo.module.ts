@@ -6,6 +6,7 @@ import { DemoResetService } from './demo-reset.service.js';
 
 @Module({
   controllers: [DemoResetController],
+  exports: [DemoResetService],
   imports: [DatabaseModule],
   providers: [DemoResetService],
 })
