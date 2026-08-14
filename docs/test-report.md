@@ -59,9 +59,10 @@ and seeded before the browser suite, mirroring CI.
 commit set was additionally verified by GitHub-hosted CI — the `verify` and
 `docker-build` jobs of run
 [31817920438](https://github.com/longhang2004/StockPilot/actions/runs/31817920438)
-(commit `0a2e535`, all gates incl. 28/28 E2E on Linux, `pnpm audit`
-clean, archive self-test, and both container builds) — plus CodeQL
-(success) and the Render deploy workflow (success). Local and CI results
+(commit `c33628b`, the final polish commit — all gates incl. 28/28 E2E
+on Linux, `pnpm audit` clean, archive self-test, and both container
+builds) — plus CodeQL (success) and the Render deploy workflow
+(success). Local and CI results
 agree; where they cannot both run (platform-specific behavior), the
 difference is stated explicitly.
 
@@ -89,8 +90,9 @@ difference is stated explicitly.
 > run in-container (health + corrected `/openapi.json` verified). The same
 > final commit set was built again by the GitHub-hosted CI `docker-build`
 > job (run
-> [31817920438](https://github.com/longhang2004/StockPilot/actions/runs/31817920438),
-> commit `0a2e535`), which also asserts both images run as `node`.
+> [31821176059](https://github.com/longhang2004/StockPilot/actions/runs/31821176059),
+> commit `c33628b`, the final polish commit), which also asserts both
+> images run as `node`.
 
 ## Correction pass (14 August 2026, second review)
 
