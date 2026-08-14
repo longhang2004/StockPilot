@@ -12,9 +12,9 @@ export default defineConfig({
   // CI-only single retry: `next dev` occasionally drops a connection while
   // recompiling a route on demand (reproduced as ERR_CONNECTION_REFUSED /
   // socket hang up on /api rewrites and image routes; absent in production
-  // `next start`). This is environment flakiness, not an application bug —
-  // the deterministic failures this suite had (API startup race, parallel
-  // workers sharing the demo DB, loader contrast) are fixed in code.
+  // `next start`). The deterministic classes are fixed in code: the
+  // e2e-server pre-warms the lazy next/og metadata routes and gates on API
+  // readiness, workers are pinned, and stale servers are never reused.
   retries: process.env.CI ? 1 : 0,
   reporter: [
     ['list'],

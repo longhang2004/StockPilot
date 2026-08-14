@@ -139,6 +139,47 @@ try {
   fail(error.message);
 }
 
+// next/og metadata routes (/icon, /apple-icon, og images) compile lazily in
+// dev; the first request can reset the connection while satori/WASM
+// initializes (reproduced in CI as `socket hang up` on GET /icon, failing
+// the seo suite on a cold runner). Pre-warm them so tests never race the
+// one-time compile. Production builds prerender these routes, so this only
+// affects the dev-mode test server.
+const METADATA_ROUTES = [
+  '/icon',
+  '/apple-icon',
+  '/opengraph-image',
+  '/twitter-image',
+];
+for (const route of METADATA_ROUTES) {
+  let warmed = false;
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
+    try {
+      const response = await fetch(`${WEB_URL}${route}`, {
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (response.ok) {
+        warmed = true;
+        break;
+      }
+      console.error(
+        `[e2e-server] metadata route ${route} returned HTTP ${response.status}; retrying (${attempt}/5)`,
+      );
+    } catch (error) {
+      console.error(
+        `[e2e-server] metadata route ${route} warm-up failed (${error?.cause?.code ?? error}); retrying (${attempt}/5)`,
+      );
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+  }
+  if (!warmed) {
+    api.kill('SIGTERM');
+    web.kill('SIGTERM');
+    fail(`metadata route ${route} did not become ready after 5 attempts.`);
+  }
+}
+console.error('[e2e-server] metadata image routes warmed.');
+
 // Keep both children alive; forward termination so Playwright teardown (or
 // Ctrl-C locally) shuts the whole tree down cleanly.
 for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
