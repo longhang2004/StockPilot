@@ -23,8 +23,22 @@ export const WORKSPACE_SECTIONS = [
 
 export type WorkspaceSection = (typeof WORKSPACE_SECTIONS)[number];
 
+/**
+ * Sections reachable at a URL path of their own (`/app/[section]`).
+ * `overview` is a valid section but lives at the shell root (`/app`), so
+ * it is deliberately NOT a dynamic section: `/app/overview` must keep its
+ * historical fallback behavior instead of rendering Overview.
+ */
+export type DynamicWorkspaceSection = Exclude<WorkspaceSection, 'overview'>;
+
 export function isWorkspaceSection(value: string): value is WorkspaceSection {
   return (WORKSPACE_SECTIONS as readonly string[]).includes(value);
+}
+
+export function isDynamicWorkspaceSection(
+  value: string,
+): value is DynamicWorkspaceSection {
+  return value !== 'overview' && isWorkspaceSection(value);
 }
 
 /** Canonical href for a section (overview lives at the shell root). */

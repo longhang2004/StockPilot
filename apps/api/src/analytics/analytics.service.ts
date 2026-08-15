@@ -1,25 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
+import type { AnalyticsResponse } from '@stockpilot/contracts';
 
 import { requireMembership, type AuthContext } from '../auth/auth-context.js';
 import { TenantDatabase } from '../database/tenant-database.js';
 
-export interface AnalyticsResponse {
-  averageFulfilledOrderValue: string;
-  fulfilledOrderCount: number;
-  fulfilledOrderValue: string;
-  lowStockSkuCount: number;
-  ordersByStatus: Array<{ count: number; status: string }>;
-  topFulfilledProducts: Array<{
-    name: string;
-    sku: string;
-    unitsFulfilled: number;
-  }>;
-}
-
 /**
  * Operational analytics computed directly from the append-only ledger and
  * order tables. No redundant aggregates: portfolio scale queries are cheap,
- * and every query runs inside the tenant-scoped RLS transaction.
+ * and every query runs inside the tenant-scoped RLS transaction. The
+ * response shape is the shared AnalyticsResponse contract.
  */
 @Injectable()
 export class AnalyticsService {

@@ -5,7 +5,7 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import type { Plan } from '../generated/prisma/client.js';
+import type { BillingStatusView, Plan } from '@stockpilot/contracts';
 
 import { requireMembership, type AuthContext } from '../auth/auth-context.js';
 import { ENVIRONMENT } from '../config/environment.module.js';
@@ -19,27 +19,8 @@ import {
   type StripeWebhookEvent,
 } from './stripe-client.js';
 
-export interface BillingStatusView {
-  cancelAtPeriodEnd: boolean;
-  currentPeriodEnd: string | null;
-  entitlements: {
-    csvImport: boolean;
-    integrations: boolean;
-    maxTeamMembers: number;
-  };
-  isDemoBilling: boolean;
-  plan: Plan;
-  status:
-    | 'ACTIVE'
-    | 'CANCELED'
-    | 'INCOMPLETE'
-    | 'PAST_DUE'
-    | 'TRIALING'
-    | 'UNPAID'
-    | null;
-  teamUsage: { limit: number; members: number };
-}
-
+// The response view is the shared contract type (BillingStatusViewSchema in
+// @stockpilot/contracts); the serializers below must keep matching it.
 const STATUS_BY_STRIPE_STATUS: Record<string, BillingStatusView['status']> = {
   active: 'ACTIVE',
   canceled: 'CANCELED',

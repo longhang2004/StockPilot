@@ -331,9 +331,12 @@ reorder_point`, custom quoting-aware parser, preview flags duplicate/existing SK
   shapes), `inventory` (receipt/adjustment inputs + balances/movements/alerts/results),
   `orders` (order input + list/detail/lines/transitions), `billing`, `integrations`,
   `imports`, `audit`, `analytics`, plus a backwards-compatible barrel `index.ts`.
-- Input schemas are parsed by the API controllers; response schemas are Zod schemas
-  whose inferred types describe the JSON wire shape (dates and money as strings) and
-  are consumed read-only by the web client — no browser runtime response parsing.
+- Input schemas are parsed by the API controllers. Shared wire contracts are
+  centralized in `@stockpilot/contracts`: most response contracts are Zod schemas
+  whose inferred types describe the JSON wire shape (dates and money as strings)
+  and are used where runtime/OpenAPI projection provides value; a few (e.g.
+  `OverviewResponse`) are type-only contracts consumed read-only by the web
+  client — no browser runtime response parsing anywhere.
 - The OpenAPI projection in `apps/api/src/openapi/schemas.ts` imports the shared
   response schemas (plus API-local request schemas from the domain schema modules),
   so the documented contract cannot drift from the serializers.

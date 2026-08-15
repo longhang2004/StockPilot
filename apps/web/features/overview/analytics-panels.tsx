@@ -6,19 +6,6 @@ import Link from 'next/link';
 import { EmptyState, StatusBadge } from '../../components/ui/operations-ui';
 import { fetchAnalytics, overviewKeys } from './api';
 
-export interface AnalyticsView {
-  averageFulfilledOrderValue: string;
-  fulfilledOrderCount: number;
-  fulfilledOrderValue: string;
-  lowStockSkuCount: number;
-  ordersByStatus: Array<{ count: number; status: string }>;
-  topFulfilledProducts: Array<{
-    name: string;
-    sku: string;
-    unitsFulfilled: number;
-  }>;
-}
-
 export function AnalyticsPanels() {
   const analytics = useQuery({
     queryKey: overviewKeys.analytics,
