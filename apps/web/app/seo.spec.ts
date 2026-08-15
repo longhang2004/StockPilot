@@ -67,5 +67,11 @@ describe('public SEO contract', () => {
     expect(jsonLd).toContain('WebSite');
     expect(jsonLd).toContain('WebPage');
     expect(jsonLd).not.toContain('</script>');
+    // StockPilot is a portfolio/demo project: no organization entity and no
+    // fabricated application offers/ratings in the structured data.
+    expect(jsonLd).not.toContain('SoftwareApplication');
+    expect(jsonLd).not.toContain('"Organization"');
+    expect(jsonLd).not.toContain('aggregateRating');
+    expect(jsonLd).not.toContain('offers');
   });
 });

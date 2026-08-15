@@ -3,6 +3,7 @@
 import type { Role } from '@stockpilot/contracts';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from '@phosphor-icons/react';
+import Image from 'next/image';
 import { useState } from 'react';
 
 import {
@@ -231,7 +232,23 @@ const productColumns: TableColumn<ProductRecord>[] = [
   {
     key: 'name',
     label: 'Product',
-    render: (record) => <strong>{record.name}</strong>,
+    render: (record) => (
+      <span className="product-name-cell">
+        {record.image ? (
+          // Decorative next to the adjacent name: the image adds no
+          // information beyond the product name, so the alt text is empty.
+          <Image
+            alt=""
+            className="product-thumbnail-inline"
+            height={28}
+            sizes="28px"
+            src={record.image.url}
+            width={28}
+          />
+        ) : null}
+        <strong>{record.name}</strong>
+      </span>
+    ),
   },
   {
     key: 'salePrice',

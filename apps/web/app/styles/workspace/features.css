@@ -173,29 +173,21 @@
   margin-top: 0.5rem;
 }
 
-/* Product thumbnail & image picker */
-.product-thumbnail-frame {
+/* Product thumbnail inside the products table. Products without an image
+   render the name only — no placeholder box is drawn. */
+.product-name-cell {
   align-items: center;
+  display: inline-flex;
+  gap: 0.55rem;
+}
+
+.product-thumbnail-inline {
   background: var(--surface-hover);
   border: 1px solid var(--line-subtle);
   border-radius: var(--radius-xs);
-  display: inline-flex;
-  height: 38px;
-  justify-content: center;
-  overflow: hidden;
-  width: 38px;
-}
-
-.product-thumbnail {
-  height: 38px;
+  height: 28px;
   object-fit: cover;
-  width: 38px;
-}
-
-.product-thumbnail-placeholder {
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
+  width: 28px;
 }
 
 .product-image-picker {

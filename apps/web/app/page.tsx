@@ -192,24 +192,6 @@ const jsonLd = {
       inLanguage: 'en',
       primaryImageOfPage: `${siteOrigin}/assets/overview-desktop.png`,
     },
-    {
-      '@type': 'SoftwareApplication',
-      name: siteName,
-      applicationCategory: 'BusinessApplication',
-      operatingSystem: 'Web',
-      description: siteDescription,
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-      },
-    },
-    {
-      '@type': 'Organization',
-      name: siteName,
-      url: siteOrigin,
-      logo: `${siteOrigin}/icon`,
-    },
   ],
 };
 
