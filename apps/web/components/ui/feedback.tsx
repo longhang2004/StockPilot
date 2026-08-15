@@ -4,6 +4,7 @@ import { CheckCircle, WarningCircle, XCircle } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 
 const statusLabels: Record<string, string> = {
+  ACTIVE: 'Active',
   ADJUSTMENT_IN: 'Adjustment in',
   ADJUSTMENT_OUT: 'Adjustment out',
   CANCELLED: 'Cancelled',
@@ -11,13 +12,14 @@ const statusLabels: Record<string, string> = {
   DRAFT: 'Draft',
   FAILED: 'Failed',
   FULFILLED: 'Fulfilled',
+  INACTIVE: 'Inactive',
   OPEN: 'Open',
   PROCESSING: 'Processing',
   RECEIVED: 'Received',
   RECEIPT: 'Receipt',
   RESOLVED: 'Resolved',
   SALE: 'Sale',
-  SUCCEEDED: 'Active',
+  SUCCEEDED: 'Succeeded',
 };
 
 export function StatusBadge({ value }: { value: string }) {

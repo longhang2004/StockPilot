@@ -1,11 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-try {
-  process.loadEnvFile('.env');
-} catch {
-  // Ignored if env already set
-}
-
 export default defineConfig({
   // The E2E suite shares one seeded demo database and mutates it (receipts,
   // orders, and the Owner demo reset which wipes and reseeds the tenant), so

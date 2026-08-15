@@ -249,7 +249,7 @@ export function WorkspaceSidebar({
         <span className="user-avatar" aria-hidden="true">
           {initials}
         </span>
-        <span>
+        <span className="user-identity">
           <strong>{session.user.displayName}</strong>
           <small>{roleLabels[session.membership.role]}</small>
         </span>

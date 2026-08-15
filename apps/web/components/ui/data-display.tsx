@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUpRight, CaretLeft, CaretRight } from '@phosphor-icons/react';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 
 export function PageHeader({
@@ -114,15 +114,6 @@ export function ResponsiveDataTable<T extends { id?: string }>({
                 <tr
                   key={record.id ?? `record-${index}`}
                   className={isSelected ? 'table-row-selected' : undefined}
-                  style={
-                    isSelected
-                      ? {
-                          backgroundColor:
-                            'var(--color-accent-subtle, #faebe4)',
-                          outline: '1px solid var(--color-accent)',
-                        }
-                      : undefined
-                  }
                 >
                   {columns.map((column) => (
                     <td
@@ -145,7 +136,7 @@ export function ResponsiveDataTable<T extends { id?: string }>({
                         onClick={() => onRowClick(record)}
                         type="button"
                       >
-                        Open <ArrowUpRight size={14} aria-hidden="true" />
+                        Open <CaretRight size={13} aria-hidden="true" />
                       </button>
                     </td>
                   ) : null}
@@ -191,7 +182,7 @@ export function ResponsiveDataTable<T extends { id?: string }>({
                   onClick={() => onRowClick(record)}
                   type="button"
                 >
-                  Open <ArrowUpRight size={14} aria-hidden="true" />
+                  Open <CaretRight size={13} aria-hidden="true" />
                 </button>
               ) : null}
             </article>

@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import type { Role } from '@stockpilot/contracts';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from '@phosphor-icons/react';
@@ -162,6 +161,7 @@ export function ProductsWorkspace({ role }: { role: Role }) {
                 }
               : undefined
           }
+          selectedId={editing?.id}
         />
       ) : (
         <EmptyState
@@ -224,31 +224,6 @@ export function ProductsWorkspace({ role }: { role: Role }) {
 
 const productColumns: TableColumn<ProductRecord>[] = [
   {
-    key: 'image',
-    label: 'Image',
-    render: (record) => (
-      <span className="product-thumbnail-frame">
-        {record.image ? (
-          <Image
-            alt={`${record.name} product image`}
-            className="product-thumbnail"
-            height={38}
-            sizes="38px"
-            src={record.image.url}
-            width={38}
-          />
-        ) : (
-          <span
-            aria-label="No product image"
-            className="product-thumbnail-placeholder"
-          >
-            —
-          </span>
-        )}
-      </span>
-    ),
-  },
-  {
     key: 'sku',
     label: 'SKU',
     render: (record) => <span className="mono">{record.sku}</span>,
@@ -274,7 +249,7 @@ const productColumns: TableColumn<ProductRecord>[] = [
     key: 'isActive',
     label: 'Lifecycle',
     render: (record) => (
-      <StatusBadge value={record.isActive ? 'SUCCEEDED' : 'CANCELLED'} />
+      <StatusBadge value={record.isActive ? 'ACTIVE' : 'INACTIVE'} />
     ),
   },
 ];

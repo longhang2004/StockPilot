@@ -50,6 +50,7 @@ export function InventoryWorkspace({ role }: { role: Role }) {
     [balances.data?.items, search],
   );
   const canAdjust = role === 'MANAGER' || role === 'OWNER';
+
   return (
     <section className="workspace-section-page">
       <PageHeader
@@ -67,47 +68,8 @@ export function InventoryWorkspace({ role }: { role: Role }) {
           ) : undefined
         }
       />
-      <div className="workspace-grid" aria-label="Inventory summary">
-        <StatCard
-          hint="Current tenant balances"
-          label="SKUs tracked"
-          value={balances.data?.total ?? 0}
-        />
-        <StatCard
-          hint="At or below reorder point"
-          label="Open alerts"
-          tone="danger"
-          value={
-            (alerts.data?.items ?? []).filter(
-              (alert) => alert.status === 'OPEN',
-            ).length
-          }
-        />
-        <StatCard
-          hint="Available units across balances"
-          label="Available"
-          tone="positive"
-          value={filtered.reduce((sum, balance) => sum + balance.available, 0)}
-        />
-      </div>
-      <SearchFilterBar
-        onSearch={setSearch}
-        placeholder="Search SKU or product"
-        search={search}
-      >
-        <select
-          aria-label="Filter alerts"
-          onChange={(event) =>
-            setAlertStatus(event.target.value as 'OPEN' | 'RESOLVED')
-          }
-          value={alertStatus}
-        >
-          <option value="OPEN">Open alerts</option>
-          <option value="RESOLVED">Resolved alerts</option>
-        </select>
-      </SearchFilterBar>
       {balances.isLoading || alerts.isLoading ? (
-        <Skeleton lines={5} />
+        <Skeleton lines={6} />
       ) : balances.isError || alerts.isError ? (
         <ErrorState
           description="Inventory balances or alerts could not be loaded."
@@ -118,6 +80,48 @@ export function InventoryWorkspace({ role }: { role: Role }) {
         />
       ) : (
         <>
+          <div className="workspace-grid" aria-label="Inventory summary">
+            <StatCard
+              hint="Current tenant balances"
+              label="SKUs tracked"
+              value={balances.data?.total ?? 0}
+            />
+            <StatCard
+              hint="At or below reorder point"
+              label="Open alerts"
+              tone="danger"
+              value={
+                (alerts.data?.items ?? []).filter(
+                  (alert) => alert.status === 'OPEN',
+                ).length
+              }
+            />
+            <StatCard
+              hint="Available units across balances"
+              label="Available"
+              tone="positive"
+              value={filtered.reduce(
+                (sum, balance) => sum + balance.available,
+                0,
+              )}
+            />
+          </div>
+          <SearchFilterBar
+            onSearch={setSearch}
+            placeholder="Search SKU or product"
+            search={search}
+          >
+            <select
+              aria-label="Filter alerts"
+              onChange={(event) =>
+                setAlertStatus(event.target.value as 'OPEN' | 'RESOLVED')
+              }
+              value={alertStatus}
+            >
+              <option value="OPEN">Open alerts</option>
+              <option value="RESOLVED">Resolved alerts</option>
+            </select>
+          </SearchFilterBar>
           {filtered.length ? (
             <ResponsiveDataTable
               columns={balanceColumns}
@@ -145,25 +149,16 @@ export function InventoryWorkspace({ role }: { role: Role }) {
               </Link>
             </div>
             {alerts.data?.items.length ? (
-              alerts.data.items.map((alert) => (
-                <div className="work-row" key={alert.id}>
-                  <StatusBadge value={alert.status} />
-                  <span>
-                    <strong>
-                      {alert.product.sku} · {alert.product.name}
-                    </strong>
-                    <small>
-                      Available {alert.availableAtOpen} · reorder point{' '}
-                      {alert.reorderPoint} · opened{' '}
-                      {formatDateTime(alert.openedAt)}
-                    </small>
-                  </span>
-                </div>
-              ))
+              <ResponsiveDataTable
+                ariaLabel="Low-stock alerts"
+                columns={alertColumns}
+                data={alerts.data.items}
+                getRowLabel={(record) => record.product.sku}
+              />
             ) : (
               <EmptyState
-                description="The reconciliation worker will keep this queue current."
-                title="No alerts in this view"
+                description="No products are currently at or below their reorder threshold."
+                title="No open alerts"
               />
             )}
           </article>
@@ -171,14 +166,14 @@ export function InventoryWorkspace({ role }: { role: Role }) {
       )}
       <ToastRegion toasts={toasts} />
       <AdjustmentDrawer
-        open={adjustOpen}
         onClose={() => setAdjustOpen(false)}
         onSaved={() => {
           setAdjustOpen(false);
           void invalidatePageQueries(queryClient, BALANCES_RESOURCE);
           void invalidatePageQueries(queryClient, ALERTS_RESOURCE);
-          push('Stock adjustment applied.', 'success');
+          push('Stock adjustment applied to the ledger.', 'success');
         }}
+        open={adjustOpen}
         push={push}
       />
     </section>
@@ -187,19 +182,14 @@ export function InventoryWorkspace({ role }: { role: Role }) {
 
 const balanceColumns: TableColumn<BalanceRecord>[] = [
   {
+    key: 'sku',
+    label: 'SKU',
+    render: (record) => <span className="mono">{record.product.sku}</span>,
+  },
+  {
     key: 'product',
     label: 'Product',
-    render: (record) => (
-      <span>
-        <strong>{record.product.name}</strong>
-        <small
-          className="muted-note mono"
-          style={{ display: 'block', marginTop: '0.1rem' }}
-        >
-          {record.product.sku}
-        </small>
-      </span>
-    ),
+    render: (record) => <strong>{record.product.name}</strong>,
   },
   {
     key: 'onHand',
@@ -225,8 +215,44 @@ const balanceColumns: TableColumn<BalanceRecord>[] = [
   },
   {
     key: 'updatedAt',
-    label: 'Updated',
+    label: 'Last movement',
     align: 'right',
     render: (record) => formatDate(record.updatedAt),
+  },
+];
+
+const alertColumns: TableColumn<AlertRecord>[] = [
+  {
+    key: 'sku',
+    label: 'SKU',
+    render: (record) => <span className="mono">{record.product.sku}</span>,
+  },
+  {
+    key: 'product',
+    label: 'Product',
+    render: (record) => <strong>{record.product.name}</strong>,
+  },
+  {
+    key: 'status',
+    label: 'Status',
+    render: (record) => <StatusBadge value={record.status} />,
+  },
+  {
+    key: 'available',
+    label: 'Available',
+    align: 'right',
+    render: (record) => <span className="mono">{record.availableAtOpen}</span>,
+  },
+  {
+    key: 'reorderPoint',
+    label: 'Reorder threshold',
+    align: 'right',
+    render: (record) => <span className="mono">{record.reorderPoint}</span>,
+  },
+  {
+    key: 'openedAt',
+    label: 'Triggered',
+    align: 'right',
+    render: (record) => formatDateTime(record.openedAt),
   },
 ];

@@ -21,6 +21,25 @@ describe('parseEnvironment', () => {
     });
   });
 
+  it('accepts empty string for optional database and telemetry URLs from .env templates', async () => {
+    const { parseEnvironment } = await import('./environment.js');
+
+    const config = parseEnvironment({
+      CSRF_SECRET: 'development-csrf-secret-with-enough-length',
+      DATABASE_URL:
+        'postgresql://stockpilot:stockpilot@localhost:5432/stockpilot',
+      MIGRATION_DATABASE_URL: '',
+      QUEUE_DATABASE_URL: '',
+      SENTRY_DSN: '',
+      STRIPE_SECRET_KEY: '',
+      WEB_ORIGIN: 'http://localhost:3000',
+      WEBHOOK_SIGNING_SECRET: 'development-secret-with-enough-length',
+    });
+
+    expect(config.MIGRATION_DATABASE_URL).toBe('');
+    expect(config.QUEUE_DATABASE_URL).toBe('');
+  });
+
   it('rejects startup when security-sensitive variables are missing', async () => {
     const { parseEnvironment } = await import('./environment.js');
 

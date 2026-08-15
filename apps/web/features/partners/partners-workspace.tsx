@@ -154,7 +154,7 @@ const partnerColumns: TableColumn<PartnerRecord>[] = [
     key: 'isActive',
     label: 'Lifecycle',
     render: (record) => (
-      <StatusBadge value={record.isActive ? 'SUCCEEDED' : 'CANCELLED'} />
+      <StatusBadge value={record.isActive ? 'ACTIVE' : 'INACTIVE'} />
     ),
   },
 ];

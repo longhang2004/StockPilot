@@ -5,103 +5,68 @@
 > guidance may extend these rules, but must not replace the semantic contract.
 
 **Project:** StockPilot
-**Updated:** 2026-08-04
-**Direction:** quiet industrial / data-first / accessible
-**Design dials:** Variance 3/10 · Motion 2/10 · Density 7/10
+**Updated:** 2026-08-15
+**Direction:** quiet industrial / high-density / data-first / accessible
+**Design dials:** Variance 4/10 · Motion 2/10 · Density 8/10
 
 ## Design intent
 
 StockPilot should feel calm, precise, and ready for the next warehouse action:
 
-- warm neutral surfaces and ink structure keep the workspace quiet;
-- terracotta is the only visual accent; success, warning, and danger are
-  reserved for semantic status feedback;
-- dense tables use stable alignment, tabular numerals, and short labels;
-- desktop keeps the persistent sidebar; mobile keeps the four-item bottom
-  navigation and bottom-sheet interactions.
+- Warm neutral surfaces and dark ink console structure keep the workspace quiet and focused.
+- Terracotta is the sole brand accent; emerald, ochre/amber, and rust/red are reserved for semantic status feedback.
+- High-density operations tables use tabular numerals, right-aligned monetary/quantity values, and 40–44px row heights.
+- Desktop features an integrated ink sidebar and docked horizontal statistic strips with vertical hairline dividers (no floating card soup).
+- Mobile features sticky bottom navigation with safe-area padding and single-column touch-friendly records (>= 44px touch targets).
 
 ## Token contract
 
-Tokens follow three layers: primitives hold values, semantic tokens assign
-meaning, and component tokens define local behavior. Feature components must
-consume semantic/component tokens rather than hardcoded colors.
+Tokens follow three layers: primitives hold values, semantic tokens assign meaning, and component tokens define local behavior. Feature components must consume semantic/component tokens rather than hardcoded colors.
 
 ### Core colors
 
-| Role       | Token                      | Value     |
-| ---------- | -------------------------- | --------- |
-| Canvas     | `--color-background`       | `#F2F0EA` |
-| Surface    | `--color-surface`          | `#FCFBF7` |
-| Ink        | `--color-foreground`       | `#17201F` |
-| Muted text | `--color-muted-foreground` | `#5D6562` |
-| Divider    | `--color-border`           | `#D9D6CE` |
-| Accent     | `--color-accent`           | `#C45A2A` |
-| Success    | `--color-success`          | `#2F6B4F` |
-| Warning    | `--color-warning`          | `#8A5A16` |
-| Danger     | `--color-danger`           | `#B34B39` |
-
-Status colors must be paired with text, an icon, or another semantic cue. The
-accent is not reused to imply success or warning.
+| Role         | Token                      | Value     | Contrast / Purpose                           |
+| ------------ | -------------------------- | --------- | -------------------------------------------- |
+| Canvas       | `--color-background`       | `#F2F0EA` | Neutral bone off-white background            |
+| Surface      | `--color-surface`          | `#FCFBF7` | Paper white container surface                |
+| Surface Alt  | `--surface-subtle`         | `#EAE7DE` | Subtle background tone for headers/tags      |
+| Ink          | `--color-foreground`       | `#17201F` | Deep slate ink for typography                |
+| Muted text   | `--color-muted-foreground` | `#5D6562` | Secondary labels and metadata                |
+| Divider      | `--color-border`           | `#D9D6CE` | 1px hairlines for table and card borders     |
+| Divider Thin | `--line-subtle`            | `#E5E2DA` | 1px internal row hairlines                   |
+| Accent       | `--color-accent`           | `#B34718` | Quiet terracotta (WCAG 2 AA >4.8:1 contrast) |
+| Success      | `--color-success`          | `#2D6B4F` | Inbound receipts, confirmed status           |
+| Warning      | `--color-warning`          | `#A7701E` | Draft orders, pending items                  |
+| Danger       | `--color-danger`           | `#B34638` | Low stock exceptions, cancelled/failed       |
 
 ### Typography
 
-- IBM Plex Sans is the interface family; IBM Plex Mono is used for SKU, order
-  IDs, quantities, dates, and money with tabular figures.
-- Both families are loaded with `next/font`; do not add runtime Google Fonts
-  stylesheet imports.
-- Type scale is fixed at `12 / 14 / 16 / 20 / 28 / 36 / 48px`.
+- Inter is the interface family; JetBrains Mono / IBM Plex Mono is used for SKU, order numbers, quantities, timestamps, and currency with tabular numerals (`.mono`).
+- Type scale: `10px` (`--text-2xs`), `11px` (`--text-xs`), `13px` (`--text-sm`), `15px` (`--text-md`), `18px` (`--text-lg`), `22px` (`--text-xl`), `28px` (`--text-2xl`).
 
-### Spacing, shape, and motion
+### Spacing, Shape, and Motion
 
-- The spacing grid is 4/8px. Use `--space-1` through `--space-10` rather than
-  inventing feature-specific spacing values.
-- Radius is limited to `4px`, `8px`, and `12px`; pills are status-only.
-- Interactive targets are at least 44px. Focus rings use the accent token.
-- Motion is 150–220ms and limited to `opacity` and `transform`. Respect
-  `prefers-reduced-motion: reduce`.
-- Shadows are reserved for drawers and dialogs; data surfaces use dividers and
-  spacing for hierarchy.
+- Spacing grid: 4px base (`0.25rem`, `0.5rem`, `0.75rem`, `1rem`, `1.25rem`, `1.5rem`).
+- Border Radii: `4px` (`--radius-xs` for controls/tags), `6px` (`--radius-sm` for buttons/inputs), `8px` (`--radius-md` for cards/tables), `10px` (`--radius-lg` for panels/drawers).
+- Control Heights:
+  - Desktop: 40–44px table rows; 38–40px search/filter controls and buttons.
+  - Mobile: >= 44px touch targets for buttons, selectors, and bottom navigation.
+- Motion: 150–220ms limited to `opacity` and `background-color`. Respect `prefers-reduced-motion: reduce`.
+- Shadows: low, restrained shadows (`--shadow-sm`, `--shadow-md`) on panels and modal overlays; data surfaces use hairlines and spacing for hierarchy.
 
-### Component defaults
+### Status Semantics
 
-```css
-.button-primary {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  min-height: var(--button-min-height);
-}
+Status keys represent distinct business domains and must not be overloaded:
 
-.button-primary:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-}
+- **Lifecycle (Products, Partners)**: `ACTIVE` ("Active"), `INACTIVE` ("Inactive")
+- **Integration Deliveries**: `SUCCEEDED` ("Succeeded"), `FAILED` ("Failed")
+- **Orders**: `DRAFT` ("Draft"), `CONFIRMED` ("Confirmed"), `FULFILLED` ("Fulfilled"), `CANCELLED` ("Cancelled")
+- **Inventory Alerts**: `OPEN` ("Open"), `RESOLVED` ("Resolved")
+- **Stock Ledger Movements**: `RECEIPT` ("Receipt"), `SALE` ("Sale"), `ADJUSTMENT_IN` ("Adjustment in"), `ADJUSTMENT_OUT` ("Adjustment out")
 
-.input,
-.form-field input,
-.form-field select,
-.form-field textarea {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--input-radius);
-  min-height: var(--input-min-height);
-}
-```
+## Layout and Responsive Behavior
 
-## Layout and responsive behavior
-
-- Validate at 375, 390, 768, 1024, and 1440px.
-- Desktop uses a persistent sidebar and a readable fluid main column.
-- At 768px and below, hide the sidebar, reserve safe-area space for the fixed
-  four-item bottom navigation, and render primary data as ordered record cards.
-- Keep one reading column on narrow screens. No horizontal page scroll and no
-  content hidden under fixed navigation.
-
-## Product and interaction boundaries
-
-- Preserve every existing route, navigation label, form field name/order,
-  permission, tenant boundary, and mutation behavior.
-- Keep drawer focus trap, Escape close, focus restoration, and unsaved-change
-  guard behavior intact.
-- Do not add dark mode, a second icon family, decorative gradients/glows,
-  repeated eyebrow labels, Unicode arrows, or card lift on hover.
-- Marketing may use a checked-in product screenshot, but dashboard surfaces
-  must represent real workflows rather than fabricated metric decoration.
+- Tested & validated at 390px (mobile), 768px (tablet), 1024px (laptop), and 1440px (desktop).
+- Desktop uses a fixed 228px ink sidebar with integrated organization header and active terracotta indicators.
+- At 768px and below, hide the sidebar, render primary data as flat record cards, and display sticky bottom navigation with safe-area insets.
+- Zero horizontal overflow on mobile viewports.

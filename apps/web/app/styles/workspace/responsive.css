@@ -118,6 +118,11 @@
     background: var(--surface-hover);
   }
 
+  .mobile-record-card.mobile-record-selected {
+    background: var(--color-accent-subtle, #faebe4);
+    border-color: var(--color-accent);
+  }
+
   .mobile-record-heading {
     align-items: center;
     border-bottom: 1px solid var(--line-subtle);
