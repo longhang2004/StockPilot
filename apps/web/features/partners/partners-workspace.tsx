@@ -68,7 +68,7 @@ export function PartnersWorkspace({ role }: { role: Role }) {
               }}
               type="button"
             >
-              <Plus size={17} /> Add partner
+              <Plus size={16} /> Add partner
             </button>
           ) : undefined
         }
@@ -117,6 +117,7 @@ export function PartnersWorkspace({ role }: { role: Role }) {
                 }
               : undefined
           }
+          selectedId={editing?.id}
         />
       ) : (
         <EmptyState

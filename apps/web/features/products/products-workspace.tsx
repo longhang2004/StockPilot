@@ -132,7 +132,7 @@ export function ProductsWorkspace({ role }: { role: Role }) {
               }}
               type="button"
             >
-              <Plus size={17} /> Add product
+              <Plus size={16} /> Add product
             </button>
           ) : undefined
         }
@@ -232,10 +232,10 @@ const productColumns: TableColumn<ProductRecord>[] = [
           <Image
             alt={`${record.name} product image`}
             className="product-thumbnail"
-            height={48}
-            sizes="48px"
+            height={38}
+            sizes="38px"
             src={record.image.url}
-            width={48}
+            width={38}
           />
         ) : (
           <span
@@ -261,11 +261,13 @@ const productColumns: TableColumn<ProductRecord>[] = [
   {
     key: 'salePrice',
     label: 'Sale price',
+    align: 'right',
     render: (record) => <span className="mono">${record.salePrice}</span>,
   },
   {
     key: 'reorderPoint',
     label: 'Reorder point',
+    align: 'right',
     render: (record) => <span className="mono">{record.reorderPoint}</span>,
   },
   {

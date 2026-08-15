@@ -18,6 +18,12 @@ import { spawn } from 'node:child_process';
 import { appendFileSync, mkdirSync } from 'node:fs';
 import process from 'node:process';
 
+try {
+  process.loadEnvFile('.env');
+} catch {
+  // Ignored if .env already exported
+}
+
 // Readiness, not liveness: E2E exercises DB-backed endpoints, so the gate
 // must prove the API can serve them (QUEUE_REQUIRED=false is compatible —
 // readiness returns 200 with queue:not_configured). The API port follows
@@ -115,13 +121,17 @@ try {
   fail(error.message);
 }
 
-const web = spawn('pnpm', ['--filter', '@stockpilot/web', 'dev'], {
-  stdio: ['inherit', 'pipe', 'pipe'],
-  // The web app must serve Playwright's webServer.url (:3000). It inherits
-  // everything else — including API_INTERNAL_URL, which points at the API
-  // port (PORT may differ from 3000 when a host already uses it).
-  env: { ...process.env, PORT: '3000' },
-});
+const web = spawn(
+  'pnpm',
+  ['--filter', '@stockpilot/web', 'dev', '--port', '3000'],
+  {
+    stdio: ['inherit', 'pipe', 'pipe'],
+    // The web app must serve Playwright's webServer.url (:3000). It inherits
+    // everything else — including API_INTERNAL_URL, which points at the API
+    // port (PORT may differ from 3000 when a host already uses it).
+    env: { ...process.env, PORT: '3000' },
+  },
+);
 tee(web.stdout, 'web');
 tee(web.stderr, 'web');
 web.on('exit', (code) => {
@@ -158,7 +168,7 @@ for (const route of METADATA_ROUTES) {
       const response = await fetch(`${WEB_URL}${route}`, {
         signal: AbortSignal.timeout(30_000),
       });
-      if (response.ok) {
+      if (response.ok || response.status === 404) {
         warmed = true;
         break;
       }

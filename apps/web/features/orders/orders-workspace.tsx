@@ -95,7 +95,7 @@ export function OrdersWorkspace({ role }: { role: Role }) {
             onClick={() => setFormOpen(true)}
             type="button"
           >
-            <Plus size={17} /> New draft
+            <Plus size={16} /> New draft
           </button>
         }
       />
@@ -136,6 +136,7 @@ export function OrdersWorkspace({ role }: { role: Role }) {
             data={list.data.items}
             getRowLabel={(record) => record.orderNumber}
             onRowClick={(record) => setSelectedId(record.id)}
+            selectedId={selectedId}
           />
           <Pagination
             onPageChange={setPage}
@@ -226,11 +227,13 @@ const orderColumns: TableColumn<OrderRecord>[] = [
   {
     key: 'subtotal',
     label: 'Value',
+    align: 'right',
     render: (record) => <span className="mono">${record.subtotal}</span>,
   },
   {
     key: 'createdAt',
     label: 'Created',
+    align: 'right',
     render: (record) => formatDate(record.createdAt),
   },
 ];

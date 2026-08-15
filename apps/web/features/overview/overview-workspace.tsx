@@ -91,7 +91,7 @@ export function OverviewWorkspace({
               {overview.data?.plan ?? 'PRO'}
             </span>
             <Link className="button button-primary" href="/app/orders?new=1">
-              Create draft order <ArrowRight size={17} />
+              Create draft order <ArrowRight size={15} />
             </Link>
           </>
         }
@@ -250,11 +250,13 @@ const recentOrderColumns: TableColumn<OverviewRecentOrder>[] = [
   {
     key: 'subtotal',
     label: 'Value',
+    align: 'right',
     render: (record) => <span className="mono">${record.subtotal}</span>,
   },
   {
     key: 'createdAt',
     label: 'Created',
+    align: 'right',
     render: (record) => formatDate(record.createdAt),
   },
 ];

@@ -53,7 +53,7 @@ export function ImportsWorkspace({ role }: { role: Role }) {
             className="button button-secondary"
             href="/api/v1/products/export.csv"
           >
-            <DownloadSimple size={17} /> Export catalog
+            <DownloadSimple size={16} /> Export catalog
           </a>
         }
       />
@@ -66,7 +66,7 @@ export function ImportsWorkspace({ role }: { role: Role }) {
       </div>
       <article className="import-card">
         <label className="file-drop">
-          <UploadSimple size={24} aria-hidden="true" />
+          <UploadSimple size={22} aria-hidden="true" />
           <strong>{fileName || 'Choose a product CSV'}</strong>
           <small>Maximum 2 MB and 5,000 rows</small>
           <input

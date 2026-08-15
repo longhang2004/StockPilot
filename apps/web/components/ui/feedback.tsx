@@ -17,7 +17,7 @@ const statusLabels: Record<string, string> = {
   RECEIPT: 'Receipt',
   RESOLVED: 'Resolved',
   SALE: 'Sale',
-  SUCCEEDED: 'Succeeded',
+  SUCCEEDED: 'Active',
 };
 
 export function StatusBadge({ value }: { value: string }) {
@@ -42,11 +42,11 @@ export function EmptyState({
   return (
     <div className="state-card state-empty">
       <div className="state-icon" aria-hidden="true">
-        <CheckCircle size={20} weight="regular" />
+        <CheckCircle size={18} weight="regular" />
       </div>
       <strong>{title}</strong>
       <p>{description}</p>
-      {action}
+      {action ? <div style={{ marginTop: '0.5rem' }}>{action}</div> : null}
     </div>
   );
 }
@@ -63,7 +63,7 @@ export function ErrorState({
   return (
     <div className="state-card state-error" role="alert">
       <div className="state-icon" aria-hidden="true">
-        <XCircle size={20} weight="regular" />
+        <XCircle size={18} weight="regular" />
       </div>
       <strong>{title}</strong>
       <p>{description}</p>
@@ -71,6 +71,7 @@ export function ErrorState({
         <button
           className="button button-secondary"
           onClick={onRetry}
+          style={{ marginTop: '0.5rem' }}
           type="button"
         >
           Try again
@@ -101,9 +102,9 @@ export function ToastRegion({ toasts }: { toasts: ToastMessage[] }) {
     <div className="toast-region" aria-live="polite" aria-atomic="true">
       {toasts.map((toast) => (
         <div className={`toast toast-${toast.tone}`} key={toast.id}>
-          {toast.tone === 'success' ? <CheckCircle size={18} /> : null}
-          {toast.tone === 'error' ? <XCircle size={18} /> : null}
-          {toast.tone === 'info' ? <WarningCircle size={18} /> : null}
+          {toast.tone === 'success' ? <CheckCircle size={16} /> : null}
+          {toast.tone === 'error' ? <XCircle size={16} /> : null}
+          {toast.tone === 'info' ? <WarningCircle size={16} /> : null}
           <span>{toast.message}</span>
         </div>
       ))}

@@ -71,6 +71,7 @@ export function AuditWorkspace() {
           data={audit.data.items}
           getRowLabel={(record) => record.action}
           onRowClick={setSelected}
+          selectedId={selected?.id}
         />
       ) : (
         <EmptyState
@@ -172,6 +173,7 @@ const auditColumns: TableColumn<AuditRecord>[] = [
   {
     key: 'createdAt',
     label: 'When',
+    align: 'right',
     render: (record) => formatDateTime(record.createdAt),
   },
 ];

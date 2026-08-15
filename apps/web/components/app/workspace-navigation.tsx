@@ -236,7 +236,7 @@ export function WorkspaceSidebar({
               href={href}
               key={href}
             >
-              <Icon size={18} weight="regular" aria-hidden="true" />
+              <Icon size={16} weight="regular" aria-hidden="true" />
               <span>{label}</span>
             </Link>
           );
@@ -281,16 +281,17 @@ export function MobileWorkspaceNavigation({
               href={href}
               key={href}
             >
-              <Icon size={19} aria-hidden="true" />
+              <Icon size={18} aria-hidden="true" />
               <span>{label}</span>
             </Link>
           );
         })}
       <Link
         aria-current={section === 'more' ? 'page' : undefined}
+        className={section === 'more' ? 'mobile-nav-active' : undefined}
         href="/app/more"
       >
-        <GearSix size={19} aria-hidden="true" />
+        <GearSix size={18} aria-hidden="true" />
         <span>More</span>
       </Link>
     </nav>

@@ -58,6 +58,7 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
           data={deliveries.data.items}
           getRowLabel={(record) => record.externalDeliveryId}
           onRowClick={setSelected}
+          selectedId={selected?.id}
         />
       ) : (
         <EmptyState
@@ -129,11 +130,13 @@ const integrationColumns: TableColumn<IntegrationRecord>[] = [
   {
     key: 'attempts',
     label: 'Attempts',
+    align: 'right',
     render: (record) => <span className="mono">{record.attempts}</span>,
   },
   {
     key: 'createdAt',
     label: 'Created',
+    align: 'right',
     render: (record) => formatDate(record.createdAt),
   },
 ];

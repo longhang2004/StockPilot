@@ -20,8 +20,8 @@ const EnvironmentSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
     .default('development'),
-  MIGRATION_DATABASE_URL: z.string().min(1).optional(),
-  QUEUE_DATABASE_URL: z.string().min(1).optional(),
+  MIGRATION_DATABASE_URL: z.string().min(1).optional().or(z.literal('')),
+  QUEUE_DATABASE_URL: z.string().min(1).optional().or(z.literal('')),
   PORT: z.coerce.number().int().positive().default(4000),
   SENTRY_DSN: z.url().optional().or(z.literal('')),
   SESSION_COOKIE_NAME: z.string().min(1).default('stockpilot_session'),

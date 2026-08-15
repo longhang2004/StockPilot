@@ -48,7 +48,7 @@ export function ReceiptsWorkspace() {
             onClick={() => setOpen(true)}
             type="button"
           >
-            <Plus size={17} /> Receive stock
+            <Plus size={16} /> Receive stock
           </button>
         }
       />
@@ -107,19 +107,26 @@ const movementColumns: TableColumn<MovementRecord>[] = [
     label: 'Product',
     render: (record) => (
       <span>
-        {record.product?.name ?? '—'}
-        <small className="muted-note mono">{record.product?.sku}</small>
+        <strong>{record.product?.name ?? '—'}</strong>
+        <small
+          className="muted-note mono"
+          style={{ display: 'block', marginTop: '0.1rem' }}
+        >
+          {record.product?.sku}
+        </small>
       </span>
     ),
   },
   {
     key: 'quantityDelta',
     label: 'Quantity',
+    align: 'right',
     render: (record) => <span className="mono">+{record.quantityDelta}</span>,
   },
   {
     key: 'createdAt',
     label: 'When',
+    align: 'right',
     render: (record) => formatDateTime(record.createdAt),
   },
 ];

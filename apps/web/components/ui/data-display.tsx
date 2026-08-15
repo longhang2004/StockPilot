@@ -9,10 +9,10 @@ export function PageHeader({
   description,
   action,
 }: {
-  eyebrow?: string;
+  eyebrow?: string | undefined;
   title: string;
-  description?: string;
-  action?: ReactNode;
+  description?: string | undefined;
+  action?: ReactNode | undefined;
 }) {
   return (
     <header className="page-header">
@@ -35,7 +35,7 @@ export function StatCard({
   label: string;
   value: ReactNode;
   hint: string;
-  tone?: 'neutral' | 'attention' | 'positive' | 'danger';
+  tone?: 'neutral' | 'attention' | 'positive' | 'danger' | undefined;
 }) {
   return (
     <article className={`stat-card stat-card-${tone}`}>
@@ -49,7 +49,8 @@ export function StatCard({
 export interface TableColumn<T> {
   key: string;
   label: string;
-  render?: (record: T) => ReactNode;
+  align?: 'left' | 'right' | 'center' | undefined;
+  render?: ((record: T) => ReactNode) | undefined;
 }
 
 export function ResponsiveDataTable<T extends { id?: string }>({
@@ -58,12 +59,14 @@ export function ResponsiveDataTable<T extends { id?: string }>({
   onRowClick,
   getRowLabel,
   ariaLabel = 'Data table',
+  selectedId,
 }: {
   columns: TableColumn<T>[];
   data: T[];
   onRowClick?: ((record: T) => void) | undefined;
   getRowLabel?: ((record: T) => string) | undefined;
-  ariaLabel?: string;
+  ariaLabel?: string | undefined;
+  selectedId?: string | null | undefined;
 }) {
   if (data.length === 0) return null;
   const hasRowAction = Boolean(onRowClick);
@@ -87,79 +90,113 @@ export function ResponsiveDataTable<T extends { id?: string }>({
           <thead>
             <tr>
               {columns.map((column) => (
-                <th key={column.key} scope="col">
+                <th
+                  key={column.key}
+                  scope="col"
+                  style={column.align ? { textAlign: column.align } : undefined}
+                >
                   {column.label}
                 </th>
               ))}
-              {hasRowAction ? <th scope="col">Action</th> : null}
+              {hasRowAction ? (
+                <th scope="col" style={{ textAlign: 'right' }}>
+                  Action
+                </th>
+              ) : null}
             </tr>
           </thead>
           <tbody>
-            {data.map((record, index) => (
-              <tr key={record.id ?? `record-${index}`}>
-                {columns.map((column) => (
-                  <td data-label={column.label} key={column.key}>
-                    {column.render
-                      ? column.render(record)
-                      : String(record[column.key as keyof T] ?? '—')}
-                  </td>
-                ))}
-                {onRowClick ? (
-                  <td className="table-action-cell">
-                    <button
-                      aria-label={`Open ${rowLabel(record, index)}`}
-                      className="table-row-action"
-                      onClick={() => onRowClick(record)}
-                      type="button"
+            {data.map((record, index) => {
+              const isSelected = Boolean(
+                selectedId && record.id === selectedId,
+              );
+              return (
+                <tr
+                  key={record.id ?? `record-${index}`}
+                  className={isSelected ? 'table-row-selected' : undefined}
+                  style={
+                    isSelected
+                      ? {
+                          backgroundColor:
+                            'var(--color-accent-subtle, #faebe4)',
+                          outline: '1px solid var(--color-accent)',
+                        }
+                      : undefined
+                  }
+                >
+                  {columns.map((column) => (
+                    <td
+                      data-label={column.label}
+                      key={column.key}
+                      style={
+                        column.align ? { textAlign: column.align } : undefined
+                      }
                     >
-                      Open <ArrowUpRight size={16} aria-hidden="true" />
-                    </button>
-                  </td>
-                ) : null}
-              </tr>
-            ))}
+                      {column.render
+                        ? column.render(record)
+                        : String(record[column.key as keyof T] ?? '—')}
+                    </td>
+                  ))}
+                  {onRowClick ? (
+                    <td className="table-action-cell">
+                      <button
+                        aria-label={`Open ${rowLabel(record, index)}`}
+                        className="table-row-action"
+                        onClick={() => onRowClick(record)}
+                        type="button"
+                      >
+                        Open <ArrowUpRight size={14} aria-hidden="true" />
+                      </button>
+                    </td>
+                  ) : null}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
       <div className="mobile-record-list">
-        {data.map((record, index) => (
-          <article
-            aria-label={onRowClick ? rowLabel(record, index) : undefined}
-            className="mobile-record-card"
-            key={record.id ?? `mobile-${index}`}
-          >
-            <div className="mobile-record-heading">
-              <strong>{rowLabel(record, index)}</strong>
-              {shouldShowPrimary(record, index) ? (
-                <span className="mobile-record-primary">
-                  {primaryValue(record)}
-                </span>
+        {data.map((record, index) => {
+          const isSelected = Boolean(selectedId && record.id === selectedId);
+          return (
+            <article
+              aria-label={onRowClick ? rowLabel(record, index) : undefined}
+              className={`mobile-record-card${isSelected ? ' mobile-record-selected' : ''}`}
+              key={record.id ?? `mobile-${index}`}
+            >
+              <div className="mobile-record-heading">
+                <strong>{rowLabel(record, index)}</strong>
+                {shouldShowPrimary(record, index) ? (
+                  <span className="mobile-record-primary">
+                    {primaryValue(record)}
+                  </span>
+                ) : null}
+              </div>
+              <dl>
+                {columns.slice(1).map((column) => (
+                  <div key={column.key}>
+                    <dt>{column.label}</dt>
+                    <dd>
+                      {column.render
+                        ? column.render(record)
+                        : String(record[column.key as keyof T] ?? '—')}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              {onRowClick ? (
+                <button
+                  aria-label={`Open ${rowLabel(record, index)}`}
+                  className="mobile-record-action"
+                  onClick={() => onRowClick(record)}
+                  type="button"
+                >
+                  Open <ArrowUpRight size={14} aria-hidden="true" />
+                </button>
               ) : null}
-            </div>
-            <dl>
-              {columns.slice(1).map((column) => (
-                <div key={column.key}>
-                  <dt>{column.label}</dt>
-                  <dd>
-                    {column.render
-                      ? column.render(record)
-                      : String(record[column.key as keyof T] ?? '—')}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            {onRowClick ? (
-              <button
-                aria-label={`Open ${rowLabel(record, index)}`}
-                className="mobile-record-action"
-                onClick={() => onRowClick(record)}
-                type="button"
-              >
-                Open <ArrowUpRight size={16} aria-hidden="true" />
-              </button>
-            ) : null}
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </div>
     </div>
   );
@@ -183,9 +220,9 @@ export function Pagination({
         onClick={() => onPageChange(page - 1)}
         type="button"
       >
-        <CaretLeft size={18} />
+        <CaretLeft size={16} />
       </button>
-      <span>
+      <span className="mono">
         Page <strong>{page}</strong> of {totalPages}
       </span>
       <button
@@ -194,7 +231,7 @@ export function Pagination({
         onClick={() => onPageChange(page + 1)}
         type="button"
       >
-        <CaretRight size={18} />
+        <CaretRight size={16} />
       </button>
     </nav>
   );

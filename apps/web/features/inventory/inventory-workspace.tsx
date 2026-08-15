@@ -62,11 +62,34 @@ export function InventoryWorkspace({ role }: { role: Role }) {
               onClick={() => setAdjustOpen(true)}
               type="button"
             >
-              <Plus size={17} /> Adjust stock
+              <Plus size={16} /> Adjust stock
             </button>
           ) : undefined
         }
       />
+      <div className="workspace-grid" aria-label="Inventory summary">
+        <StatCard
+          hint="Current tenant balances"
+          label="SKUs tracked"
+          value={balances.data?.total ?? 0}
+        />
+        <StatCard
+          hint="At or below reorder point"
+          label="Open alerts"
+          tone="danger"
+          value={
+            (alerts.data?.items ?? []).filter(
+              (alert) => alert.status === 'OPEN',
+            ).length
+          }
+        />
+        <StatCard
+          hint="Available units across balances"
+          label="Available"
+          tone="positive"
+          value={filtered.reduce((sum, balance) => sum + balance.available, 0)}
+        />
+      </div>
       <SearchFilterBar
         onSearch={setSearch}
         placeholder="Search SKU or product"
@@ -95,32 +118,6 @@ export function InventoryWorkspace({ role }: { role: Role }) {
         />
       ) : (
         <>
-          <div className="workspace-grid">
-            <StatCard
-              hint="Current tenant balances"
-              label="SKUs tracked"
-              value={balances.data?.total ?? 0}
-            />
-            <StatCard
-              hint="At or below reorder point"
-              label="Open alerts"
-              tone="danger"
-              value={
-                (alerts.data?.items ?? []).filter(
-                  (alert) => alert.status === 'OPEN',
-                ).length
-              }
-            />
-            <StatCard
-              hint="Available units across balances"
-              label="Available"
-              tone="positive"
-              value={filtered.reduce(
-                (sum, balance) => sum + balance.available,
-                0,
-              )}
-            />
-          </div>
           {filtered.length ? (
             <ResponsiveDataTable
               columns={balanceColumns}
@@ -195,23 +192,31 @@ const balanceColumns: TableColumn<BalanceRecord>[] = [
     render: (record) => (
       <span>
         <strong>{record.product.name}</strong>
-        <small className="muted-note mono">{record.product.sku}</small>
+        <small
+          className="muted-note mono"
+          style={{ display: 'block', marginTop: '0.1rem' }}
+        >
+          {record.product.sku}
+        </small>
       </span>
     ),
   },
   {
     key: 'onHand',
     label: 'On hand',
+    align: 'right',
     render: (record) => <span className="mono">{record.onHand}</span>,
   },
   {
     key: 'reserved',
     label: 'Reserved',
+    align: 'right',
     render: (record) => <span className="mono">{record.reserved}</span>,
   },
   {
     key: 'available',
     label: 'Available',
+    align: 'right',
     render: (record) => (
       <span className="mono">
         <strong>{record.available}</strong>
@@ -221,6 +226,7 @@ const balanceColumns: TableColumn<BalanceRecord>[] = [
   {
     key: 'updatedAt',
     label: 'Updated',
+    align: 'right',
     render: (record) => formatDate(record.updatedAt),
   },
 ];

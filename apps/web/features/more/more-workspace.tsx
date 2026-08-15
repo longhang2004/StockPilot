@@ -30,7 +30,7 @@ export function MoreWorkspace({ session }: { session: WorkspaceSessionView }) {
         {links.map(([label, href]) => (
           <Link className="more-link" href={href} key={href}>
             <strong>{label}</strong>
-            <ArrowRight size={17} />
+            <ArrowRight size={16} aria-hidden="true" />
           </Link>
         ))}
       </div>
