@@ -346,13 +346,19 @@ export default function HomePage() {
                   <h3>{tour.title}</h3>
                   <p>{tour.body}</p>
                 </div>
-                <figure className="tour-shot">
+                <figure
+                  className={`tour-shot${tour.image.includes('mobile') ? ' tour-shot-mobile' : ''}`}
+                >
                   <Image
                     src={tour.image}
                     alt={tour.alt}
-                    width={tour.image.includes('mobile') ? 520 : 1100}
-                    height={tour.image.includes('mobile') ? 752 : 728}
-                    sizes="(max-width: 900px) 100vw, 50vw"
+                    width={tour.image.includes('mobile') ? 380 : 1100}
+                    height={tour.image.includes('mobile') ? 580 : 728}
+                    sizes={
+                      tour.image.includes('mobile')
+                        ? '(max-width: 900px) 100vw, 360px'
+                        : '(max-width: 900px) 100vw, 50vw'
+                    }
                     loading="lazy"
                   />
                   <figcaption>{tour.caption}</figcaption>
