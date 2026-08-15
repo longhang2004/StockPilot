@@ -192,6 +192,24 @@ const jsonLd = {
       inLanguage: 'en',
       primaryImageOfPage: `${siteOrigin}/assets/overview-desktop.png`,
     },
+    {
+      '@type': 'SoftwareApplication',
+      name: siteName,
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      description: siteDescription,
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+    },
+    {
+      '@type': 'Organization',
+      name: siteName,
+      url: siteOrigin,
+      logo: `${siteOrigin}/icon`,
+    },
   ],
 };
 
@@ -215,6 +233,15 @@ export default function HomePage() {
             <a href="#workflow">Workflow</a>
             <a href="#trust">Trust</a>
             <a href="#demo">Demo</a>
+          </div>
+          <div className="site-nav-cta">
+            <Link
+              className="button button-nav-action"
+              href="/login?role=manager"
+            >
+              Manager demo
+              <MarketingArrowUpRightIcon />
+            </Link>
           </div>
         </nav>
       </header>
