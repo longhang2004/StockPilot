@@ -452,7 +452,9 @@
 }
 
 .tour-number {
-  color: var(--color-accent);
+  /* Darker accent for 11px bold mono text: #b34718 fails WCAG AA on the
+     tour background (4.43:1); #963910 passes at 5.88:1. */
+  color: var(--color-accent-hover);
   display: block;
   margin-bottom: 0.75rem;
 }
@@ -801,6 +803,15 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Entrance motion is decorative; users who request reduced motion get a
+   static hero (also keeps axe sampling deterministic for motion users). */
+@media (prefers-reduced-motion: reduce) {
+  .hero-copy,
+  .hero-shot {
+    animation: none;
   }
 }
 

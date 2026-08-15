@@ -8,6 +8,14 @@ test.describe('axe smoke', () => {
     page,
   }) => {
     await page.goto('/');
+    // The hero entrance animations fade text in over ~350ms; axe sampling a
+    // mid-fade element computes blended (lower-contrast) colors. Wait for
+    // all animations to settle so the analysis sees the steady-state UI.
+    await page.waitForFunction(
+      () => document.getAnimations().length === 0,
+      null,
+      { timeout: 5_000 },
+    );
     const results = await new AxeBuilder({ page }).analyze();
     expect(
       results.violations.filter(
