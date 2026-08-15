@@ -38,7 +38,7 @@ export function MovementChart({ rows }: { rows: MovementRow[] }) {
         <span className="muted-note">Inbound · Outbound</span>
       </div>
       {rows.length ? (
-        <>
+        <div className="chart-panel-body">
           <div
             className="movement-chart"
             role="img"
@@ -120,7 +120,7 @@ export function MovementChart({ rows }: { rows: MovementRow[] }) {
               </table>
             </div>
           </details>
-        </>
+        </div>
       ) : (
         <EmptyState
           description="Movements will create the 14-day summary automatically."

@@ -17,6 +17,10 @@ export function AnalyticsPanels() {
     1,
     ...data.ordersByStatus.map((row) => row.count),
   );
+  const totalTopUnits = data.topFulfilledProducts.reduce(
+    (sum, product) => sum + product.unitsFulfilled,
+    0,
+  );
   return (
     <div className="analytics-grid">
       <article className="work-panel">
@@ -29,37 +33,41 @@ export function AnalyticsPanels() {
             Open queue
           </Link>
         </div>
-        {data.ordersByStatus.length ? (
-          <div className="status-breakdown">
-            {data.ordersByStatus.map((row) => (
-              <div className="status-breakdown-row" key={row.status}>
-                <StatusBadge value={row.status} />
-                <span
-                  className="status-breakdown-bar"
-                  style={{
-                    width: `${Math.max(6, (row.count / maxStatusCount) * 100)}%`,
-                  }}
-                />
-                <strong>{row.count}</strong>
-              </div>
-            ))}
+        <div className="analytics-panel-body">
+          {data.ordersByStatus.length ? (
+            <div className="status-breakdown">
+              {data.ordersByStatus.map((row) => (
+                <div className="status-breakdown-row" key={row.status}>
+                  <StatusBadge value={row.status} />
+                  <span
+                    className="status-breakdown-bar"
+                    style={{
+                      width: `${Math.max(8, (row.count / maxStatusCount) * 100)}%`,
+                    }}
+                  />
+                  <strong>{row.count}</strong>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              description="Confirmed orders will appear here."
+              title="No orders yet"
+            />
+          )}
+          <div className="chart-kpis">
+            <span>
+              <strong className="mono">${data.fulfilledOrderValue}</strong>
+              fulfilled value
+            </span>
+            <span>
+              <strong className="mono">
+                ${data.averageFulfilledOrderValue}
+              </strong>
+              avg order
+            </span>
           </div>
-        ) : (
-          <EmptyState
-            description="Confirmed orders will appear here."
-            title="No orders yet"
-          />
-        )}
-        <p className="chart-kpis">
-          <span>
-            <strong className="mono">${data.fulfilledOrderValue}</strong>
-            fulfilled value
-          </span>
-          <span>
-            <strong className="mono">${data.averageFulfilledOrderValue}</strong>
-            avg order
-          </span>
-        </p>
+        </div>
       </article>
       <article className="work-panel">
         <div className="panel-heading">
@@ -69,33 +77,39 @@ export function AnalyticsPanels() {
           </div>
           <span className="muted-note">{data.fulfilledOrderCount} orders</span>
         </div>
-        {data.topFulfilledProducts.length ? (
-          <div className="top-products">
-            {data.topFulfilledProducts.map((product, index) => (
-              <div className="top-product-row" key={product.sku}>
-                <span className="top-product-rank">{index + 1}</span>
-                <span className="top-product-name">
-                  <strong>{product.name}</strong>
-                  <small className="mono">{product.sku}</small>
-                </span>
-                <span className="top-product-units mono">
-                  {product.unitsFulfilled} units
-                </span>
-              </div>
-            ))}
+        <div className="analytics-panel-body">
+          {data.topFulfilledProducts.length ? (
+            <div className="top-products">
+              {data.topFulfilledProducts.map((product, index) => (
+                <div className="top-product-row" key={product.sku}>
+                  <span className="top-product-rank">{index + 1}</span>
+                  <span className="top-product-name">
+                    <strong>{product.name}</strong>
+                    <small className="mono">{product.sku}</small>
+                  </span>
+                  <span className="top-product-units mono">
+                    {product.unitsFulfilled} units
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              description="Fulfilled sales movements will rank products here."
+              title="No fulfilled units yet"
+            />
+          )}
+          <div className="chart-kpis">
+            <span>
+              <strong className="mono">{data.lowStockSkuCount}</strong>
+              low-stock SKUs
+            </span>
+            <span>
+              <strong className="mono">{totalTopUnits}</strong>
+              top units fulfilled
+            </span>
           </div>
-        ) : (
-          <EmptyState
-            description="Fulfilled sales movements will rank products here."
-            title="No fulfilled units yet"
-          />
-        )}
-        <p className="chart-kpis">
-          <span>
-            <strong className="mono">{data.lowStockSkuCount}</strong>
-            low-stock SKUs
-          </span>
-        </p>
+        </div>
       </article>
     </div>
   );

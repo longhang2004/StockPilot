@@ -429,9 +429,13 @@
 
 .detail-lines,
 .transition-timeline,
-.team-list,
+.team-list {
+  border-top: 1px solid var(--line);
+}
+
 .import-errors {
   border-top: 1px solid var(--line);
+  padding: 0 1rem 0.75rem;
 }
 
 .detail-line,
