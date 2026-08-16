@@ -45,11 +45,11 @@ All limits are fixed 60-second windows enforced per API process
 (`apps/api/src/auth/rate-limit.guard.ts` and `auth-throttle.service.ts`).
 Exceeding a limit returns `429` with a `Retry-After` header.
 
-| Tier | Key | Default | Covered routes |
-| ---- | --- | ------- | -------------- |
-| Auth | client address + route | 10/min | `POST /v1/auth/login`, `/signup`, `/demo-login` |
-| Public | client address + route | 60/min | Other public writes: storefront and Stripe webhooks |
-| User | user id (all routes) | 240/min | Every authenticated write |
+| Tier   | Key                    | Default | Covered routes                                      |
+| ------ | ---------------------- | ------- | --------------------------------------------------- |
+| Auth   | client address + route | 10/min  | `POST /v1/auth/login`, `/signup`, `/demo-login`     |
+| Public | client address + route | 60/min  | Other public writes: storefront and Stripe webhooks |
+| User   | user id (all routes)   | 240/min | Every authenticated write                           |
 
 The auth tier is the per-client brute-force tripwire; the per-account
 throttle below is the second line of defense that stops credential stuffing

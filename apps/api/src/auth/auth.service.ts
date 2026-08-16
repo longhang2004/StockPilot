@@ -38,7 +38,8 @@ export class AuthService {
     @Inject(ENVIRONMENT) private readonly environment: Environment,
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(DemoResetService) private readonly demoReset: DemoResetService,
-    @Inject(AuthThrottleService) private readonly authThrottle: AuthThrottleService,
+    @Inject(AuthThrottleService)
+    private readonly authThrottle: AuthThrottleService,
   ) {}
 
   async signup(input: {

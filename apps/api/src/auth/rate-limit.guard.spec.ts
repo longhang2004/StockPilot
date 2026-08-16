@@ -23,15 +23,13 @@ function createGuard(
   return new RateLimitGuard(reflector as never, environment);
 }
 
-function createContext(
-  request: {
-    auth?: { user?: { id: string } };
-    get(name: string): string | undefined;
-    method: string;
-    path?: string;
-    socket?: { remoteAddress?: string };
-  },
-): ExecutionContext {
+function createContext(request: {
+  auth?: { user?: { id: string } };
+  get(name: string): string | undefined;
+  method: string;
+  path?: string;
+  socket?: { remoteAddress?: string };
+}): ExecutionContext {
   const headers: Record<string, string> = {};
   request.get = (name: string) => headers[name.toLowerCase()];
   const response = { setHeader: vi.fn() };
@@ -57,9 +55,9 @@ function expectTooManyRequests(
   }
   expect(caught).toBeInstanceOf(HttpException);
   expect((caught as HttpException).getStatus()).toBe(429);
-  const response = context
-    .switchToHttp()
-    .getResponse() as { setHeader: ReturnType<typeof vi.fn> };
+  const response = context.switchToHttp().getResponse() as {
+    setHeader: ReturnType<typeof vi.fn>;
+  };
   expect(response.setHeader).toHaveBeenCalledWith(
     'Retry-After',
     expect.any(String),
@@ -128,13 +126,13 @@ describe('RateLimitGuard', () => {
     expectTooManyRequests(guard, exhausted('/v1/auth/login', '1.2.3.4'));
 
     // A different client address has its own budget.
-    expect(
-      guard.canActivate(exhausted('/v1/auth/login', '5.6.7.8')),
-    ).toBe(true);
+    expect(guard.canActivate(exhausted('/v1/auth/login', '5.6.7.8'))).toBe(
+      true,
+    );
     // A different auth route has its own budget.
-    expect(
-      guard.canActivate(exhausted('/v1/auth/signup', '1.2.3.4')),
-    ).toBe(true);
+    expect(guard.canActivate(exhausted('/v1/auth/signup', '1.2.3.4'))).toBe(
+      true,
+    );
   });
 
   it('applies the looser public tier to non-auth public writes', () => {

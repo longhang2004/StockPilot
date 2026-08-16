@@ -68,8 +68,7 @@ export class AuthThrottleService {
         throw new HttpException(
           {
             code: 'AUTH_ATTEMPTS_EXCEEDED',
-            message:
-              'Too many failed sign-in attempts. Try again later.',
+            message: 'Too many failed sign-in attempts. Try again later.',
           },
           HttpStatus.TOO_MANY_REQUESTS,
         );

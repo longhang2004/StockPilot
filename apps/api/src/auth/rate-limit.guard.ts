@@ -121,11 +121,7 @@ export class RateLimitGuard implements CanActivate {
       // Authenticated write: per-user tier across all routes. The session
       // guard runs before this one, so request.auth is always populated for
       // protected routes.
-      return this.enforce(
-        context,
-        this.userLimiter,
-        `user:${auth.user.id}`,
-      );
+      return this.enforce(context, this.userLimiter, `user:${auth.user.id}`);
     }
 
     if (!isPublic) {
@@ -136,23 +132,26 @@ export class RateLimitGuard implements CanActivate {
     const tier = AUTH_ROUTE_PATHS.has(request.path ?? '')
       ? this.authLimiter
       : this.publicLimiter;
-    return this.enforce(context, tier, `${address}:${request.path ?? 'public'}`);
+    return this.enforce(
+      context,
+      tier,
+      `${address}:${request.path ?? 'public'}`,
+    );
   }
 
   /** Aggregate limiter state for the readiness endpoint and operators. */
   stats(): RateLimitStats {
     return {
       buckets:
-        this.authLimiter.size +
-        this.publicLimiter.size +
-        this.userLimiter.size,
+        this.authLimiter.size + this.publicLimiter.size + this.userLimiter.size,
       rejected: {
         public: this.publicLimiter.rejected,
         auth: this.authLimiter.rejected,
         user: this.userLimiter.rejected,
       },
       limits: {
-        publicWritesPerMinute: this.environment.RATE_LIMIT_PUBLIC_WRITES_PER_MIN,
+        publicWritesPerMinute:
+          this.environment.RATE_LIMIT_PUBLIC_WRITES_PER_MIN,
         authWritesPerMinute: this.environment.RATE_LIMIT_AUTH_WRITES_PER_MIN,
         userWritesPerMinute: this.environment.RATE_LIMIT_USER_WRITES_PER_MIN,
       },

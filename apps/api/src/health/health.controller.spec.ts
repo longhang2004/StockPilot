@@ -33,8 +33,7 @@ describe('HealthController', () => {
           useValue: { QUEUE_REQUIRED: false },
         },
         {
-          provide: (await import('../auth/rate-limit.guard.js'))
-            .RateLimitGuard,
+          provide: (await import('../auth/rate-limit.guard.js')).RateLimitGuard,
           useValue: { stats: () => RATE_LIMIT_STATS },
         },
       ],
@@ -70,8 +69,7 @@ describe('HealthController', () => {
           useValue: { QUEUE_REQUIRED: false },
         },
         {
-          provide: (await import('../auth/rate-limit.guard.js'))
-            .RateLimitGuard,
+          provide: (await import('../auth/rate-limit.guard.js')).RateLimitGuard,
           useValue: { stats: () => RATE_LIMIT_STATS },
         },
       ],
@@ -111,8 +109,7 @@ describe('HealthController', () => {
           useValue: { QUEUE_REQUIRED: true },
         },
         {
-          provide: (await import('../auth/rate-limit.guard.js'))
-            .RateLimitGuard,
+          provide: (await import('../auth/rate-limit.guard.js')).RateLimitGuard,
           useValue: { stats: () => RATE_LIMIT_STATS },
         },
       ],
@@ -152,8 +149,7 @@ describe('HealthController', () => {
           useValue: { QUEUE_REQUIRED: true },
         },
         {
-          provide: (await import('../auth/rate-limit.guard.js'))
-            .RateLimitGuard,
+          provide: (await import('../auth/rate-limit.guard.js')).RateLimitGuard,
           useValue: { stats: () => RATE_LIMIT_STATS },
         },
       ],

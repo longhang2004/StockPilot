@@ -22,8 +22,7 @@ function createService(
 describe('AuthThrottleService', () => {
   it('allows attempts until the failure limit is reached', () => {
     const service = createService({ limit: 3 });
-    const attempt = () =>
-      service.checkAttempt('owner@example.com', '1.2.3.4');
+    const attempt = () => service.checkAttempt('owner@example.com', '1.2.3.4');
 
     expect(() => attempt()).not.toThrow();
     service.recordFailure('owner@example.com', '1.2.3.4');
@@ -70,9 +69,9 @@ describe('AuthThrottleService', () => {
     service.recordFailure('owner@example.com', '1.2.3.4');
     // Block armed at 1_000 for 15 minutes.
     now = 1_000 + 15 * 60_000 - 1;
-    expect(() =>
-      service.checkAttempt('owner@example.com', '1.2.3.4'),
-    ).toThrow(HttpException);
+    expect(() => service.checkAttempt('owner@example.com', '1.2.3.4')).toThrow(
+      HttpException,
+    );
 
     now = 1_000 + 15 * 60_000;
     expect(() =>
@@ -111,9 +110,9 @@ describe('AuthThrottleService', () => {
     service.recordFailure('Owner@Example.com', '1.2.3.4');
 
     // Same email (different case) and same client is blocked.
-    expect(() =>
-      service.checkAttempt('owner@example.com', '1.2.3.4'),
-    ).toThrow(HttpException);
+    expect(() => service.checkAttempt('owner@example.com', '1.2.3.4')).toThrow(
+      HttpException,
+    );
     // A different client address for the same email is not blocked.
     expect(() =>
       service.checkAttempt('owner@example.com', '5.6.7.8'),
