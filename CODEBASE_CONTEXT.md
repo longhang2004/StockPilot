@@ -247,7 +247,7 @@ attempts, lastError, optional `salesOrderId`); `ProductImportRun` (status, row c
   transaction-locally; RLS enforces row isolation. Org id always derived from the
   session, never from the client.
 - **Rate limiting** (`auth/rate-limit.guard.ts` + `auth/auth-throttle.service.ts`):
-  fixed 60 s windows, in-memory. Three tiers: auth routes 10/min per client+route
+  fixed 60 s windows, in-memory. Three tiers: auth routes 60/min per client+route
   (login/signup/demo-login), other public writes 60/min per client+route, authenticated
   writes 240/min per user. Per-account sign-in throttle: 5 failures per (email, client)
   in 15 min → 429 block for 15 min; success clears. Unknown-email logins verify a dummy

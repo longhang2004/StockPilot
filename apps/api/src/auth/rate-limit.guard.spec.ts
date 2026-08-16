@@ -14,7 +14,7 @@ function createGuard(
   isPublic: () => boolean = () => false,
 ): RateLimitGuard {
   const environment = {
-    RATE_LIMIT_AUTH_WRITES_PER_MIN: overrides.authWritesPerMinute ?? 10,
+    RATE_LIMIT_AUTH_WRITES_PER_MIN: overrides.authWritesPerMinute ?? 60,
     RATE_LIMIT_PUBLIC_WRITES_PER_MIN: overrides.publicWritesPerMinute ?? 60,
     RATE_LIMIT_USER_WRITES_PER_MIN: overrides.userWritesPerMinute ?? 240,
     TRUSTED_PROXY_CIDRS: undefined,
@@ -219,7 +219,7 @@ describe('RateLimitGuard', () => {
       rejected: { public: 0, auth: 0, user: 0 },
       limits: {
         publicWritesPerMinute: 60,
-        authWritesPerMinute: 10,
+        authWritesPerMinute: 60,
         userWritesPerMinute: 240,
       },
     });

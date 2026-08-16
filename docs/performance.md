@@ -40,9 +40,9 @@ Defaults: `API_URL=http://localhost:4000`, `--concurrency 10`,
 The harness logs in once as the seeded Manager and replays the session
 cookie for the read workloads, so they exercise the real auth/session path.
 The write workload is **not** part of the default run: `demo-login` is a
-public write limited to 10 requests per minute per client by the auth-tier
+public write limited to 60 requests per minute per client by the auth-tier
 rate limiter, and load-testing it by default would collide with that limit
-by design. When opted in, the workload is capped at 8 requests so latency
+by design. When opted in, the workload is capped at 40 requests so latency
 numbers are never polluted by intentional 429s.
 
 ### Rate-limit check mode
@@ -117,8 +117,8 @@ them only as a local baseline for change detection.
   The six-hour demo reset clears sessions; do not point the harness at a
   production tenant.
 - **Rate limiting.** The auth-tier limiter caps `/v1/auth/demo-login` at
-  10 requests per minute per client address (in-memory, per process). The
-  default run never touches it; `--include-writes` caps the workload at 8;
+  60 requests per minute per client address (in-memory, per process). The
+  default run never touches it; `--include-writes` caps the workload at 40;
   `--rate-limit-check` is the mode that deliberately crosses it.
 
 ## Scaling notes

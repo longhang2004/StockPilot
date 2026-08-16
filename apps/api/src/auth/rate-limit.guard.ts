@@ -62,7 +62,8 @@ export interface RateLimitStats {
  *
  * Tiers (all fixed 60s windows, all configurable via environment):
  * - auth: public credential routes (login, signup, demo-login), per
- *   (client, route). Default 10/min — the brute-force tripwire per client.
+ *   (client, route). Default 60/min — a coarse per-client backstop; precise
+ *   brute-force defense is the per-account sign-in throttle.
  * - public: other public writes (webhooks), per (client, route).
  *   Default 60/min.
  * - user: every authenticated write, per user across all routes.

@@ -47,13 +47,14 @@ Exceeding a limit returns `429` with a `Retry-After` header.
 
 | Tier   | Key                    | Default | Covered routes                                      |
 | ------ | ---------------------- | ------- | --------------------------------------------------- |
-| Auth   | client address + route | 10/min  | `POST /v1/auth/login`, `/signup`, `/demo-login`     |
+| Auth   | client address + route | 60/min  | `POST /v1/auth/login`, `/signup`, `/demo-login`     |
 | Public | client address + route | 60/min  | Other public writes: storefront and Stripe webhooks |
 | User   | user id (all routes)   | 240/min | Every authenticated write                           |
 
-The auth tier is the per-client brute-force tripwire; the per-account
-throttle below is the second line of defense that stops credential stuffing
-even when the attacker rotates source addresses.
+The auth tier is a coarse per-client backstop (its default equals the public
+tier because proxied clients share one bucket); the per-account throttle
+below is the precise defense that stops credential stuffing even when the
+attacker rotates source addresses.
 
 **Per-account sign-in throttle.** Failed credential attempts are counted per
 (email, client address) pair. After `AUTH_FAILURE_LIMIT` (default 5)

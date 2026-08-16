@@ -6,7 +6,7 @@ const RATE_LIMIT_STATS = {
   rejected: { public: 0, auth: 0, user: 0 },
   limits: {
     publicWritesPerMinute: 60,
-    authWritesPerMinute: 10,
+    authWritesPerMinute: 60,
     userWritesPerMinute: 240,
   },
 };

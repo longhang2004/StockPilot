@@ -33,7 +33,10 @@ const EnvironmentSchema = z.object({
   // window and are enforced per API process (single-instance deployment).
   RATE_LIMIT_PUBLIC_WRITES_PER_MIN: z.coerce.number().int().min(1).default(60),
   // Stricter tier for public credential endpoints (login, signup, demo-login).
-  RATE_LIMIT_AUTH_WRITES_PER_MIN: z.coerce.number().int().min(1).default(10),
+  // Default equals the public tier: behind a shared proxy every client maps
+  // to one bucket, so a lower default would throttle aggregate traffic.
+  // Precise brute-force defense lives in the per-account sign-in throttle.
+  RATE_LIMIT_AUTH_WRITES_PER_MIN: z.coerce.number().int().min(1).default(60),
   // Cap on authenticated writes per user (all routes combined).
   RATE_LIMIT_USER_WRITES_PER_MIN: z.coerce.number().int().min(1).default(240),
   // Per-account sign-in brute-force throttle: after AUTH_FAILURE_LIMIT

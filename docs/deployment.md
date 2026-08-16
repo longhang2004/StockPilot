@@ -117,7 +117,7 @@ use the production origin.
 | `SESSION_COOKIE_NAME`              | —                    | `stockpilot_session`         | Change to expire all existing cookies.                                                                                   |
 | `MAX_ACTIVE_SESSIONS_PER_USER`     | —                    | `10`                         | Active sessions kept per user; the oldest beyond the cap are revoked on new logins.                                      |
 | `RATE_LIMIT_PUBLIC_WRITES_PER_MIN` | —                    | `60`                         | Public non-auth writes (webhooks) per client per route per minute.                                                       |
-| `RATE_LIMIT_AUTH_WRITES_PER_MIN`   | —                    | `10`                         | Credential endpoints (login/signup/demo-login) per client per minute.                                                    |
+| `RATE_LIMIT_AUTH_WRITES_PER_MIN`   | —                    | `60`                         | Credential endpoints (login/signup/demo-login) per client per minute.                                                    |
 | `RATE_LIMIT_USER_WRITES_PER_MIN`   | —                    | `240`                        | Authenticated writes per user per minute.                                                                                |
 | `AUTH_FAILURE_LIMIT`               | —                    | `5`                          | Failed sign-ins per (email, client) before temporary block.                                                              |
 | `AUTH_FAILURE_WINDOW_MINUTES`      | —                    | `15`                         | Failure counting window for the sign-in throttle.                                                                        |

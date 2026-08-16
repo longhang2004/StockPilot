@@ -22,7 +22,13 @@ describe('authentication API', () => {
   let admin: Awaited<ReturnType<typeof createAdminClient>>;
 
   beforeAll(async () => {
-    setTestEnvironment({ DEMO_ORGANIZATION_SLUG: demoSlug });
+    // A tight auth-tier budget isolates the per-client limiter test below
+    // from the default (60/min), which the suite's own logins could not
+    // exhaust.
+    setTestEnvironment({
+      DEMO_ORGANIZATION_SLUG: demoSlug,
+      RATE_LIMIT_AUTH_WRITES_PER_MIN: '10',
+    });
 
     admin = await createAdminClient(adminDatabaseUrl());
     const passwordHash = await hash('DemoPass123!');

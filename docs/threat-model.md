@@ -29,7 +29,7 @@
 - **CSRF on public login:** public browser writes still require a trusted
   Origin; only the HMAC webhook has an explicit CSRF exemption.
 - **Credential stuffing and password brute force:** credential endpoints are
-  capped at 10 attempts per minute per client, failed sign-ins are counted
+  capped at 60 attempts per minute per client, failed sign-ins are counted
   per (email, client) pair with a temporary 429 block, and login response
   time is equalized for unknown emails so account existence cannot be
   inferred from latency.
