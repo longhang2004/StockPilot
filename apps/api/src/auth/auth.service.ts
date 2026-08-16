@@ -12,11 +12,21 @@ import { ENVIRONMENT } from '../config/environment.module.js';
 import type { Environment } from '../config/environment.js';
 import { PrismaService } from '../database/prisma.service.js';
 import { DemoResetService } from '../demo/demo-reset.service.js';
+import { AuthThrottleService } from './auth-throttle.service.js';
 import type { AuthContext } from './auth-context.js';
 import {
   createSessionCredentials,
   deriveCsrfToken,
 } from './session-credentials.js';
+
+/**
+ * A valid argon2 hash of a throwaway string, verified when the submitted
+ * email does not exist. Without it, unknown-email logins return in
+ * microseconds while known-email logins take a full hash computation,
+ * letting a remote client enumerate accounts by response time.
+ */
+const DUMMY_PASSWORD_HASH =
+  '$argon2id$v=19$m=65536,t=3,p=4$xEh+X58Gp6+A2iFCc618NQ$N9i9H1PcfuJLm+qMooqd0P7/GRntQAVSgJa/FEKef0g';
 
 type MembershipWithIdentity = Awaited<
   ReturnType<AuthService['findDemoMembership']>
@@ -28,6 +38,7 @@ export class AuthService {
     @Inject(ENVIRONMENT) private readonly environment: Environment,
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(DemoResetService) private readonly demoReset: DemoResetService,
+    @Inject(AuthThrottleService) private readonly authThrottle: AuthThrottleService,
   ) {}
 
   async signup(input: {
@@ -54,7 +65,10 @@ export class AuthService {
     return this.issueSession(null, user);
   }
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string, clientAddress: string) {
+    // Blocked pairs never reach the database or the password hash.
+    this.authThrottle.checkAttempt(email, clientAddress);
+
     const user = await this.prisma.user.findUnique({
       include: {
         memberships: {
@@ -65,9 +79,20 @@ export class AuthService {
       },
       where: { email: email.toLowerCase() },
     });
-    if (!user || !(await verify(user.passwordHash, password))) {
+    if (!user) {
+      // Equalize response time with the known-user path so account
+      // existence cannot be inferred from latency (see DUMMY_PASSWORD_HASH).
+      await verify(DUMMY_PASSWORD_HASH, password);
+      this.authThrottle.recordFailure(email, clientAddress);
       throw new UnauthorizedException('Email or password is incorrect.');
     }
+    if (!(await verify(user.passwordHash, password))) {
+      this.authThrottle.recordFailure(email, clientAddress);
+      throw new UnauthorizedException('Email or password is incorrect.');
+    }
+    // A successful sign-in clears prior failures for this pair so the
+    // account owner is never locked out by their own mistakes.
+    this.authThrottle.clearFailures(email, clientAddress);
     const membership = user.memberships[0] ?? null;
     return this.issueSession(membership ? { ...membership, user } : null, user);
   }
@@ -161,6 +186,33 @@ export class AuthService {
     membership: MembershipWithIdentity | null,
     user: { displayName: string; email: string; id: string },
   ) {
+    // Session hygiene (per user, before the new session is created):
+    // expired rows are dropped so the table cannot grow without bound, and
+    // the oldest active sessions beyond MAX_ACTIVE_SESSIONS_PER_USER are
+    // revoked so one credential pair cannot accumulate an unbounded
+    // session surface.
+    const now = new Date();
+    await this.prisma.session.deleteMany({
+      where: { expiresAt: { lt: now }, userId: user.id },
+    });
+    const activeSessions = await this.prisma.session.findMany({
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+      where: { expiresAt: { gt: now }, revokedAt: null, userId: user.id },
+    });
+    const excess =
+      activeSessions.length - this.environment.MAX_ACTIVE_SESSIONS_PER_USER;
+    if (excess > 0) {
+      await this.prisma.session.updateMany({
+        data: { revokedAt: now },
+        where: {
+          id: {
+            in: activeSessions.slice(0, excess).map((session) => session.id),
+          },
+        },
+      });
+    }
+
     const credentials = createSessionCredentials();
     const session = await this.prisma.session.create({
       data: {

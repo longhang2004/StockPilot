@@ -125,4 +125,54 @@ describe('authentication API', () => {
 
     expect(response.status).toBe(403);
   });
+
+  it('blocks repeated failed sign-in attempts for the same account', async () => {
+    const login = (password: string) =>
+      request(app.getHttpServer())
+        .post('/v1/auth/login')
+        .set('Origin', TEST_WEB_ORIGIN)
+        .send({
+          email: `${demoSlug}@stockpilot.test`,
+          password,
+        });
+
+    // Enough failures to cross AUTH_FAILURE_LIMIT (5), regardless of how
+    // many prior suites contributed failures for this unique email.
+    for (let index = 0; index < 6; index += 1) {
+      const response = await login('wrong-password');
+      expect([401, 429]).toContain(response.status);
+    }
+    const blocked = await login('wrong-password');
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.code).toBe('AUTH_ATTEMPTS_EXCEEDED');
+
+    // Even the correct password is rejected while the block is armed.
+    const correct = await login('DemoPass123!');
+    expect(correct.status).toBe(429);
+  });
+
+  it('caps credential attempts per client with the auth tier', async () => {
+    // The suite already consumed some of the per-client auth budget
+    // (10/min), so a burst of further attempts must trip the limiter with
+    // 429 and a Retry-After header.
+    const responses: Array<{
+      body: { code?: string };
+      headers: Record<string, unknown>;
+      status: number;
+    }> = [];
+    for (let index = 0; index < 11; index += 1) {
+      responses.push(
+        await request(app.getHttpServer())
+          .post('/v1/auth/login')
+          .set('Origin', TEST_WEB_ORIGIN)
+          .send({
+            email: `ghost-${index}@stockpilot.test`,
+            password: 'wrong-password',
+          }),
+      );
+    }
+    expect(responses.some((response) => response.status === 429)).toBe(true);
+    expect(responses[responses.length - 1].status).toBe(429);
+    expect(responses[responses.length - 1].headers['retry-after']).toBeTruthy();
+  });
 });

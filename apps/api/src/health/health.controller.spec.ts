@@ -1,6 +1,16 @@
 import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+const RATE_LIMIT_STATS = {
+  buckets: 0,
+  rejected: { public: 0, auth: 0, user: 0 },
+  limits: {
+    publicWritesPerMinute: 60,
+    authWritesPerMinute: 10,
+    userWritesPerMinute: 240,
+  },
+};
+
 describe('HealthController', () => {
   it('reports a live API process', async () => {
     const { HealthController } = await import('./health.controller.js');
@@ -21,6 +31,11 @@ describe('HealthController', () => {
           provide: (await import('../config/environment.module.js'))
             .ENVIRONMENT,
           useValue: { QUEUE_REQUIRED: false },
+        },
+        {
+          provide: (await import('../auth/rate-limit.guard.js'))
+            .RateLimitGuard,
+          useValue: { stats: () => RATE_LIMIT_STATS },
         },
       ],
     }).compile();
@@ -54,6 +69,11 @@ describe('HealthController', () => {
             .ENVIRONMENT,
           useValue: { QUEUE_REQUIRED: false },
         },
+        {
+          provide: (await import('../auth/rate-limit.guard.js'))
+            .RateLimitGuard,
+          useValue: { stats: () => RATE_LIMIT_STATS },
+        },
       ],
     }).compile();
 
@@ -62,6 +82,7 @@ describe('HealthController', () => {
       moduleRef.get(HealthController).ready(response),
     ).resolves.toEqual({
       checks: { database: 'ok', queue: 'not_configured' },
+      rateLimit: RATE_LIMIT_STATS,
       status: 'ready',
     });
     expect(response.status).not.toHaveBeenCalled();
@@ -89,6 +110,11 @@ describe('HealthController', () => {
             .ENVIRONMENT,
           useValue: { QUEUE_REQUIRED: true },
         },
+        {
+          provide: (await import('../auth/rate-limit.guard.js'))
+            .RateLimitGuard,
+          useValue: { stats: () => RATE_LIMIT_STATS },
+        },
       ],
     }).compile();
 
@@ -97,6 +123,7 @@ describe('HealthController', () => {
       moduleRef.get(HealthController).ready(response),
     ).resolves.toEqual({
       checks: { database: 'ok', queue: 'not_configured' },
+      rateLimit: RATE_LIMIT_STATS,
       status: 'degraded',
     });
     expect(response.status).toHaveBeenCalledWith(503);
@@ -124,6 +151,11 @@ describe('HealthController', () => {
             .ENVIRONMENT,
           useValue: { QUEUE_REQUIRED: true },
         },
+        {
+          provide: (await import('../auth/rate-limit.guard.js'))
+            .RateLimitGuard,
+          useValue: { stats: () => RATE_LIMIT_STATS },
+        },
       ],
     }).compile();
 
@@ -132,6 +164,7 @@ describe('HealthController', () => {
       moduleRef.get(HealthController).ready(response),
     ).resolves.toEqual({
       checks: { database: 'unavailable', queue: 'ready' },
+      rateLimit: RATE_LIMIT_STATS,
       status: 'degraded',
     });
     expect(response.status).toHaveBeenCalledWith(503);

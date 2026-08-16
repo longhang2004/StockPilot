@@ -38,6 +38,14 @@ export async function executeIdempotent<T>(
     SELECT pg_advisory_xact_lock(hashtextextended(${lockName}, 0))
   `;
 
+  // Expire-on-write: purge records whose 24h window elapsed so the table
+  // cannot grow without bound under key-churn abuse. expiresAt is indexed,
+  // so this stays cheap at the portfolio scale; replays of live keys are
+  // unaffected because the advisory lock is per key.
+  await transaction.idempotencyRecord.deleteMany({
+    where: { expiresAt: { lt: new Date() } },
+  });
+
   const existing = await transaction.idempotencyRecord.findUnique({
     where: {
       organizationId_scope_key: {

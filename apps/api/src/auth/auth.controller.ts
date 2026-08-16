@@ -18,6 +18,7 @@ import {
 
 import { ENVIRONMENT } from '../config/environment.module.js';
 import type { Environment } from '../config/environment.js';
+import { resolveRequestClientAddress } from './client-address.js';
 import { schemaRef } from '../openapi/schemas.js';
 import type { AuthenticatedRequest } from './auth-context.js';
 import {
@@ -61,12 +62,16 @@ export class AuthController {
   @ApiBody({ schema: schemaRef('LoginInput') })
   async login(
     @Body() body: unknown,
+    @Req() request: AuthenticatedRequest,
     @Res({ passthrough: true }) response: SessionCookieResponse,
   ) {
     const credentials = LoginInputSchema.parse(body);
     const result = await this.authService.login(
       credentials.email,
       credentials.password,
+      // Same trust rules as the rate-limit guard, so the per-account
+      // brute-force throttle keys on the same client identity.
+      resolveRequestClientAddress(request, this.environment).address,
     );
     setSessionCookie(this.environment, response, result.rawToken);
     return { ...result.context, csrfToken: result.csrfToken };

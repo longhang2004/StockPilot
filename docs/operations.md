@@ -39,20 +39,39 @@ same shared exception→status mapping the problem-details filter uses
 HttpException declared status, else 500), so structured logs always agree
 with the actual response status.
 
-## Public-write rate limiting
+## Rate limiting
 
-`POST /v1/auth/signup`, `/v1/auth/login`, `/v1/auth/demo-login`, the
-storefront webhook, and other public writes are limited to 60 requests per
-minute per client per route (`apps/api/src/auth/rate-limit.guard.ts`).
-Exceeding the limit returns `429` with a `Retry-After` header.
+All limits are fixed 60-second windows enforced per API process
+(`apps/api/src/auth/rate-limit.guard.ts` and `auth-throttle.service.ts`).
+Exceeding a limit returns `429` with a `Retry-After` header.
+
+| Tier | Key | Default | Covered routes |
+| ---- | --- | ------- | -------------- |
+| Auth | client address + route | 10/min | `POST /v1/auth/login`, `/signup`, `/demo-login` |
+| Public | client address + route | 60/min | Other public writes: storefront and Stripe webhooks |
+| User | user id (all routes) | 240/min | Every authenticated write |
+
+The auth tier is the per-client brute-force tripwire; the per-account
+throttle below is the second line of defense that stops credential stuffing
+even when the attacker rotates source addresses.
+
+**Per-account sign-in throttle.** Failed credential attempts are counted per
+(email, client address) pair. After `AUTH_FAILURE_LIMIT` (default 5)
+failures inside `AUTH_FAILURE_WINDOW_MINUTES` (default 15), further attempts
+for that pair are rejected with `429` (`code: AUTH_ATTEMPTS_EXCEEDED`) for
+`AUTH_FAILURE_BLOCK_MINUTES` (default 15) — before any password hash is
+computed. A successful sign-in clears the counter. Keying on the pair rather
+than the email alone means a distributed attacker cannot lock a victim out
+of their own account from a different address.
 
 **Client identity.** The API never trusts `X-Forwarded-For` blindly. By
 default the bucket key is the immediate socket peer. Because browsers reach
 the API through Vercel's proxy (Browser → Vercel → Render), proxied public
 writes are therefore capped **per route in aggregate** — all demo users
-share the socket peer. Direct API callers are capped per IP. A deployment
-that wants per-client buckets can set `TRUSTED_PROXY_CIDRS` to the
-comma-separated CIDR list of its reverse proxies.
+share the socket peer, and per-account throttling degenerates to per-email.
+Direct API callers are capped per IP. A deployment that wants per-client
+buckets can set `TRUSTED_PROXY_CIDRS` to the comma-separated CIDR list of
+its reverse proxies.
 
 When the socket peer is inside `TRUSTED_PROXY_CIDRS`, the forwarding chain
 is walked **right to left** — from the hop nearest the application toward
@@ -68,17 +87,31 @@ empty is the safe default: the socket peer is always used and the header is
 never inspected.
 
 **Memory is bounded.** Buckets expire lazily per key and an amortized sweep
-runs every 256 requests; a hard cap of 10 000 buckets evicts the oldest
-window under cardinality abuse (e.g. spoofed source addresses). Unit tests
+runs every 256 requests; a hard cap of 10 000 buckets (50 000 for the user
+tier) evicts the oldest window under cardinality abuse (e.g. spoofed source
+addresses). The account-throttle map is bounded the same way. Unit tests
 cover eviction, the cap, route isolation, and window expiry.
 
-**Single-instance limitation (explicit).** This limiter is in-memory, so it
-is per API process. The portfolio topology runs one API instance; if the API
-were horizontally scaled, each instance would carry its own counter and the
-aggregate limit would multiply by the instance count. The fix at that scale
-is a shared counter (Redis) with the same fixed-window semantics; it is
-deliberately not introduced while one instance is the architecture. See
-[`docs/performance.md`](performance.md) for the scaling threshold notes.
+**Session hygiene.** Issuing a session (login, signup, demo login, workspace
+switch) first deletes the user's expired session rows and revokes the oldest
+active sessions beyond `MAX_ACTIVE_SESSIONS_PER_USER` (default 10), so
+session tables stay bounded and one credential pair cannot accumulate an
+unbounded session surface. Idempotency records are purged the same way:
+every idempotent write deletes records whose 24-hour window has elapsed.
+
+**Monitoring.** `GET /v1/health/ready` returns a `rateLimit` block with the
+tracked bucket count, per-tier rejection counters, and the configured
+limits — watch rejected counters for brute-force attempts and the bucket
+count for cardinality abuse. 429 responses are also visible in the
+structured request logs.
+
+**Single-instance limitation (explicit).** These limiters are in-memory, so
+they are per API process. The portfolio topology runs one API instance; if
+the API were horizontally scaled, each instance would carry its own counter
+and the aggregate limit would multiply by the instance count. The fix at
+that scale is a shared counter (Redis) with the same fixed-window semantics;
+it is deliberately not introduced while one instance is the architecture.
+See [`docs/performance.md`](performance.md) for the scaling threshold notes.
 
 When the opt-in queue profile is enabled, the worker creates these pg-boss
 queues:

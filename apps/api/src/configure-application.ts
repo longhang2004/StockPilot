@@ -1,5 +1,5 @@
-import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
@@ -9,11 +9,17 @@ import { ProblemDetailsFilter } from './problem-details.filter.js';
 import { RequestLoggingInterceptor } from './observability/request-logging.interceptor.js';
 import { SentryReporter } from './observability/sentry-reporter.js';
 
-export function configureApplication(app: INestApplication): void {
+export function configureApplication(app: NestExpressApplication): void {
   const environment = parseEnvironment(process.env);
 
   app.use(helmet());
   app.use(cookieParser());
+  // Explicit request-size limits (Express defaults, declared so the policy
+  // is intentional): JSON bodies are capped at 100kb and urlencoded bodies
+  // are parsed with extended:false, which rejects nested object syntax that
+  // the qs library would otherwise interpret (prototype-pollution surface).
+  app.useBodyParser('json', { limit: '100kb' });
+  app.useBodyParser('urlencoded', { extended: false, limit: '100kb' });
   app.setGlobalPrefix('v1');
   app.enableCors({
     credentials: true,

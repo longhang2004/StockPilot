@@ -33,6 +33,9 @@ describe('FixedWindowRateLimiter', () => {
     // The window opened at the first request, so it resets a full window
     // from that moment.
     expect(rejected.retryAfterMs).toBe(60_000);
+    expect(limiter.rejected).toBe(1);
+    expect(limiter.consume('ip:/v1/auth/signup').allowed).toBe(false);
+    expect(limiter.rejected).toBe(2);
   });
 
   it('opens a fresh window after the fixed window elapses', () => {

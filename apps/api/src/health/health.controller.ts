@@ -2,6 +2,7 @@ import { Controller, Get, Inject, Res } from '@nestjs/common';
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '../auth/public.decorator.js';
+import { RateLimitGuard } from '../auth/rate-limit.guard.js';
 import { ENVIRONMENT } from '../config/environment.module.js';
 import type { Environment } from '../config/environment.js';
 import { PrismaService } from '../database/prisma.service.js';
@@ -19,6 +20,7 @@ export class HealthController {
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(JobRunnerService) private readonly jobs: JobRunnerService,
     @Inject(ENVIRONMENT) private readonly environment: Environment,
+    @Inject(RateLimitGuard) private readonly rateLimit: RateLimitGuard,
   ) {}
 
   @Get('live')
@@ -41,6 +43,7 @@ export class HealthController {
       response.status(503);
       return {
         checks: { database: 'unavailable' as const, queue },
+        rateLimit: this.rateLimit.stats(),
         status: 'degraded' as const,
       };
     }
@@ -49,12 +52,14 @@ export class HealthController {
       response.status(503);
       return {
         checks: { database: 'ok' as const, queue },
+        rateLimit: this.rateLimit.stats(),
         status: 'degraded' as const,
       };
     }
 
     return {
       checks: { database: 'ok' as const, queue },
+      rateLimit: this.rateLimit.stats(),
       status: 'ready' as const,
     };
   }

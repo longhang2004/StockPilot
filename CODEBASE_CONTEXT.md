@@ -246,9 +246,14 @@ attempts, lastError, optional `salesOrderId`); `ProductImportRun` (status, row c
   which sets Postgres GUCs `app.current_org_id` / `app.current_actor_id`
   transaction-locally; RLS enforces row isolation. Org id always derived from the
   session, never from the client.
-- **Rate limiting**: in-memory token bucket, 60 req/60 s per path, public non-safe routes
-  only, keyed by the socket peer (or first `x-forwarded-for` IP when the peer is inside
-  `TRUSTED_PROXY_CIDRS`).
+- **Rate limiting** (`auth/rate-limit.guard.ts` + `auth/auth-throttle.service.ts`):
+  fixed 60 s windows, in-memory. Three tiers: auth routes 10/min per client+route
+  (login/signup/demo-login), other public writes 60/min per client+route, authenticated
+  writes 240/min per user. Per-account sign-in throttle: 5 failures per (email, client)
+  in 15 min → 429 block for 15 min; success clears. Unknown-email logins verify a dummy
+  argon2 hash to equalize timing. Stats (buckets + per-tier rejected) on `/v1/health/ready`.
+  Public tiers are keyed by the socket peer (or first untrusted `x-forwarded-for` hop when
+  the peer is inside `TRUSTED_PROXY_CIDRS`); the user tier is keyed by user id.
 - **Demo auth**: `POST /auth/demo-login` requires `DEMO_MODE`, resolves the demo org
   membership by role + `DEMO_ORGANIZATION_SLUG`, and delegates due auto-reset to the
   demo domain before continuing the login flow. Demo passwords are `StockPilotDemo!`.

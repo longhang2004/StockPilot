@@ -36,6 +36,15 @@ describe('health endpoints', () => {
     expect(readiness.status).toBe(200);
     expect(readiness.body).toEqual({
       checks: { database: 'ok', queue: 'not_configured' },
+      rateLimit: {
+        buckets: 0,
+        rejected: { public: 0, auth: 0, user: 0 },
+        limits: {
+          publicWritesPerMinute: 60,
+          authWritesPerMinute: 10,
+          userWritesPerMinute: 240,
+        },
+      },
       status: 'ready',
     });
 
@@ -56,6 +65,15 @@ describe('health endpoints', () => {
       expect(readiness.status).toBe(503);
       expect(readiness.body).toEqual({
         checks: { database: 'ok', queue: 'not_configured' },
+        rateLimit: {
+          buckets: 0,
+          rejected: { public: 0, auth: 0, user: 0 },
+          limits: {
+            publicWritesPerMinute: 60,
+            authWritesPerMinute: 10,
+            userWritesPerMinute: 240,
+          },
+        },
         status: 'degraded',
       });
     } finally {

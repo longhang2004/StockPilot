@@ -48,6 +48,8 @@ export class FixedWindowRateLimiter {
   private readonly maxBuckets: number;
   private readonly sweepInterval: number;
   private callsSinceSweep = 0;
+  /** Denied consume() calls since process start; exposed for health checks. */
+  private rejectedCount = 0;
 
   constructor(
     private readonly now: () => number,
@@ -64,6 +66,11 @@ export class FixedWindowRateLimiter {
     return this.buckets.size;
   }
 
+  /** Total denied requests; exposed for tests and health checks. */
+  get rejected(): number {
+    return this.rejectedCount;
+  }
+
   consume(key: string): RateLimitResult {
     const now = this.now();
     const bucket = this.buckets.get(key);
@@ -75,6 +82,7 @@ export class FixedWindowRateLimiter {
     }
 
     if (bucket.count >= this.maxWrites) {
+      this.rejectedCount += 1;
       this.maybeSweep();
       return { allowed: false, retryAfterMs: bucket.resetAt - now };
     }

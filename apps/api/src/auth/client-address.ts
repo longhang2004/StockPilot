@@ -72,3 +72,25 @@ export function resolveClientAddress(
   // Every hop is trusted: the socket peer is the effective client.
   return { address: socket, source: 'socket' };
 }
+
+/**
+ * Resolves the effective client address from an Express-style request using
+ * the same trust rules as the raw resolver. Shared by the rate-limit guard
+ * and the auth controllers so every security control keys on the same
+ * identity.
+ */
+export interface RequestAddressLike {
+  get(name: string): string | undefined;
+  socket?: { remoteAddress?: string };
+}
+
+export function resolveRequestClientAddress(
+  request: RequestAddressLike,
+  environment: { TRUSTED_PROXY_CIDRS?: string | undefined },
+): ClientAddressResolution {
+  return resolveClientAddress(
+    request.socket?.remoteAddress,
+    request.get('x-forwarded-for'),
+    environment.TRUSTED_PROXY_CIDRS,
+  );
+}

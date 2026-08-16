@@ -19,9 +19,9 @@
  * Opt-in workload (--include-writes):
  *   demo-login         POST /v1/auth/demo-login (public write; creates one
  *                       session row per request — cleaned by the six-hour
- *                       demo reset). The public-write rate limiter caps this
- *                       route at 60/min per client, so the write workload is
- *                       capped at 40 requests per run to stay clear of it.
+ *                       demo reset). Demo-login sits on the auth-tier rate
+ *                       limiter (10/min per client), so the write workload is
+ *                       capped at 8 requests per run to stay clear of it.
  *
  * Rate-limit check (--rate-limit-check): a dedicated mode that runs ONLY
  * demo-login and asserts that the limiter returns 429 once the threshold is
@@ -40,15 +40,15 @@ const API_URL = process.env.API_URL ?? 'http://localhost:4000';
 const WEB_ORIGIN = process.env.WEB_ORIGIN ?? 'http://localhost:3000';
 const DEFAULT_CONCURRENCY = 10;
 const DEFAULT_REQUESTS = 200;
-// The rate-limit check crosses the 60/min threshold by design; a dedicated,
-// smaller default keeps a single check run fast while still proving 429
-// enforcement.
+// The rate-limit check crosses the auth-tier threshold (10/min) by design;
+// a dedicated, smaller default keeps a single check run fast while still
+// proving 429 enforcement.
 const RATE_LIMIT_CHECK_DEFAULT_REQUESTS = 100;
 const TIMEOUT_MS = 15_000;
-// Public-write limiter ceiling for /v1/auth/demo-login: 60/min per client.
+// Auth-tier limiter ceiling for /v1/auth/demo-login: 10/min per client.
 // The opt-in write workload stays below it so 429s never pollute latency
 // measurements.
-const WRITE_WORKLOAD_REQUEST_CAP = 40;
+const WRITE_WORKLOAD_REQUEST_CAP = 8;
 
 const args = process.argv.slice(2);
 function argValue(name, fallback) {
@@ -232,8 +232,8 @@ async function main() {
     }
     if ((counts[429] ?? 0) === 0) {
       console.error(
-        'FAIL: no 429 observed. The public-write limiter is not enforcing ' +
-          'the 60/min threshold (check TRUSTED_PROXY_CIDRS and the guard).',
+        'FAIL: no 429 observed. The auth-tier limiter is not enforcing ' +
+          'the 10/min threshold (check TRUSTED_PROXY_CIDRS and the guard).',
       );
       process.exit(1);
     }
@@ -294,7 +294,7 @@ async function main() {
     );
     if (includeWrites) {
       console.log(
-        `note: demo-login capped at ${WRITE_WORKLOAD_REQUEST_CAP} requests to stay under the 60/min public-write limiter`,
+        `note: demo-login capped at ${WRITE_WORKLOAD_REQUEST_CAP} requests to stay under the 10/min auth-tier limiter`,
       );
     }
     console.log(
