@@ -9,7 +9,8 @@ services:
     rootDir: .
     dockerfilePath: ./apps/api/Dockerfile
     dockerContext: .
-    healthCheckPath: /v1/health/ready
+    # Keep platform probes off Neon so idle compute can scale to zero.
+    healthCheckPath: /v1/health/live
     numInstances: 1
     buildFilter:
       paths:
