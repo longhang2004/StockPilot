@@ -50,7 +50,7 @@ use the production origin.
   commit. A Deploy Hook is optional for teams that want an explicit rollout
   trigger after the migration gate. Render Free does not provide the paid
   service pre-deploy command.
-- Set the Render health check to `/v1/health/ready`, generate a public
+- Set the Render health check to `/v1/health/live`, generate a public
   `onrender.com` domain, and use that URL as Vercel's `API_INTERNAL_URL`.
 - Add the `sync: false` variables from the Blueprint in Render's dashboard.
   Keep generated secrets in Render's secret store; never commit or print them.
