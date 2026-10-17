@@ -8,7 +8,9 @@ import {
   EmptyState,
   ErrorState,
   PageHeader,
+  Pagination,
   ResponsiveDataTable,
+  SearchFilterBar,
   Skeleton,
   StatusBadge,
   ToastRegion,
@@ -28,15 +30,17 @@ import { ReceiptDrawer } from './receipt-drawer';
  */
 export function ReceiptsWorkspace() {
   const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
   const movements = usePage<MovementRecord>(MOVEMENTS_RESOURCE, {
-    page: 1,
-    pageSize: 100,
+    page,
+    pageSize: 25,
+    search,
+    type: 'RECEIPT',
   });
-  const receipts = (movements.data?.items ?? []).filter(
-    (movement) => movement.type === 'RECEIPT',
-  );
+  const receipts = movements.data?.items ?? [];
   return (
     <section className="workspace-section-page">
       <PageHeader
@@ -52,6 +56,19 @@ export function ReceiptsWorkspace() {
           </button>
         }
       />
+      <SearchFilterBar
+        onSearch={(value) => {
+          setPage(1);
+          setSearch(value);
+        }}
+        placeholder="Search SKU or product"
+        search={search}
+      />
+      {movements.data ? (
+        <p className="muted-note">
+          {movements.data.total} receipt movements match this view
+        </p>
+      ) : null}
       {movements.isLoading ? (
         <Skeleton lines={4} />
       ) : movements.isError ? (
@@ -68,8 +85,12 @@ export function ReceiptsWorkspace() {
         />
       ) : (
         <EmptyState
-          description="Create a receipt to increase on-hand stock and resolve low-stock alerts."
-          title="No receipts yet"
+          description={
+            search
+              ? 'Try another SKU or product name.'
+              : 'Create a receipt to increase on-hand stock and resolve low-stock alerts.'
+          }
+          title={search ? 'No receipts match this search' : 'No receipts yet'}
           action={
             <button
               className="button button-primary"
@@ -81,6 +102,11 @@ export function ReceiptsWorkspace() {
           }
         />
       )}
+      <Pagination
+        onPageChange={setPage}
+        page={page}
+        totalPages={movements.data?.totalPages ?? 0}
+      />
       <ToastRegion toasts={toasts} />
       <ReceiptDrawer
         open={open}
@@ -88,6 +114,11 @@ export function ReceiptsWorkspace() {
         onSaved={() => {
           setOpen(false);
           void invalidatePageQueries(queryClient, MOVEMENTS_RESOURCE);
+          void invalidatePageQueries(queryClient, '/inventory/balances');
+          void invalidatePageQueries(queryClient, '/alerts');
+          void queryClient.invalidateQueries({
+            queryKey: ['inventory-summary'],
+          });
           push('Receipt applied to the ledger.', 'success');
         }}
         push={push}

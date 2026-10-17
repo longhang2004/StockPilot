@@ -178,6 +178,23 @@ describe('inventory receipts and adjustments API', () => {
     const resolvedAlerts = await manager.get('/v1/alerts?status=RESOLVED');
     expect(alerts.body.items).toHaveLength(0);
     expect(resolvedAlerts.body.items).toHaveLength(1);
+
+    // The overview chart mirrors the ledger on the real calendar day: the
+    // receipt (12) and adjustment-in (3) are inbound, the adjustment-out (7)
+    // is outbound, and every other day of the zero-filled window stays flat.
+    const overview = await manager.get('/v1/dashboard/overview');
+    expect(overview.status).toBe(200);
+    const chartRows = overview.body.fourteenDayMovements as Array<{
+      inbound: number;
+      outbound: number;
+    }>;
+    expect(chartRows).toHaveLength(14);
+    expect(chartRows.at(-1)).toMatchObject({ inbound: 15, outbound: 7 });
+    expect(
+      chartRows
+        .slice(0, -1)
+        .every((row) => row.inbound === 0 && row.outbound === 0),
+    ).toBe(true);
   });
 
   it('keeps receiving and adjustment permissions away from Staff', async () => {

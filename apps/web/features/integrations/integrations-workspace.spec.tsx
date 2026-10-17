@@ -1,0 +1,94 @@
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { QueryProvider } from '../../lib/query-provider';
+import { fetchDelivery, retryDelivery } from './api';
+import { IntegrationsWorkspace } from './integrations-workspace';
+
+vi.mock('./api', () => ({
+  DELIVERIES_RESOURCE: '/integration-deliveries',
+  fetchDelivery: vi.fn(),
+  retryDelivery: vi.fn(),
+}));
+
+const delivery = {
+  id: 'delivery-a',
+  externalDeliveryId: 'storefront-42',
+  eventType: 'order.created',
+  status: 'FAILED' as const,
+  attempts: 1,
+  lastError: 'Unknown SKU',
+  payload: { sku: 'MISSING' },
+  createdAt: '2026-10-17T00:00:00Z',
+  processedAt: null,
+};
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            items: [delivery],
+            total: 101,
+            page: 1,
+            pageSize: 25,
+            totalPages: 5,
+          }),
+        ),
+      ),
+    ),
+  );
+});
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
+
+describe('integration retry feedback', () => {
+  it('shows a business failure on HTTP success and refreshes the selected detail', async () => {
+    vi.mocked(fetchDelivery)
+      .mockResolvedValueOnce(delivery)
+      .mockResolvedValue({
+        ...delivery,
+        attempts: 2,
+        lastError: 'Still unknown SKU',
+      });
+    vi.mocked(retryDelivery).mockResolvedValue({
+      status: 'FAILED',
+      error: 'Still unknown SKU',
+    });
+    render(
+      <QueryProvider>
+        <IntegrationsWorkspace role="MANAGER" />
+      </QueryProvider>,
+    );
+    fireEvent.click(
+      (
+        await screen.findAllByRole('button', { name: 'Open storefront-42' })
+      )[0]!,
+    );
+    const dialog = await screen.findByRole('dialog');
+    fireEvent.click(
+      await within(dialog).findByRole('button', { name: 'Retry delivery' }),
+    );
+    await waitFor(() => expect(within(dialog).getByText('2')).toBeVisible());
+    expect(screen.getAllByText('Still unknown SKU').length).toBeGreaterThan(0);
+    expect(
+      screen.queryByText('Delivery retry queued.'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Delivery processed successfully.'),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Next page' })).toBeEnabled();
+  });
+});

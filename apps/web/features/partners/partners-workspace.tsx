@@ -10,7 +10,9 @@ import {
   EmptyState,
   ErrorState,
   PageHeader,
+  Pagination,
   ResponsiveDataTable,
+  SearchFilterBar,
   Skeleton,
   StatusBadge,
   ToastRegion,
@@ -24,13 +26,17 @@ import { type PartnerRecord } from '../shared/types';
 
 export function PartnersWorkspace({ role }: { role: Role }) {
   const [kind, setKind] = useState<'customers' | 'suppliers'>('customers');
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<PartnerRecord | null>(null);
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
   const partners = usePage<PartnerRecord>(`/${kind}`, {
-    page: 1,
-    pageSize: 100,
+    page,
+    pageSize: 25,
+    search,
+    includeInactive: true,
   });
   const canWrite = role === 'MANAGER' || role === 'OWNER';
   const mutation = useMutation({
@@ -81,7 +87,11 @@ export function PartnersWorkspace({ role }: { role: Role }) {
         <button
           aria-selected={kind === 'customers'}
           className={kind === 'customers' ? 'is-active' : undefined}
-          onClick={() => setKind('customers')}
+          onClick={() => {
+            setPage(1);
+            setSearch('');
+            setKind('customers');
+          }}
           role="tab"
           type="button"
         >
@@ -90,13 +100,30 @@ export function PartnersWorkspace({ role }: { role: Role }) {
         <button
           aria-selected={kind === 'suppliers'}
           className={kind === 'suppliers' ? 'is-active' : undefined}
-          onClick={() => setKind('suppliers')}
+          onClick={() => {
+            setPage(1);
+            setSearch('');
+            setKind('suppliers');
+          }}
           role="tab"
           type="button"
         >
           Suppliers
         </button>
       </div>
+      <SearchFilterBar
+        onSearch={(value) => {
+          setPage(1);
+          setSearch(value);
+        }}
+        placeholder="Search company, contact, or email"
+        search={search}
+      />
+      {partners.data ? (
+        <p className="muted-note">
+          {partners.data.total} {kind} match this view
+        </p>
+      ) : null}
       {partners.isLoading ? (
         <Skeleton lines={4} />
       ) : partners.isError ? (
@@ -121,10 +148,19 @@ export function PartnersWorkspace({ role }: { role: Role }) {
         />
       ) : (
         <EmptyState
-          description={`Create a ${kind === 'customers' ? 'customer' : 'supplier'} to use in operational forms.`}
-          title={`No ${kind} yet`}
+          description={
+            search
+              ? 'Try another company, contact, or email.'
+              : `Create a ${kind === 'customers' ? 'customer' : 'supplier'} to use in operational forms.`
+          }
+          title={search ? `No ${kind} match this search` : `No ${kind} yet`}
         />
       )}
+      <Pagination
+        onPageChange={setPage}
+        page={page}
+        totalPages={partners.data?.totalPages ?? 0}
+      />
       <ToastRegion toasts={toasts} />
       <PartnerDrawer
         editing={editing}

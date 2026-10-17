@@ -17,6 +17,8 @@ import { Prisma } from './generated/prisma/client.js';
  * - anything else -> 500
  */
 export function errorStatusCode(exception: unknown): number {
+  const parserStatus = bodyParserErrorStatus(exception);
+  if (parserStatus) return parserStatus;
   if (exception instanceof ZodError) {
     return 400;
   }
@@ -29,4 +31,15 @@ export function errorStatusCode(exception: unknown): number {
     return exception.getStatus();
   }
   return 500;
+}
+
+export function bodyParserErrorStatus(
+  exception: unknown,
+): 400 | 413 | undefined {
+  if (!exception || typeof exception !== 'object' || !('type' in exception)) {
+    return undefined;
+  }
+  if (exception.type === 'entity.too.large') return 413;
+  if (exception.type === 'entity.parse.failed') return 400;
+  return undefined;
 }

@@ -30,6 +30,7 @@ import {
   InventoryAdjustmentInputSchema,
   InventoryBalanceListSchema,
   InventoryBalanceSchema,
+  InventorySummarySchema,
   LowStockAlertListSchema,
   LowStockAlertSchema,
   OrderListSchema,
@@ -68,6 +69,7 @@ import {
 import {
   AlertListQuerySchema,
   InventoryListQuerySchema,
+  MovementListQuerySchema,
 } from '../inventory/inventory-schemas.js';
 import { ImportPreviewInputSchema } from '../imports/import-schemas.js';
 import { OrderListQuerySchema } from '../orders/orders-schemas.js';
@@ -95,6 +97,8 @@ const NAMED_SCHEMAS: Readonly<Record<string, z.ZodType>> = {
   PartnerListQuery: CatalogListQuerySchema,
   OrderListQuery: OrderListQuerySchema,
   InventoryListQuery: InventoryListQuerySchema,
+  MovementListQuery: MovementListQuerySchema,
+  InventorySummary: InventorySummarySchema,
   AlertListQuery: AlertListQuerySchema,
   AuthSessionResult: AuthSessionResultSchema,
   SessionInfo: SessionInfoSchema,

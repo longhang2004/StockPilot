@@ -67,13 +67,19 @@ export class DashboardService {
             Array<{ day: Date; inbound: number; outbound: number }>
           >`
             SELECT
-              date_trunc('day', "created_at") AS day,
-              COALESCE(SUM(CASE WHEN "quantity_delta" > 0 THEN "quantity_delta" ELSE 0 END), 0)::int AS inbound,
-              COALESCE(SUM(CASE WHEN "quantity_delta" < 0 THEN ABS("quantity_delta") ELSE 0 END), 0)::int AS outbound
-            FROM "stock_movements"
-            WHERE "organization_id" = ${organizationId}::uuid
-              AND "created_at" >= (CURRENT_DATE - INTERVAL '13 days')
-            GROUP BY date_trunc('day', "created_at")
+              day::date AS day,
+              COALESCE(SUM(CASE WHEN m."quantity_delta" > 0 THEN m."quantity_delta" ELSE 0 END), 0)::int AS inbound,
+              COALESCE(SUM(CASE WHEN m."quantity_delta" < 0 THEN ABS(m."quantity_delta") ELSE 0 END), 0)::int AS outbound
+            FROM generate_series(
+              (CURRENT_DATE - INTERVAL '13 days')::date,
+              CURRENT_DATE::date,
+              INTERVAL '1 day'
+            ) AS day
+            LEFT JOIN "stock_movements" m
+              ON m."organization_id" = ${organizationId}::uuid
+              AND m."created_at" >= (CURRENT_DATE - INTERVAL '13 days')
+              AND date_trunc('day', m."created_at")::date = day::date
+            GROUP BY day
             ORDER BY day ASC
           `,
         ]);

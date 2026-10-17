@@ -76,7 +76,8 @@ export function ProductDrawer({
             sku: '',
           },
     );
-  }, [editing, form]);
+    setLocalImageError(null);
+  }, [editing, form, open]);
 
   useEffect(() => {
     if (!imageFile) {

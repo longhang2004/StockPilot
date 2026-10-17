@@ -106,6 +106,18 @@ describe('storefront integrations API', () => {
     expect(orders.body.items[0].status).toBe('DRAFT');
     const deliveries = await manager.get('/v1/integration-deliveries');
     expect(deliveries.body.total).toBe(1);
+    const searched = await manager.get(
+      '/v1/integration-deliveries?search=DELIVERY-100',
+    );
+    expect(searched.body.total).toBe(1);
+    const detail = await manager.get(
+      `/v1/integration-deliveries/${searched.body.items[0].id}`,
+    );
+    expect(detail.status).toBe(200);
+    expect(detail.body.externalDeliveryId).toBe('delivery-100');
+    expect(
+      (await manager.get(`/v1/integration-deliveries/${randomUUID()}`)).status,
+    ).toBe(404);
   });
 
   it('records failed deliveries and lets a Manager retry after fixing the catalog', async () => {
@@ -168,5 +180,71 @@ describe('storefront integrations API', () => {
       .set('X-Storefront-Signature', '00')
       .send(payload);
     expect(response.status).toBe(401);
+  });
+
+  it('persists SQL failures and attempt counts without committing a partial customer or order', async () => {
+    const sku = `OVERFLOW-${randomUUID().slice(0, 8)}`;
+    const product = await manager
+      .post('/v1/products')
+      .set('Origin', TEST_WEB_ORIGIN)
+      .set('X-CSRF-Token', managerCsrf)
+      .send({
+        name: 'Overflow Product',
+        reorderPoint: 0,
+        salePrice: '9999999999.99',
+        sku,
+      });
+    expect(product.status).toBe(201);
+    const email = `overflow-${randomUUID()}@example.test`;
+    const payload = {
+      customer: { companyName: 'Overflow Market', email },
+      eventType: 'order.created',
+      externalOrderId: `overflow-${randomUUID()}`,
+      items: [{ quantity: 2, sku }],
+    };
+    const externalDeliveryId = `overflow-${randomUUID()}`;
+    const response = await request(app.getHttpServer())
+      .post('/v1/webhooks/mock-storefront/orders')
+      .set('X-Delivery-Id', externalDeliveryId)
+      .set('X-Organization-Slug', demoSlug)
+      .set('X-Storefront-Signature', sign(payload))
+      .send(payload);
+    expect(response.status).toBe(202);
+    expect(response.body.status).toBe('FAILED');
+    const delivery = await admin.integrationDelivery.findFirstOrThrow({
+      where: { externalDeliveryId },
+    });
+    expect(delivery.attempts).toBe(1);
+    expect(await admin.customer.count({ where: { email } })).toBe(0);
+
+    const retry = await manager
+      .post(`/v1/integration-deliveries/${delivery.id}/retry`)
+      .set('Origin', TEST_WEB_ORIGIN)
+      .set('X-CSRF-Token', managerCsrf)
+      .set('Idempotency-Key', randomUUID())
+      .send();
+    expect(retry.status).toBe(200);
+    expect(retry.body.status).toBe('FAILED');
+    expect(
+      (
+        await admin.integrationDelivery.findUniqueOrThrow({
+          where: { id: delivery.id },
+        })
+      ).attempts,
+    ).toBe(2);
+    expect(await admin.customer.count({ where: { email } })).toBe(0);
+    await admin.product.update({
+      where: { id: product.body.id },
+      data: { salePrice: '10.00' },
+    });
+    const recovered = await manager
+      .post(`/v1/integration-deliveries/${delivery.id}/retry`)
+      .set('Origin', TEST_WEB_ORIGIN)
+      .set('X-CSRF-Token', managerCsrf)
+      .set('Idempotency-Key', randomUUID())
+      .send();
+    expect(recovered.status).toBe(200);
+    expect(recovered.body.status).toBe('SUCCEEDED');
+    expect(await admin.customer.count({ where: { email } })).toBe(1);
   });
 });

@@ -27,6 +27,7 @@ export class HealthController {
   @ApiOkResponse({ description: 'The API process is running.' })
   live() {
     return {
+      revision: this.revision(),
       service: 'stockpilot-api' as const,
       status: 'ok' as const,
     };
@@ -37,6 +38,7 @@ export class HealthController {
   @ApiResponse({ status: 503, description: 'A required dependency is down.' })
   async ready(@Res({ passthrough: true }) response: HealthResponse) {
     const queue = this.jobs.queueStatus();
+    const revision = this.revision();
     try {
       await this.prisma.$queryRaw`SELECT 1`;
     } catch {
@@ -44,6 +46,7 @@ export class HealthController {
       return {
         checks: { database: 'unavailable' as const, queue },
         rateLimit: this.rateLimit.stats(),
+        revision,
         status: 'degraded' as const,
       };
     }
@@ -53,6 +56,7 @@ export class HealthController {
       return {
         checks: { database: 'ok' as const, queue },
         rateLimit: this.rateLimit.stats(),
+        revision,
         status: 'degraded' as const,
       };
     }
@@ -60,7 +64,16 @@ export class HealthController {
     return {
       checks: { database: 'ok' as const, queue },
       rateLimit: this.rateLimit.stats(),
+      revision,
       status: 'ready' as const,
     };
+  }
+
+  /**
+   * The deployed revision, so a release can be verified against the SHA that
+   * passed CI. Render exposes RENDER_GIT_COMMIT; local runs report "local".
+   */
+  private revision(): string {
+    return process.env.RENDER_GIT_COMMIT ?? 'local';
   }
 }

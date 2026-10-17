@@ -10,6 +10,7 @@ import {
 } from '../inventory/inventory-projection.js';
 import type { InventoryReconciliationService } from '../inventory/inventory-reconciliation.service.js';
 import { findOrderDetail } from './order-query.service.js';
+import { lockOrder } from './order-lock.js';
 import {
   canTransition,
   invalidTransitionMessage,
@@ -23,17 +24,7 @@ export async function transitionOrder(
   to: Exclude<OrderStatus, 'DRAFT'>,
 ) {
   const organizationId = requireMembership(auth).organization.id;
-  const locked = await transaction.$queryRaw<
-    Array<{ id: string; status: OrderStatus }>
-  >`
-    SELECT "id", "status"::text
-    FROM "sales_orders"
-    WHERE "organization_id" = ${organizationId}::uuid
-      AND "id" = ${id}::uuid
-    FOR UPDATE
-  `;
-  const current = locked[0];
-  if (!current) throw new NotFoundException('Sales order not found.');
+  const current = await lockOrder(transaction, organizationId, id);
   if (!canTransition(current.status, to)) {
     throw new ConflictException(invalidTransitionMessage(current.status, to));
   }

@@ -93,7 +93,36 @@
 
   .filter-controls select {
     flex: 1;
-    min-height: 40px;
+    min-height: 44px;
+  }
+
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
+  .line-editor-cell input,
+  .line-editor-cell select,
+  .search-input input,
+  .filter-controls select {
+    font-size: 16px;
+    height: auto;
+    min-height: 44px;
+  }
+
+  .drawer-layer .button,
+  .drawer-layer .icon-button,
+  .pagination button,
+  .line-editor-add,
+  .segmented-control button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .line-field-label {
+    color: var(--muted);
+    display: block;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
   }
 
   /* Table to Mobile Record Card transform */

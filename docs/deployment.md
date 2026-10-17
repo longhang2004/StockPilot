@@ -44,12 +44,14 @@ use the production origin.
   separate worker service is needed. A queue-enabled profile can opt in to the
   worker for a short acceptance run, but it is not suitable as an always-on
   Neon Free deployment.
-- Render auto-deploys commits on `main`. The
-  [Render deploy workflow](../.github/workflows/deploy-render.yml) runs Prisma
-  migrations and the idempotent seed against Neon; Render then builds the same
-  commit. A Deploy Hook is optional for teams that want an explicit rollout
-  trigger after the migration gate. Render Free does not provide the paid
-  service pre-deploy command.
+- Render auto-deploy is disabled (`autoDeployTrigger: off`) so a commit cannot
+  start building before the production migration gate finishes. After CI passes,
+  the [Render deploy workflow](../.github/workflows/deploy-render.yml) applies
+  Prisma migrations, seeds the idempotent fixture, then triggers the hook for
+  that exact commit. Render Free does not provide the paid service pre-deploy
+  command.
+- For an existing service, syncing this Blueprint applies the setting; until
+  then, confirm automatic deploys are disabled in the Render dashboard.
 - Set the Render health check to `/v1/health/live`, generate a public
   `onrender.com` domain, and use that URL as Vercel's `API_INTERNAL_URL`.
 - Add the `sync: false` variables from the Blueprint in Render's dashboard.
@@ -130,10 +132,10 @@ use the production origin.
 These values are used only by `.github/workflows/deploy-render.yml` and are
 never copied into the Render runtime:
 
-| Secret                   | Purpose                                                                 |
-| ------------------------ | ----------------------------------------------------------------------- |
-| `MIGRATION_DATABASE_URL` | Direct Neon owner/migration URL for Prisma migrations and seed.         |
-| `RENDER_DEPLOY_HOOK_URL` | Optional Deploy Hook URL for an explicit rollout; omit for auto-deploy. |
+| Secret                   | Purpose                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `MIGRATION_DATABASE_URL` | Direct Neon owner/migration URL for Prisma migrations and seed.                   |
+| `RENDER_DEPLOY_HOOK_URL` | Render Deploy Hook URL, required to trigger the rollout after migration and seed. |
 
 ## First deployment order
 
@@ -145,14 +147,15 @@ never copied into the Render runtime:
    short queue-enabled acceptance run. The deploy workflow owns the first
    migration and seed, so do not run them twice.
 3. Create the Render Blueprint from `main`, fill the `sync: false` variables,
-   and add `MIGRATION_DATABASE_URL` as a GitHub repository secret. If an
-   explicit rollout gate is desired, also create a Deploy Hook and add its URL
-   as the optional `RENDER_DEPLOY_HOOK_URL` secret.
+   and add both `MIGRATION_DATABASE_URL` and `RENDER_DEPLOY_HOOK_URL` as GitHub
+   repository secrets. Create the Render Deploy Hook in the service settings;
+   keep it secret. Sync the Blueprint and confirm the dashboard shows automatic
+   deploys disabled before merging deployment changes.
 4. Merge or push a commit to `main` after CI is green. The
    [`deploy-render.yml`](../.github/workflows/deploy-render.yml) workflow then
-   applies migrations and seeds the canonical fixture. Render's `main` branch
-   auto-deploy builds the API; if the optional hook secret is set, the workflow
-   can trigger the matching commit explicitly.
+   applies migrations and seeds the canonical fixture, then triggers Render
+   for that commit. The workflow fails clearly if either required secret is
+   missing.
 5. Set Render's public URL as Vercel `API_INTERNAL_URL`, set Vercel `SITE_URL`
    to the custom origin, and redeploy Vercel.
 6. Set Render `WEB_ORIGIN` to that same custom origin, redeploy the API, then
@@ -161,8 +164,8 @@ never copied into the Render runtime:
    only if its Neon CU cost is acceptable), then run the smoke checklist below
    from the demo origin.
 8. Keep CI required on `main`, block force-pushes and branch deletion, and keep
-   the default branch as `main`. Leave Render auto-deploy enabled for the normal
-   free-demo path.
+   the default branch as `main`. Confirm Render's dashboard keeps automatic
+   deploys disabled; the deploy hook is the only rollout trigger.
 
 The selected Render Free, Neon Free, Vercel Hobby, and UptimeRobot Free path
 does not require a billing upgrade. Do not paste the migration URL or deploy
@@ -172,23 +175,21 @@ hook into source code or chat.
 
 1. Merge a reviewed change to protected `main` after CI is green.
 2. GitHub Actions runs `prisma migrate deploy` followed by the idempotent seed
-   against Neon. Render auto-deploys the same `main` commit; when
-   `RENDER_DEPLOY_HOOK_URL` is configured, the workflow may trigger that hook
-   after the migration gate as an explicit rollout.
+   against Neon, then triggers Render for the workflow's exact `main` commit.
 3. Confirm readiness (`queue:not_configured` is expected on the free profile)
    and the Render release log. If the opt-in queue profile is enabled, also
-   confirm pg-boss scheduling. Vercel then builds the web project from the same
-   commit.
+   confirm pg-boss scheduling. Vercel deploys through its separately configured
+   Git integration; verify its deployment details show the same commit SHA.
 4. Run the smoke paths that touch the changed area and record the release URL
    in the test report.
 
 ## Migration failure, rollback, and restore
 
 - Read a failed GitHub migration/seed log and fix it in a reviewed migration;
-  never mark `_prisma_migrations` manually. If Render auto-deployed the commit
-  before the CI gate failed, cancel or roll back that deployment before
-  retrying. An optional Deploy Hook is only called after the migration/seed
-  commands succeed.
+  never mark `_prisma_migrations` manually. Render never auto-deploys a commit
+  whose CI checks failed; if an explicit Deploy Hook triggered a rollout before
+  a later migration gate failed, cancel or roll back that deployment before
+  retrying. The hook is only called after the migration/seed commands succeed.
 - For an application regression, redeploy the previous known-good commit via
   Render and Vercel. Do not roll back a schema migration unless the migration
   explicitly includes a safe backwards-compatible down path.
@@ -206,6 +207,10 @@ curl -fsS "$API_URL/v1/health/ready"
 curl -fsS "$API_URL/docs" >/dev/null
 curl -fsS "$API_URL/openapi.json" >/dev/null
 ```
+
+For a release check, confirm the `revision` field in either health payload
+equals the merged commit SHA that passed CI, so the rollout is provably tied to
+the checked revision.
 
 Then verify through the canonical production origin configured in `SITE_URL`:
 

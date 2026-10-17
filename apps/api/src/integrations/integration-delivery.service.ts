@@ -15,7 +15,16 @@ export async function retryDeliveryTransaction(
   organizationId: string,
   actorUserId: string,
   id: string,
+  maxAttempts?: number,
 ) {
+  // Manual retries and queue workers share this lock, including the status read.
+  await transaction.$queryRaw`
+    SELECT "id"
+    FROM "integration_deliveries"
+    WHERE "organization_id" = ${organizationId}::uuid
+      AND "id" = ${id}::uuid
+    FOR UPDATE
+  `;
   const delivery = await transaction.integrationDelivery.findFirst({
     where: { id, organizationId },
   });
@@ -25,6 +34,13 @@ export async function retryDeliveryTransaction(
       duplicate: true,
       orderId: delivery.salesOrderId,
       status: delivery.status,
+    } as const;
+  }
+  if (maxAttempts !== undefined && delivery.attempts >= maxAttempts) {
+    return {
+      duplicate: false,
+      error: delivery.lastError ?? 'Automatic retry limit reached.',
+      status: 'FAILED',
     } as const;
   }
   const before = { attempts: delivery.attempts, status: delivery.status };
@@ -37,6 +53,7 @@ export async function retryDeliveryTransaction(
     },
     where: { id },
   });
+  await transaction.$executeRaw`SAVEPOINT integration_order`;
   try {
     const order = await createStorefrontDraftOrder(
       transaction,
@@ -68,6 +85,9 @@ export async function retryDeliveryTransaction(
       status: updated.status,
     } as const;
   } catch (error) {
+    // Preserve the durable attempt counter even when a SQL error aborts the
+    // order work, and never commit a partially created customer/order.
+    await transaction.$executeRaw`ROLLBACK TO SAVEPOINT integration_order`;
     const message =
       error instanceof Error ? error.message : 'Integration processing failed.';
     const updated = await transaction.integrationDelivery.update({
@@ -123,6 +143,7 @@ export function processExternalDelivery(
               attempts: 1,
             },
           });
+          await transaction.$executeRaw`SAVEPOINT integration_order`;
           try {
             const order = await createStorefrontDraftOrder(
               transaction,
@@ -144,6 +165,7 @@ export function processExternalDelivery(
               status: updated.status,
             };
           } catch (error) {
+            await transaction.$executeRaw`ROLLBACK TO SAVEPOINT integration_order`;
             const message =
               error instanceof Error
                 ? error.message

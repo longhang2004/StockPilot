@@ -42,7 +42,7 @@ export function MovementChart({ rows }: { rows: MovementRow[] }) {
           <div
             className="movement-chart"
             role="img"
-            aria-label={`Inbound and outbound units over the last ${rows.length} days.`}
+            aria-label={`Inbound and outbound units per day over the last ${rows.length} days. Zero days render no bar; open the table summary for exact values.`}
           >
             <svg
               aria-hidden="true"
@@ -64,22 +64,26 @@ export function MovementChart({ rows }: { rows: MovementRow[] }) {
                 const outboundHeight = (row.outbound / maxValue) * plotHeight;
                 return (
                   <g key={row.date}>
-                    <rect
-                      className="chart-bar chart-bar-inbound"
-                      height={Math.max(1, inboundHeight)}
-                      rx="2"
-                      width={BAR_WIDTH}
-                      x={groupX - BAR_WIDTH - 1}
-                      y={PLOT_BOTTOM - Math.max(1, inboundHeight)}
-                    />
-                    <rect
-                      className="chart-bar chart-bar-outbound"
-                      height={Math.max(1, outboundHeight)}
-                      rx="2"
-                      width={BAR_WIDTH}
-                      x={groupX + 1}
-                      y={PLOT_BOTTOM - Math.max(1, outboundHeight)}
-                    />
+                    {inboundHeight > 0 ? (
+                      <rect
+                        className="chart-bar chart-bar-inbound"
+                        height={inboundHeight}
+                        rx="2"
+                        width={BAR_WIDTH}
+                        x={groupX - BAR_WIDTH - 1}
+                        y={PLOT_BOTTOM - inboundHeight}
+                      />
+                    ) : null}
+                    {outboundHeight > 0 ? (
+                      <rect
+                        className="chart-bar chart-bar-outbound"
+                        height={outboundHeight}
+                        rx="2"
+                        width={BAR_WIDTH}
+                        x={groupX + 1}
+                        y={PLOT_BOTTOM - outboundHeight}
+                      />
+                    ) : null}
                     {index % 2 === 0 ? (
                       <text
                         className="chart-label"

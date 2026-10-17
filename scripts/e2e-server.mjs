@@ -20,12 +20,12 @@ import process from 'node:process';
 
 // Readiness, not liveness: E2E exercises DB-backed endpoints, so the gate
 // must prove the API can serve them (QUEUE_REQUIRED=false is compatible —
-// readiness returns 200 with queue:not_configured). The API port follows
-// the API's own PORT convention so a host already using :4000 can run the
-// suite elsewhere (set PORT and API_INTERNAL_URL together).
-const API_PORT = process.env.PORT ?? '4000';
+// readiness returns 200 with queue:not_configured). E2E-specific ports avoid
+// colliding with other local dev servers; PORT remains a fallback for the API.
+const API_PORT = process.env.E2E_API_PORT ?? process.env.PORT ?? '4000';
+const WEB_PORT = process.env.E2E_WEB_PORT ?? '3000';
 const API_READY_URL = `http://localhost:${API_PORT}/v1/health/ready`;
-const WEB_URL = 'http://localhost:3000';
+const WEB_URL = `http://localhost:${WEB_PORT}`;
 const READY_TIMEOUT_MS = 180_000;
 const POLL_INTERVAL_MS = 500;
 
@@ -33,6 +33,33 @@ const POLL_INTERVAL_MS = 500;
 // failures retain the API/web server logs for diagnosis.
 const SERVER_LOG_PATH = 'test-results/e2e-server.log';
 mkdirSync('test-results', { recursive: true });
+const children = [];
+let stopping = false;
+
+function stop(signal = 'SIGTERM', exitCode = 0) {
+  if (stopping) return;
+  stopping = true;
+  for (const child of children) {
+    if (child.pid === undefined) continue;
+    try {
+      if (process.platform === 'win32') child.kill(signal);
+      else process.kill(-child.pid, signal);
+    } catch (error) {
+      if (error?.code !== 'ESRCH') {
+        console.error(
+          `[e2e-server] Could not stop child process group: ${error}`,
+        );
+      }
+    }
+  }
+  // Each child is a process-group leader on POSIX, so its descendants receive
+  // the signal before this supervisor exits.
+  process.exit(exitCode);
+}
+
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.on(signal, () => stop(signal));
+}
 
 function tee(stream, label) {
   stream.on('data', (chunk) => {
@@ -89,21 +116,26 @@ async function assertPortFree(port, label) {
 
 function fail(message) {
   console.error(`[e2e-server] ${message}`);
-  process.exit(1);
+  stop('SIGTERM', 1);
 }
 
 await assertPortFree(Number(API_PORT), 'API');
-await assertPortFree(3000, 'Web');
+await assertPortFree(Number(WEB_PORT), 'Web');
 
 const api = spawn('pnpm', ['--filter', '@stockpilot/api', 'dev'], {
   stdio: ['inherit', 'pipe', 'pipe'],
-  env: process.env,
+  detached: process.platform !== 'win32',
+  env: { ...process.env, PORT: API_PORT, WEB_ORIGIN: WEB_URL },
 });
+children.push(api);
 tee(api.stdout, 'api');
 tee(api.stderr, 'api');
-api.on('exit', (code) => {
-  if (code !== null && code !== 0) {
-    fail(`API dev server exited unexpectedly (code ${code}).`);
+api.on('error', (error) => fail(`Could not start API dev server: ${error}`));
+api.on('exit', (code, signal) => {
+  if (!stopping) {
+    fail(
+      `API dev server exited unexpectedly (code ${code}, signal ${signal}).`,
+    );
   }
 });
 
@@ -111,22 +143,30 @@ try {
   await waitFor(API_READY_URL, READY_TIMEOUT_MS);
   console.error('[e2e-server] API is ready; starting web app.');
 } catch (error) {
-  api.kill('SIGTERM');
   fail(error.message);
 }
 
 const web = spawn('pnpm', ['--filter', '@stockpilot/web', 'dev'], {
   stdio: ['inherit', 'pipe', 'pipe'],
-  // The web app must serve Playwright's webServer.url (:3000). It inherits
-  // everything else — including API_INTERNAL_URL, which points at the API
-  // port (PORT may differ from 3000 when a host already uses it).
-  env: { ...process.env, PORT: '3000' },
+  detached: process.platform !== 'win32',
+  // Keep web rewrites and browser origin aligned with the selected E2E ports.
+  env: {
+    ...process.env,
+    API_INTERNAL_URL: `http://localhost:${API_PORT}`,
+    NODE_ENV: 'development',
+    PORT: WEB_PORT,
+    SITE_URL: WEB_URL,
+  },
 });
+children.push(web);
 tee(web.stdout, 'web');
 tee(web.stderr, 'web');
-web.on('exit', (code) => {
-  if (code !== null && code !== 0) {
-    fail(`Web dev server exited unexpectedly (code ${code}).`);
+web.on('error', (error) => fail(`Could not start web dev server: ${error}`));
+web.on('exit', (code, signal) => {
+  if (!stopping) {
+    fail(
+      `Web dev server exited unexpectedly (code ${code}, signal ${signal}).`,
+    );
   }
 });
 
@@ -134,8 +174,6 @@ try {
   await waitFor(WEB_URL, READY_TIMEOUT_MS);
   console.error('[e2e-server] web app is ready.');
 } catch (error) {
-  api.kill('SIGTERM');
-  web.kill('SIGTERM');
   fail(error.message);
 }
 
@@ -173,18 +211,9 @@ for (const route of METADATA_ROUTES) {
     await new Promise((resolve) => setTimeout(resolve, 2_000));
   }
   if (!warmed) {
-    api.kill('SIGTERM');
-    web.kill('SIGTERM');
     fail(`metadata route ${route} did not become ready after 5 attempts.`);
   }
 }
 console.error('[e2e-server] metadata image routes warmed.');
 
-// Keep both children alive; forward termination so Playwright teardown (or
-// Ctrl-C locally) shuts the whole tree down cleanly.
-for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
-  process.on(signal, () => {
-    api.kill(signal);
-    web.kill(signal);
-  });
-}
+// Keep both process groups alive until Playwright teardown or Ctrl-C.

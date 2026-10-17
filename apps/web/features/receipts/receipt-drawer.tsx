@@ -2,8 +2,8 @@
 
 import { ReceiptInputSchema } from '@stockpilot/contracts';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import { Plus, Trash } from '@phosphor-icons/react';
+import { useEffect } from 'react';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import type { z } from 'zod';
 
@@ -14,9 +14,14 @@ import {
   type ToastMessage,
 } from '../../components/ui/operations-ui';
 import { closeFormSafely, formatMoney } from '../../lib/formatters';
-import { usePage } from '../../hooks/use-page-query';
+import { useCommandMutation } from '../../hooks/use-command-mutation';
+import {
+  CatalogSearchControls,
+  useCatalogSearch,
+} from '../shared/catalog-search';
 import { availableLineProducts } from '../shared/line-selection';
 import { type PartnerRecord, type ProductRecord } from '../shared/types';
+import { ExpiredCommandResolution } from '../shared/expired-command-resolution';
 import { createReceipt } from './api';
 
 /**
@@ -36,14 +41,8 @@ export function ReceiptDrawer({
   onSaved: () => void;
   push: (message: string, tone?: ToastMessage['tone']) => void;
 }) {
-  const products = usePage<ProductRecord>('/products', {
-    page: 1,
-    pageSize: 100,
-  });
-  const suppliers = usePage<PartnerRecord>('/suppliers', {
-    page: 1,
-    pageSize: 100,
-  });
+  const products = useCatalogSearch<ProductRecord>('/products');
+  const suppliers = useCatalogSearch<PartnerRecord>('/suppliers');
   const form = useForm<z.infer<typeof ReceiptInputSchema>>({
     resolver: zodResolver(ReceiptInputSchema) as never,
     defaultValues: {
@@ -59,26 +58,46 @@ export function ReceiptDrawer({
     name: 'lines',
   });
   const lines = useWatch({ control: form.control, name: 'lines' }) ?? [];
-  const productById = new Map(
-    (products.data?.items ?? []).map((product) => [product.id, product]),
-  );
   const totalCost = lines.reduce((sum, line) => {
-    const product = line?.productId
-      ? productById.get(line.productId)
-      : undefined;
-    if (!product || !line?.quantity || !line?.unitCost) return sum;
+    if (!line?.quantity || !line?.unitCost) return sum;
     return sum + line.quantity * Number(line.unitCost);
   }, 0);
-  const mutation = useMutation({
-    mutationFn: createReceipt,
+  const mutation = useCommandMutation({
+    command: createReceipt,
+    prefix: 'receipt',
+    validate: (value): value is z.infer<typeof ReceiptInputSchema> =>
+      ReceiptInputSchema.safeParse(value).success,
     onError: (error) =>
       push(
         error instanceof Error ? error.message : 'Could not apply the receipt.',
         'error',
       ),
-    onSuccess: onSaved,
+    onSuccess: () => {
+      resetForm();
+      onSaved();
+    },
   });
-  const close = closeFormSafely(form.formState.isDirty, onClose);
+  useEffect(() => {
+    if (mutation.restoredValue) form.reset(mutation.restoredValue);
+  }, [form, mutation.restoredValue]);
+  function resetForm() {
+    form.reset({
+      lines: [{ productId: '', quantity: 1, unitCost: null }],
+      note: null,
+      receiptNumber: `WEB-${Date.now()}`,
+      receivedAt: new Date().toISOString(),
+      supplierId: '',
+    });
+  }
+  const close = () => {
+    if (mutation.isPending) return;
+    if (mutation.outcomeUnknown) return onClose();
+    closeFormSafely(form.formState.isDirty, () => {
+      resetForm();
+      mutation.reset();
+      onClose();
+    })();
+  };
   return (
     <Drawer
       description="Receipt, ledger movement, balance update, and alert reconciliation commit together."
@@ -90,193 +109,260 @@ export function ReceiptDrawer({
       <UnsavedChangesGuard dirty={form.formState.isDirty} />
       <form
         className="form-stack"
-        onSubmit={(event) =>
-          void form.handleSubmit((value) => mutation.mutate(value))(event)
-        }
+        onSubmit={(event) => {
+          if (mutation.outcomeUnknown && mutation.variables) {
+            event.preventDefault();
+            mutation.mutate(mutation.variables);
+            return;
+          }
+          void form.handleSubmit((value) => mutation.mutate(value))(event);
+        }}
       >
-        <div className="form-grid">
-          <FormField
-            error={form.formState.errors.receiptNumber?.message}
-            htmlFor="receipt-number"
-            label="Receipt number"
-          >
-            <input id="receipt-number" {...form.register('receiptNumber')} />
-          </FormField>
-          <FormField
-            error={form.formState.errors.supplierId?.message}
-            htmlFor="receipt-supplier"
-            label="Supplier"
-          >
-            <select id="receipt-supplier" {...form.register('supplierId')}>
-              <option value="">Choose supplier</option>
-              {suppliers.data?.items
-                .filter((supplier) => supplier.isActive)
-                .map((supplier) => (
-                  <option key={supplier.id} value={supplier.id}>
-                    {supplier.companyName}
+        {mutation.outcomeUnknown ? (
+          <div className="form-error form-stack" role="alert">
+            <p>{mutation.recoveryMessage}</p>
+            {mutation.recoveryExpired ? (
+              <ExpiredCommandResolution
+                idempotencyKey={mutation.idempotencyKey}
+                onResolve={mutation.resolveExpired}
+              />
+            ) : null}
+          </div>
+        ) : null}
+        <fieldset className="form-stack form-fields" disabled={mutation.locked}>
+          <CatalogSearchControls catalog={suppliers} label="Search suppliers" />
+          <div className="form-grid">
+            <FormField
+              error={form.formState.errors.receiptNumber?.message}
+              htmlFor="receipt-number"
+              label="Receipt number"
+            >
+              <input id="receipt-number" {...form.register('receiptNumber')} />
+            </FormField>
+            <FormField
+              error={form.formState.errors.supplierId?.message}
+              htmlFor="receipt-supplier"
+              label="Supplier"
+            >
+              <select
+                id="receipt-supplier"
+                {...form.register('supplierId', {
+                  onChange: (event) => suppliers.remember(event.target.value),
+                })}
+              >
+                <option value="">Choose supplier</option>
+                {form.watch('supplierId') &&
+                !suppliers.items.some(
+                  (supplier) => supplier.id === form.watch('supplierId'),
+                ) ? (
+                  <option value={form.watch('supplierId')}>
+                    Saved supplier · {form.watch('supplierId')}
                   </option>
-                ))}
-            </select>
-          </FormField>
-        </div>
-        <div className="line-editor" aria-label="Receipt lines">
-          <div className="line-editor-header" aria-hidden="true">
-            <span>Product</span>
-            <span>Qty</span>
-            <span>Unit cost</span>
-            <span>Total</span>
-            <span />
+                ) : null}
+                {suppliers.items
+                  .filter((supplier) => supplier.isActive)
+                  .map((supplier) => (
+                    <option key={supplier.id} value={supplier.id}>
+                      {supplier.companyName}
+                    </option>
+                  ))}
+              </select>
+            </FormField>
           </div>
-          {fields.map((field, index) => {
-            const line = lines[index];
-            const product = line?.productId
-              ? productById.get(line.productId)
-              : undefined;
-            const lineTotal =
-              product && line?.quantity && line?.unitCost
-                ? line.quantity * Number(line.unitCost)
-                : 0;
-            const availableProducts = availableLineProducts(
-              products.data?.items ?? [],
-              lines,
-              index,
-            );
-            return (
-              <div className="line-editor-row" key={field.id}>
-                <div className="line-editor-cell line-editor-product">
-                  <Controller
-                    control={form.control}
-                    name={`lines.${index}.productId`}
-                    render={({ field: productField }) => (
-                      <select
-                        aria-label={`Product for line ${index + 1}`}
-                        {...productField}
+          <CatalogSearchControls catalog={products} label="Search products" />
+          <div className="line-editor" aria-label="Receipt lines">
+            <div className="line-editor-header" aria-hidden="true">
+              <span>Product</span>
+              <span>Qty</span>
+              <span>Unit cost</span>
+              <span>Total</span>
+              <span />
+            </div>
+            {fields.map((field, index) => {
+              const line = lines[index];
+              const lineTotal =
+                line?.quantity && line?.unitCost
+                  ? line.quantity * Number(line.unitCost)
+                  : 0;
+              const availableProducts = availableLineProducts(
+                products.items,
+                lines,
+                index,
+              );
+              return (
+                <div className="line-editor-row" key={field.id}>
+                  <div className="line-editor-cell line-editor-product">
+                    <Controller
+                      control={form.control}
+                      name={`lines.${index}.productId`}
+                      render={({ field: productField }) => (
+                        <select
+                          aria-label={`Product for line ${index + 1}`}
+                          {...productField}
+                          onChange={(event) => {
+                            products.remember(event.target.value);
+                            productField.onChange(event);
+                          }}
+                        >
+                          <option value="">Choose product</option>
+                          {line?.productId &&
+                          !availableProducts.some(
+                            (candidate) => candidate.id === line.productId,
+                          ) ? (
+                            <option value={line.productId}>
+                              Saved product · {line.productId}
+                            </option>
+                          ) : null}
+                          {availableProducts.map((candidate) => (
+                            <option key={candidate.id} value={candidate.id}>
+                              {candidate.sku} · {candidate.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                    {form.formState.errors.lines?.[index]?.productId
+                      ?.message && (
+                      <span className="form-error">
+                        {
+                          form.formState.errors.lines?.[index]?.productId
+                            ?.message
+                        }
+                      </span>
+                    )}
+                  </div>
+                  <div className="line-editor-cell line-editor-qty">
+                    <span className="line-field-label" aria-hidden="true">
+                      Quantity
+                    </span>
+                    <Controller
+                      control={form.control}
+                      name={`lines.${index}.quantity`}
+                      render={({ field: quantityField }) => (
+                        <input
+                          aria-label={`Quantity for line ${index + 1}`}
+                          min="1"
+                          type="number"
+                          {...quantityField}
+                          onChange={(event) =>
+                            quantityField.onChange(
+                              event.target.value === ''
+                                ? 1
+                                : Number(event.target.value),
+                            )
+                          }
+                        />
+                      )}
+                    />
+                    {form.formState.errors.lines?.[index]?.quantity
+                      ?.message && (
+                      <span className="form-error">
+                        {
+                          form.formState.errors.lines?.[index]?.quantity
+                            ?.message
+                        }
+                      </span>
+                    )}
+                  </div>
+                  <div className="line-editor-cell line-editor-qty">
+                    <span className="line-field-label" aria-hidden="true">
+                      Unit cost
+                    </span>
+                    <Controller
+                      control={form.control}
+                      name={`lines.${index}.unitCost`}
+                      render={({ field: costField }) => (
+                        <input
+                          aria-label={`Unit cost for line ${index + 1}`}
+                          placeholder="0.00"
+                          {...costField}
+                          value={costField.value ?? ''}
+                          onChange={(event) =>
+                            costField.onChange(
+                              event.target.value === ''
+                                ? null
+                                : event.target.value,
+                            )
+                          }
+                        />
+                      )}
+                    />
+                    {form.formState.errors.lines?.[index]?.unitCost
+                      ?.message && (
+                      <span className="form-error">
+                        {
+                          form.formState.errors.lines?.[index]?.unitCost
+                            ?.message
+                        }
+                      </span>
+                    )}
+                  </div>
+                  <div className="line-editor-cell line-editor-total mono">
+                    <span className="line-field-label" aria-hidden="true">
+                      Total
+                    </span>
+                    {formatMoney(lineTotal)}
+                  </div>
+                  <div className="line-editor-cell line-editor-remove">
+                    {fields.length > 1 && (
+                      <button
+                        aria-label={`Remove line ${index + 1}`}
+                        className="button icon-button"
+                        onClick={() => remove(index)}
+                        type="button"
                       >
-                        <option value="">Choose product</option>
-                        {availableProducts.map((candidate) => (
-                          <option key={candidate.id} value={candidate.id}>
-                            {candidate.sku} · {candidate.name}
-                          </option>
-                        ))}
-                      </select>
+                        <Trash size={16} aria-hidden="true" />
+                      </button>
                     )}
-                  />
-                  {form.formState.errors.lines?.[index]?.productId?.message && (
-                    <span className="form-error">
-                      {form.formState.errors.lines?.[index]?.productId?.message}
-                    </span>
-                  )}
+                  </div>
                 </div>
-                <div className="line-editor-cell line-editor-qty">
-                  <Controller
-                    control={form.control}
-                    name={`lines.${index}.quantity`}
-                    render={({ field: quantityField }) => (
-                      <input
-                        aria-label={`Quantity for line ${index + 1}`}
-                        min="1"
-                        type="number"
-                        {...quantityField}
-                        onChange={(event) =>
-                          quantityField.onChange(
-                            event.target.value === ''
-                              ? 1
-                              : Number(event.target.value),
-                          )
-                        }
-                      />
-                    )}
-                  />
-                  {form.formState.errors.lines?.[index]?.quantity?.message && (
-                    <span className="form-error">
-                      {form.formState.errors.lines?.[index]?.quantity?.message}
-                    </span>
-                  )}
-                </div>
-                <div className="line-editor-cell line-editor-qty">
-                  <Controller
-                    control={form.control}
-                    name={`lines.${index}.unitCost`}
-                    render={({ field: costField }) => (
-                      <input
-                        aria-label={`Unit cost for line ${index + 1}`}
-                        placeholder="0.00"
-                        {...costField}
-                        value={costField.value ?? ''}
-                        onChange={(event) =>
-                          costField.onChange(
-                            event.target.value === ''
-                              ? null
-                              : event.target.value,
-                          )
-                        }
-                      />
-                    )}
-                  />
-                  {form.formState.errors.lines?.[index]?.unitCost?.message && (
-                    <span className="form-error">
-                      {form.formState.errors.lines?.[index]?.unitCost?.message}
-                    </span>
-                  )}
-                </div>
-                <div className="line-editor-cell line-editor-total mono">
-                  {formatMoney(lineTotal)}
-                </div>
-                <div className="line-editor-cell line-editor-remove">
-                  {fields.length > 1 && (
-                    <button
-                      aria-label={`Remove line ${index + 1}`}
-                      className="button icon-button"
-                      onClick={() => remove(index)}
-                      type="button"
-                    >
-                      <Trash size={16} aria-hidden="true" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-          <button
-            className="line-editor-add"
-            onClick={() =>
-              append({ productId: '', quantity: 1, unitCost: null })
-            }
-            type="button"
-          >
-            <Plus size={16} aria-hidden="true" /> Add line
-          </button>
-          {form.formState.errors.lines?.root?.message && (
-            <p className="form-error">
-              {form.formState.errors.lines.root.message}
-            </p>
-          )}
-          <div className="line-editor-subtotal">
-            <span>Total cost</span>
-            <strong className="mono">{formatMoney(totalCost)}</strong>
+              );
+            })}
+            <button
+              className="line-editor-add"
+              onClick={() =>
+                append({ productId: '', quantity: 1, unitCost: null })
+              }
+              type="button"
+            >
+              <Plus size={16} aria-hidden="true" /> Add line
+            </button>
+            {form.formState.errors.lines?.root?.message && (
+              <p className="form-error">
+                {form.formState.errors.lines.root.message}
+              </p>
+            )}
+            <div className="line-editor-subtotal">
+              <span>Total cost</span>
+              <strong className="mono">{formatMoney(totalCost)}</strong>
+            </div>
           </div>
-        </div>
-        <FormField
-          error={form.formState.errors.note?.message}
-          htmlFor="receipt-note"
-          label="Note"
-        >
-          <textarea id="receipt-note" {...form.register('note')} />
-        </FormField>
+          <FormField
+            error={form.formState.errors.note?.message}
+            htmlFor="receipt-note"
+            label="Note"
+          >
+            <textarea id="receipt-note" {...form.register('note')} />
+          </FormField>
+        </fieldset>
         <div className="drawer-action-row">
           <button
             className="button button-secondary"
             onClick={close}
             type="button"
           >
-            Cancel
+            {mutation.outcomeUnknown ? 'Close and keep request' : 'Cancel'}
           </button>
           <button
             className="button button-primary"
-            disabled={mutation.isPending}
+            disabled={mutation.isPending || mutation.recoveryExpired}
             type="submit"
           >
-            {mutation.isPending ? 'Applying…' : 'Apply receipt'}
+            {mutation.isPending
+              ? 'Applying…'
+              : mutation.outcomeUnknown
+                ? 'Retry same receipt'
+                : 'Apply receipt'}
           </button>
         </div>
       </form>

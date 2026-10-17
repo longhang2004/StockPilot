@@ -752,6 +752,22 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.form-fields {
+  border: 0;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.catalog-search-controls {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.line-field-label {
+  display: none;
+}
+
 .form-field {
   display: grid;
   gap: 0.25rem;

@@ -13,6 +13,7 @@ import {
   createAdminClient,
   createTestApplication,
 } from './support/test-app.js';
+import { MAX_FILE_BYTES } from '../src/imports/product-csv-parser.js';
 
 describe('catalog and partners API', () => {
   const demoSlug = `catalog-test-${randomUUID()}`;
@@ -175,7 +176,24 @@ describe('catalog and partners API', () => {
     });
     expect(response.body.recentOrders).toEqual([]);
     expect(response.body.recentMovements).toEqual([]);
-    expect(response.body.fourteenDayMovements).toEqual([]);
+    // The chart contract is a zero-filled, consecutive 14-day window so the
+    // bars and "Last 14 days" label stay truthful even on quiet days.
+    const days = response.body.fourteenDayMovements.map(
+      (row: { day: string }) => row.day,
+    );
+    expect(days).toHaveLength(14);
+    expect(new Set(days).size).toBe(14);
+    for (let index = 1; index < days.length; index += 1) {
+      expect(Date.parse(days[index]!) - Date.parse(days[index - 1]!)).toBe(
+        24 * 60 * 60 * 1000,
+      );
+    }
+    expect(
+      response.body.fourteenDayMovements.every(
+        (row: { inbound: number; outbound: number }) =>
+          row.inbound === 0 && row.outbound === 0,
+      ),
+    ).toBe(true);
   });
 
   it('previews and commits valid product CSV rows without blocking invalid rows', async () => {
@@ -240,5 +258,83 @@ describe('catalog and partners API', () => {
     expect(exported.status).toBe(200);
     expect(exported.headers['content-type']).toContain('text/csv');
     expect(exported.text).toContain('COF-1,Cold Brew Concentrate,18.50,8');
+  });
+
+  it('accepts CSV previews larger than 100 KiB through the real JSON transport', async () => {
+    const content = [
+      'sku,name,sale_price,reorder_point,description',
+      ...Array.from(
+        { length: 150 },
+        (_, index) =>
+          `BULK-${index},Bulk product ${index},10.00,0,${'x'.repeat(1000)}`,
+      ),
+    ].join('\n');
+    expect(Buffer.byteLength(content)).toBeGreaterThan(100 * 1024);
+    const preview = await manager
+      .post('/v1/product-imports/preview')
+      .set('Origin', TEST_WEB_ORIGIN)
+      .set('X-CSRF-Token', managerCsrf)
+      .send({ fileName: 'bulk.csv', content });
+    expect(preview.status).toBe(201);
+    expect(preview.body).toMatchObject({ rowsTotal: 150, rowsValid: 150 });
+  });
+
+  it('enforces decoded CSV bytes while allowing worst-case JSON escaping', async () => {
+    const prefix =
+      'sku,name,sale_price,reorder_point,description\nLIMIT,Limit product,10.00,0,';
+    // NUL takes six bytes in JSON. The row is invalid, but transport and the
+    // CSV file size limit must still accept a file of exactly 2 MiB.
+    const content =
+      prefix + '\0'.repeat(MAX_FILE_BYTES - Buffer.byteLength(prefix));
+    const preview = await manager
+      .post('/v1/product-imports/preview')
+      .set('Origin', TEST_WEB_ORIGIN)
+      .set('X-CSRF-Token', managerCsrf)
+      .send({ fileName: 'escaped.csv', content });
+    expect(preview.status).toBe(201);
+    expect(preview.body).toMatchObject({ rowsTotal: 1, rowsInvalid: 1 });
+
+    const oversizedFile = await manager
+      .post('/v1/product-imports/preview')
+      .set('Origin', TEST_WEB_ORIGIN)
+      .set('X-CSRF-Token', managerCsrf)
+      .send({ fileName: 'oversized.csv', content: content + 'x' });
+    expect(oversizedFile.status).toBe(400);
+    expect(oversizedFile.body.detail).toContain('2 MB limit');
+  });
+
+  it('keeps other JSON endpoints at 100 KiB and maps parser errors to problem details', async () => {
+    const normalEndpoint = await manager
+      .post('/v1/products')
+      .set('Origin', TEST_WEB_ORIGIN)
+      .set('X-CSRF-Token', managerCsrf)
+      .send({ name: 'x'.repeat(100 * 1024) });
+    expect(normalEndpoint.status).toBe(413);
+    expect(normalEndpoint.headers['content-type']).toContain(
+      'application/problem+json',
+    );
+    expect(normalEndpoint.body).toMatchObject({ status: 413 });
+
+    const malformed = await manager
+      .post('/v1/product-imports/preview')
+      .set('Origin', TEST_WEB_ORIGIN)
+      .set('X-CSRF-Token', managerCsrf)
+      .set('Content-Type', 'application/json')
+      .send('{"content":');
+    expect(malformed.status).toBe(400);
+    expect(malformed.headers['content-type']).toContain(
+      'application/problem+json',
+    );
+
+    const oversizedEnvelope = await manager
+      .post('/v1/product-imports/preview')
+      .set('Origin', TEST_WEB_ORIGIN)
+      .set('X-CSRF-Token', managerCsrf)
+      .send({
+        content: 'x'.repeat(MAX_FILE_BYTES * 6 + 4096),
+        fileName: 'huge.csv',
+      });
+    expect(oversizedEnvelope.status).toBe(413);
+    expect(oversizedEnvelope.body).toMatchObject({ status: 413 });
   });
 });

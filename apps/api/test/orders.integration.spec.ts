@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestAgent, demoLogin } from './support/agent.js';
 import {
   adminDatabaseUrl,
+  appDatabaseUrl,
   setTestEnvironment,
   TEST_WEB_ORIGIN,
 } from './support/environment.js';
@@ -24,6 +25,8 @@ describe('sales orders API', () => {
   let staffCsrf: string;
   let productId: string;
   let customerId: string;
+  let supplierId: string;
+  const applicationName = `orders-${randomUUID()}`;
 
   async function createOrder(
     agent: Awaited<ReturnType<typeof createTestAgent>>,
@@ -42,6 +45,7 @@ describe('sales orders API', () => {
       CSRF_SECRET: 'orders-csrf-secret-with-at-least-32-characters',
       DEMO_ORGANIZATION_SLUG: demoSlug,
       WEBHOOK_SIGNING_SECRET: 'orders-webhook-secret',
+      DATABASE_URL: `${appDatabaseUrl()}${appDatabaseUrl().includes('?') ? '&' : '?'}application_name=${applicationName}`,
     });
 
     admin = await createAdminClient(adminDatabaseUrl());
@@ -79,6 +83,7 @@ describe('sales orders API', () => {
       .send({ companyName: 'Order Test Supplier' });
     productId = product.body.id as string;
     customerId = customer.body.id as string;
+    supplierId = supplier.body.id as string;
     await manager
       .post('/v1/receipts')
       .set('Origin', TEST_WEB_ORIGIN)
@@ -221,4 +226,108 @@ describe('sales orders API', () => {
     const balances = await manager.get('/v1/inventory/balances');
     expect(balances.body.items[0].reserved).toBe(2);
   });
+
+  it.each(['confirm-first', 'edit-first'] as const)(
+    'serializes Draft edits against confirmation (%s)',
+    async (sequence) => {
+      const product = await manager
+        .post('/v1/products')
+        .set('Origin', TEST_WEB_ORIGIN)
+        .set('X-CSRF-Token', managerCsrf)
+        .send({
+          name: 'Concurrent Order Product',
+          reorderPoint: 0,
+          salePrice: '10.00',
+          sku: `RACE-${randomUUID()}`,
+        });
+      expect(product.status).toBe(201);
+      const raceProductId = product.body.id as string;
+      const receipt = await manager
+        .post('/v1/receipts')
+        .set('Origin', TEST_WEB_ORIGIN)
+        .set('X-CSRF-Token', managerCsrf)
+        .set('Idempotency-Key', randomUUID())
+        .send({
+          lines: [{ productId: raceProductId, quantity: 6, unitCost: '5.00' }],
+          receiptNumber: `RACE-${randomUUID()}`,
+          receivedAt: new Date().toISOString(),
+          supplierId,
+        });
+      expect(receipt.status).toBe(201);
+      const draft = await manager
+        .post('/v1/orders')
+        .set('Origin', TEST_WEB_ORIGIN)
+        .set('X-CSRF-Token', managerCsrf)
+        .send({
+          customerId,
+          lines: [{ productId: raceProductId, quantity: 1 }],
+        });
+      expect(draft.status).toBe(201);
+      const orderId = draft.body.id as string;
+
+      const waitForBlockedRequests = (count: number) =>
+        expect
+          .poll(
+            async () => {
+              const rows = await admin.$queryRaw<Array<{ count: number }>>`
+            SELECT count(*)::int AS count
+            FROM pg_stat_activity
+            WHERE application_name = ${applicationName}
+              AND wait_event_type = 'Lock'
+          `;
+              return rows[0]!.count;
+            },
+            { interval: 20, timeout: 3000 },
+          )
+          .toBe(count);
+
+      // Hold the parent row so the two real HTTP requests queue in a known
+      // order. Waiting for database lock state avoids timing-based sleeps.
+      const requests = await admin.$transaction(async (transaction) => {
+        await transaction.$queryRaw`
+          SELECT id FROM sales_orders WHERE id = ${orderId}::uuid FOR UPDATE
+        `;
+        const confirm = () =>
+          manager
+            .post(`/v1/orders/${orderId}/confirm`)
+            .set('Origin', TEST_WEB_ORIGIN)
+            .set('X-CSRF-Token', managerCsrf)
+            .set('Idempotency-Key', randomUUID())
+            .send()
+            .then((response) => response);
+        const edit = () =>
+          manager
+            .patch(`/v1/orders/${orderId}`)
+            .set('Origin', TEST_WEB_ORIGIN)
+            .set('X-CSRF-Token', managerCsrf)
+            .send({
+              customerId,
+              lines: [{ productId: raceProductId, quantity: 3 }],
+            })
+            .then((response) => response);
+        const first = sequence === 'confirm-first' ? confirm() : edit();
+        await waitForBlockedRequests(1);
+        const second = sequence === 'confirm-first' ? edit() : confirm();
+        await waitForBlockedRequests(2);
+        return { first, second };
+      });
+      const [first, second] = await Promise.all([
+        requests.first,
+        requests.second,
+      ]);
+      expect(first.status).toBe(200);
+      expect(second.status).toBe(sequence === 'confirm-first' ? 409 : 200);
+      const detail = await manager.get(`/v1/orders/${orderId}`);
+      const quantity = sequence === 'confirm-first' ? 1 : 3;
+      expect(detail.body).toMatchObject({
+        status: 'CONFIRMED',
+        lines: [{ quantity }],
+        subtotal: `${quantity * 10}.00`,
+      });
+      const balance = await admin.inventoryBalance.findFirstOrThrow({
+        where: { productId: raceProductId },
+      });
+      expect(balance.reserved).toBe(quantity);
+    },
+  );
 });

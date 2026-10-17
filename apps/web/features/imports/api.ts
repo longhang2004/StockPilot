@@ -1,6 +1,9 @@
-import type { ImportPreviewResult } from '@stockpilot/contracts';
+import type {
+  ImportCommitResult,
+  ImportPreviewResult,
+} from '@stockpilot/contracts';
 
-import { apiRequest, newIdempotencyKey } from '../../lib/api-client';
+import { apiRequest } from '../../lib/api-client';
 
 /** CSV preview payload (the schema is API-local; the web form owns it). */
 export interface ImportPreviewInput {
@@ -17,9 +20,12 @@ export function previewImport(
   });
 }
 
-export function commitImport(id: string): Promise<unknown> {
+export function commitImport(
+  id: string,
+  idempotencyKey: string,
+): Promise<ImportCommitResult> {
   return apiRequest(`/product-imports/${id}/commit`, {
-    idempotencyKey: newIdempotencyKey('import'),
+    idempotencyKey,
     method: 'POST',
   });
 }

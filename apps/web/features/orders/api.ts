@@ -1,6 +1,6 @@
 import type { SalesOrderInput } from '@stockpilot/contracts';
 
-import { apiRequest, newIdempotencyKey } from '../../lib/api-client';
+import { apiRequest } from '../../lib/api-client';
 import type { OrderDetail } from '../shared/types';
 
 export const ORDERS_RESOURCE = '/orders';
@@ -32,11 +32,12 @@ export type OrderTransitionTarget = keyof typeof transitionPathByStatus;
 export function transitionOrder(
   id: string,
   to: OrderTransitionTarget,
+  idempotencyKey: string,
 ): Promise<OrderDetail> {
   return apiRequest<OrderDetail>(
     `/orders/${id}/${transitionPathByStatus[to]}`,
     {
-      idempotencyKey: newIdempotencyKey(`order-${to.toLowerCase()}`),
+      idempotencyKey,
       method: 'POST',
     },
   );

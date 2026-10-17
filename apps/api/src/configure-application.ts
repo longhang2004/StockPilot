@@ -8,17 +8,28 @@ import { openApiSchemas, schemaRef } from './openapi/schemas.js';
 import { ProblemDetailsFilter } from './problem-details.filter.js';
 import { RequestLoggingInterceptor } from './observability/request-logging.interceptor.js';
 import { SentryReporter } from './observability/sentry-reporter.js';
+import { MAX_FILE_BYTES } from './imports/product-csv-parser.js';
 
 export function configureApplication(app: NestExpressApplication): void {
   const environment = parseEnvironment(process.env);
 
   app.use(helmet());
   app.use(cookieParser());
-  // Explicit request-size limits (Express defaults, declared so the policy
-  // is intentional): JSON bodies are capped at 100kb and urlencoded bodies
-  // are parsed with extended:false, which rejects nested object syntax that
-  // the qs library would otherwise interpret (prototype-pollution surface).
+  // JSON can escape one CSV byte as six characters (e.g. \u0000). Keep the
+  // decoded 2 MiB file limit in parseProductCsv and allow bounded envelope
+  // overhead here, only for the import preview endpoint.
+  app.useBodyParser('json', {
+    limit: MAX_FILE_BYTES * 6 + 4096,
+    type: (request) =>
+      request.method === 'POST' &&
+      /^\/v1\/product-imports\/preview\/?(?:\?|$)/.test(request.url ?? '') &&
+      /^application\/json(?:\s*;|$)/i.test(
+        request.headers['content-type'] ?? '',
+      ),
+  });
+  // All other JSON endpoints retain the normal 100 KiB cap.
   app.useBodyParser('json', { limit: '100kb' });
+  // extended:false rejects nested object syntax.
   app.useBodyParser('urlencoded', { extended: false, limit: '100kb' });
   app.setGlobalPrefix('v1');
   app.enableCors({

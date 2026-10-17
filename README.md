@@ -11,7 +11,8 @@ receiving stock, preventing overselling, and fulfilling customer orders.
 [Live demo](https://stock-pilot-web-five.vercel.app) ·
 [API docs](https://stockpilot-api-y1aw.onrender.com/docs) ·
 [Walkthrough](docs/walkthrough.md) ·
-[Architecture](docs/architecture.md)
+[Architecture](docs/architecture.md) ·
+[Current implementation status](docs/implementation-status-2026-10-17.md)
 
 > **Portfolio demo:** the current deployment uses a temporary Vercel origin,
 > Render Free, Neon Free, and UptimeRobot. Before launch, replace the demo
@@ -157,12 +158,12 @@ The versioned API is under `/v1`:
 - **Auth:** `/auth/login`, `/auth/demo-login`, `/auth/session`, `/auth/csrf`
 - **Catalog:** `/products`, `/customers`, `/suppliers`
 - **Inventory:** `/inventory/balances`, `/inventory/movements`,
-  `/inventory/adjustments`, `/receipts`
+  `/inventory/summary`, `/inventory/adjustments`, `/receipts`
 - **Orders:** `/orders`, `/orders/:id/confirm`, `/orders/:id/fulfill`,
   `/orders/:id/cancel`
 - **Operations:** `/dashboard/overview`, `/alerts`, `/audit-events`
 - **Integrations:** `/webhooks/mock-storefront/orders`,
-  `/integration-deliveries/:id/retry`
+  `/integration-deliveries/:id`, `/integration-deliveries/:id/retry`
 - **Health/docs:** `/health/live`, `/health/ready`, `/docs`, `/openapi.json`
 
 State-changing receipts, adjustments, order transitions, import commits,

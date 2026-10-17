@@ -1,7 +1,7 @@
 'use client';
 
 import { type Role } from '@stockpilot/contracts';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from '@phosphor-icons/react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -26,9 +26,11 @@ import {
   orderKeys,
   transitionOrder,
 } from './api';
+import { ExpiredCommandResolution } from '../shared/expired-command-resolution';
 import { formatDate, formatDateTime } from '../../lib/formatters';
 import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
+import { useCommandMutation } from '../../hooks/use-command-mutation';
 import { OrderDetailView } from './components/order-detail-view';
 import { OrderFormDrawer } from './components/order-form-drawer';
 import { type OrderRecord } from '../shared/types';
@@ -66,19 +68,36 @@ export function OrdersWorkspace({ role }: { role: Role }) {
     queryFn: () => fetchOrderDetail(selectedId!),
     enabled: Boolean(selectedId),
   });
-  const transition = useMutation({
-    mutationFn: (to: 'CONFIRMED' | 'FULFILLED' | 'CANCELLED') =>
-      transitionOrder(selectedId!, to),
+  const transition = useCommandMutation({
+    prefix: 'order-transition',
+    validate: (
+      value,
+    ): value is { id: string; to: 'CONFIRMED' | 'FULFILLED' | 'CANCELLED' } =>
+      Boolean(
+        value &&
+        typeof value === 'object' &&
+        'id' in value &&
+        typeof value.id === 'string' &&
+        'to' in value &&
+        ['CONFIRMED', 'FULFILLED', 'CANCELLED'].includes(String(value.to)),
+      ),
+    command: (
+      value: { id: string; to: 'CONFIRMED' | 'FULFILLED' | 'CANCELLED' },
+      key,
+    ) => transitionOrder(value.id, value.to, key),
     onError: (error) =>
       push(
         error instanceof Error ? error.message : 'Order transition failed.',
         'error',
       ),
-    onSuccess: () => {
+    onSuccess: (_result, value) => {
       void invalidatePageQueries(queryClient, ORDERS_RESOURCE);
       void queryClient.invalidateQueries({
-        queryKey: orderKeys.detail(selectedId!),
+        queryKey: orderKeys.detail(value.id),
       });
+      void invalidatePageQueries(queryClient, '/inventory/balances');
+      void invalidatePageQueries(queryClient, '/alerts');
+      void queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
       setConfirmAction(null);
       push('Order status updated.', 'success');
     },
@@ -99,6 +118,28 @@ export function OrdersWorkspace({ role }: { role: Role }) {
           </button>
         }
       />
+      {transition.outcomeUnknown ? (
+        <div className="work-panel" role="alert">
+          <p>{transition.recoveryMessage}</p>
+          {transition.recoveryExpired ? (
+            <ExpiredCommandResolution
+              idempotencyKey={transition.idempotencyKey}
+              onResolve={transition.resolveExpired}
+            />
+          ) : (
+            <button
+              className="button button-secondary"
+              disabled={transition.isPending}
+              onClick={() =>
+                transition.variables && transition.mutate(transition.variables)
+              }
+              type="button"
+            >
+              Retry same status update
+            </button>
+          )}
+        </div>
+      ) : null}
       <SearchFilterBar
         onSearch={(value) => {
           setPage(1);
@@ -191,9 +232,9 @@ export function OrdersWorkspace({ role }: { role: Role }) {
             canManage={canManage}
             onAction={(to) => {
               if (to === 'CANCELLED') setConfirmAction(to);
-              else transition.mutate(to);
+              else transition.mutate({ id: selectedId!, to });
             }}
-            pending={transition.isPending}
+            pending={transition.locked}
             role={role}
           />
         )}
@@ -203,9 +244,11 @@ export function OrdersWorkspace({ role }: { role: Role }) {
         destructive
         description="This releases any confirmed reservation and permanently ends the order."
         onCancel={() => setConfirmAction(null)}
-        onConfirm={() => transition.mutate('CANCELLED')}
+        onConfirm={() =>
+          transition.mutate({ id: selectedId!, to: 'CANCELLED' })
+        }
         open={confirmAction === 'CANCELLED'}
-        pending={transition.isPending}
+        pending={transition.locked}
         title="Cancel this order?"
       />
     </section>

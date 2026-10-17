@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const RATE_LIMIT_STATS = {
   buckets: 0,
@@ -11,7 +11,17 @@ const RATE_LIMIT_STATS = {
   },
 };
 
+const TEST_REVISION = 'ci-test-revision';
+
 describe('HealthController', () => {
+  beforeEach(() => {
+    vi.stubEnv('RENDER_GIT_COMMIT', TEST_REVISION);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('reports a live API process', async () => {
     const { HealthController } = await import('./health.controller.js');
     const moduleRef = await Test.createTestingModule({
@@ -40,6 +50,7 @@ describe('HealthController', () => {
     }).compile();
 
     expect(moduleRef.get(HealthController).live()).toEqual({
+      revision: TEST_REVISION,
       service: 'stockpilot-api',
       status: 'ok',
     });
@@ -81,6 +92,7 @@ describe('HealthController', () => {
     ).resolves.toEqual({
       checks: { database: 'ok', queue: 'not_configured' },
       rateLimit: RATE_LIMIT_STATS,
+      revision: TEST_REVISION,
       status: 'ready',
     });
     expect(response.status).not.toHaveBeenCalled();
@@ -121,6 +133,7 @@ describe('HealthController', () => {
     ).resolves.toEqual({
       checks: { database: 'ok', queue: 'not_configured' },
       rateLimit: RATE_LIMIT_STATS,
+      revision: TEST_REVISION,
       status: 'degraded',
     });
     expect(response.status).toHaveBeenCalledWith(503);
@@ -161,6 +174,7 @@ describe('HealthController', () => {
     ).resolves.toEqual({
       checks: { database: 'unavailable', queue: 'ready' },
       rateLimit: RATE_LIMIT_STATS,
+      revision: TEST_REVISION,
       status: 'degraded',
     });
     expect(response.status).toHaveBeenCalledWith(503);

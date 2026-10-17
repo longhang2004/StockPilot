@@ -13,6 +13,7 @@ import { executeIdempotent } from '../idempotency/idempotency.js';
 import { InventoryReconciliationService } from '../inventory/inventory-reconciliation.service.js';
 import { createDraftOrder, replaceDraftLines } from './order-draft.service.js';
 import { findOrderDetail, listOrders } from './order-query.service.js';
+import { lockOrder } from './order-lock.js';
 import { transitionOrder } from './order-transition.service.js';
 import type { OrderListQuery } from './orders.types.js';
 
@@ -58,6 +59,8 @@ export class OrdersService {
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       async (transaction) => {
+        // Edits and transitions must serialize before reading Draft state or lines.
+        await lockOrder(transaction, organizationId, id);
         const existing = await transaction.salesOrder.findFirst({
           where: { id, organizationId },
         });

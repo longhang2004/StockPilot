@@ -5,7 +5,8 @@ services:
     plan: free
     region: singapore
     branch: main
-    autoDeployTrigger: 'commit'
+    # The workflow migrates and seeds Neon before it triggers Render.
+    autoDeployTrigger: 'off'
     rootDir: .
     dockerfilePath: ./apps/api/Dockerfile
     dockerContext: .

@@ -9,7 +9,7 @@ import {
 import { Prisma } from './generated/prisma/client.js';
 import { ZodError } from 'zod';
 import type { SentryReporter } from './observability/sentry-reporter.js';
-import { errorStatusCode } from './problem-status.js';
+import { bodyParserErrorStatus, errorStatusCode } from './problem-status.js';
 
 interface RequestLike {
   get(name: string): string | undefined;
@@ -72,6 +72,22 @@ export function toProblem(
   instance: string,
   traceId: string,
 ): ProblemResponse {
+  const parserStatus = bodyParserErrorStatus(exception);
+  if (parserStatus) {
+    const tooLarge = parserStatus === 413;
+    const code = tooLarge ? 'PAYLOAD_TOO_LARGE' : 'INVALID_JSON';
+    return {
+      code,
+      detail: tooLarge
+        ? 'The request body exceeds the size limit for this endpoint.'
+        : 'The request body contains invalid JSON.',
+      instance,
+      status: parserStatus,
+      title: tooLarge ? 'Payload too large' : 'Bad request',
+      traceId,
+      type: `https://stockpilot.dev/problems/${code.toLowerCase()}`,
+    };
+  }
   if (exception instanceof ZodError) {
     return {
       code: 'VALIDATION_ERROR',

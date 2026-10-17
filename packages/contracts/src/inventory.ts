@@ -116,6 +116,13 @@ export const InventoryBalanceListSchema = PageShapeSchema.extend({
 });
 export type InventoryBalanceList = z.infer<typeof InventoryBalanceListSchema>;
 
+export const InventorySummarySchema = z.object({
+  trackedSkus: z.number().int().nonnegative(),
+  availableUnits: z.number().int().nonnegative(),
+  openAlerts: z.number().int().nonnegative(),
+});
+export type InventorySummary = z.infer<typeof InventorySummarySchema>;
+
 /** Item returned by GET /v1/alerts (raw LowStockAlert row plus product brief). */
 export const LowStockAlertSchema = z.object({
   id: UuidSchema,

@@ -204,7 +204,7 @@ export default function HomePage() {
 
       <header className="marketing-header">
         <nav className="site-nav" aria-label="Primary navigation">
-          <a className="brand" href="#top" aria-label="StockPilot home">
+          <a className="brand" href="#top">
             <span className="brand-mark" aria-hidden="true">
               SP
             </span>

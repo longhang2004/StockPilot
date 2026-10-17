@@ -33,6 +33,7 @@ import {
 const ListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
+  search: z.string().trim().max(120).optional(),
   status: z.enum(['RECEIVED', 'PROCESSING', 'SUCCEEDED', 'FAILED']).optional(),
 });
 
@@ -75,6 +76,13 @@ export class IntegrationController {
   @SessionAuth()
   list(@Req() request: AuthenticatedRequest, @Query() query: unknown) {
     return this.integrations.list(request.auth, ListQuerySchema.parse(query));
+  }
+
+  @RequirePermission('integration:retry')
+  @Get('integration-deliveries/:id')
+  @SessionAuth()
+  get(@Req() request: AuthenticatedRequest, @Param('id') id: string) {
+    return this.integrations.get(request.auth, IdentifierSchema.parse(id));
   }
 
   @RequirePermission('integration:retry')

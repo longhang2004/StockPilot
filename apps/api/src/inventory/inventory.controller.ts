@@ -29,6 +29,7 @@ import {
   AlertListQuerySchema,
   IdempotencyKeySchema,
   InventoryListQuerySchema,
+  MovementListQuerySchema,
 } from './inventory-schemas.js';
 import { InventoryService } from './inventory.service.js';
 import {
@@ -47,6 +48,12 @@ export class InventoryController {
   @RequirePermission('inventory:read')
   @Get('balances')
   @ApiOperation({ summary: 'List inventory balances' })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Product name or SKU (case-insensitive).',
+    schema: { type: 'string', maxLength: 120 },
+  })
   @ApiQuery({
     name: 'page',
     required: false,
@@ -69,10 +76,37 @@ export class InventoryController {
   }
 
   @RequirePermission('inventory:read')
+  @Get('summary')
+  @ApiOperation({
+    summary: 'Get inventory totals across the active organization',
+  })
+  @ApiOkResponse({
+    description: 'Totals independent of list pagination and filters.',
+    schema: schemaRef('InventorySummary'),
+  })
+  summary(@Req() request: AuthenticatedRequest) {
+    return this.inventory.summary(request.auth);
+  }
+
+  @RequirePermission('inventory:read')
   @Get('movements')
   @ApiOperation({
     summary: 'List stock movements',
     description: 'Append-only movement ledger, newest first.',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Product name or SKU (case-insensitive).',
+    schema: { type: 'string', maxLength: 120 },
+  })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    schema: {
+      type: 'string',
+      enum: ['RECEIPT', 'SALE', 'ADJUSTMENT_IN', 'ADJUSTMENT_OUT'],
+    },
   })
   @ApiQuery({
     name: 'page',
@@ -91,7 +125,7 @@ export class InventoryController {
   movements(@Req() request: AuthenticatedRequest, @Query() query: unknown) {
     return this.inventory.listMovements(
       request.auth,
-      InventoryListQuerySchema.parse(query),
+      MovementListQuerySchema.parse(query),
     );
   }
 

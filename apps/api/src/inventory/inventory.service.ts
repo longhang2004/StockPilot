@@ -15,10 +15,12 @@ import {
   listAlerts,
   listBalances,
   listMovements,
+  inventorySummary,
 } from './inventory-query.service.js';
 import type {
   AlertStatusFilter,
   InventoryListQuery,
+  MovementListQuery,
 } from './inventory.types.js';
 
 export type {
@@ -94,9 +96,15 @@ export class InventoryService {
     );
   }
 
-  listMovements(auth: AuthContext, query: InventoryListQuery) {
+  listMovements(auth: AuthContext, query: MovementListQuery) {
     return this.inTenant(auth, (transaction, organizationId) =>
       listMovements(transaction, organizationId, query),
+    );
+  }
+
+  summary(auth: AuthContext) {
+    return this.inTenant(auth, (transaction, organizationId) =>
+      inventorySummary(transaction, organizationId),
     );
   }
 

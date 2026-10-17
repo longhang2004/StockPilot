@@ -1,0 +1,2 @@
+sku,name,sale_price,reorder_point,description
+EXAMPLE-TAPE,Packing Tape,4.25,10,Example product; replace this row before importing

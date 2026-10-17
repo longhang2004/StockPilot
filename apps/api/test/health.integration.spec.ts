@@ -20,37 +20,48 @@ describe('health endpoints', () => {
   });
 
   it('exposes liveness under the versioned API prefix', async () => {
-    ({ app } = await createTestApplication());
+    const previousRevision = process.env.RENDER_GIT_COMMIT;
+    process.env.RENDER_GIT_COMMIT = 'integration-test-revision';
+    try {
+      ({ app } = await createTestApplication());
 
-    const response = await request(app.getHttpServer()).get('/v1/health/live');
+      const response = await request(app.getHttpServer()).get(
+        '/v1/health/live',
+      );
 
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      service: 'stockpilot-api',
-      status: 'ok',
-    });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        revision: 'integration-test-revision',
+        service: 'stockpilot-api',
+        status: 'ok',
+      });
 
-    const readiness = await request(app.getHttpServer()).get(
-      '/v1/health/ready',
-    );
-    expect(readiness.status).toBe(200);
-    expect(readiness.body).toEqual({
-      checks: { database: 'ok', queue: 'not_configured' },
-      rateLimit: {
-        buckets: 0,
-        rejected: { public: 0, auth: 0, user: 0 },
-        limits: {
-          publicWritesPerMinute: 60,
-          authWritesPerMinute: 60,
-          userWritesPerMinute: 240,
+      const readiness = await request(app.getHttpServer()).get(
+        '/v1/health/ready',
+      );
+      expect(readiness.status).toBe(200);
+      expect(readiness.body).toEqual({
+        checks: { database: 'ok', queue: 'not_configured' },
+        rateLimit: {
+          buckets: 0,
+          rejected: { public: 0, auth: 0, user: 0 },
+          limits: {
+            publicWritesPerMinute: 60,
+            authWritesPerMinute: 60,
+            userWritesPerMinute: 240,
+          },
         },
-      },
-      status: 'ready',
-    });
+        revision: 'integration-test-revision',
+        status: 'ready',
+      });
 
-    const openApi = await request(app.getHttpServer()).get('/openapi.json');
-    expect(openApi.status).toBe(200);
-    expect(openApi.body.info.title).toBe('StockPilot API');
+      const openApi = await request(app.getHttpServer()).get('/openapi.json');
+      expect(openApi.status).toBe(200);
+      expect(openApi.body.info.title).toBe('StockPilot API');
+    } finally {
+      if (previousRevision === undefined) delete process.env.RENDER_GIT_COMMIT;
+      else process.env.RENDER_GIT_COMMIT = previousRevision;
+    }
   });
 
   it('returns 503 when the queue is required but not configured', async () => {
@@ -74,6 +85,7 @@ describe('health endpoints', () => {
             userWritesPerMinute: 240,
           },
         },
+        revision: process.env.RENDER_GIT_COMMIT ?? 'local',
         status: 'degraded',
       });
     } finally {

@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { QueryProvider } from '../../../lib/query-provider';
@@ -174,5 +180,67 @@ describe('OrderFormDrawer multi-line order entry', () => {
     );
     expect(orderCalls).toHaveLength(0);
     view.unmount();
+  });
+
+  it('searches products beyond the first page and retains a selected price across searches', async () => {
+    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      const body = url.includes('/customers')
+        ? customerPage
+        : JSON.stringify({
+            items: url.includes('search=REMOTE-250')
+              ? [
+                  {
+                    id: 'product-250',
+                    sku: 'REMOTE-250',
+                    name: 'Remote catalog product',
+                    salePrice: '7.50',
+                    isActive: true,
+                  },
+                ]
+              : [],
+            page: 1,
+            pageSize: 25,
+            total: url.includes('search=REMOTE-250') ? 1 : 250,
+            totalPages: url.includes('search=REMOTE-250') ? 1 : 10,
+          });
+      return Promise.resolve(new Response(body));
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    render(
+      <QueryProvider>
+        <OrderFormDrawer
+          onClose={() => undefined}
+          onSaved={() => undefined}
+          open
+          push={() => undefined}
+        />
+      </QueryProvider>,
+    );
+    fireEvent.change(screen.getByLabelText('Search products'), {
+      target: { value: 'REMOTE-250' },
+    });
+    await screen.findByText('REMOTE-250 · Remote catalog product');
+    fireEvent.change(screen.getByLabelText('Product for line 1'), {
+      target: { value: 'product-250' },
+    });
+    fireEvent.change(screen.getByLabelText('Quantity for line 1'), {
+      target: { value: '2' },
+    });
+    expect(screen.getAllByText('$15.00').length).toBeGreaterThan(0);
+    fireEvent.change(screen.getByLabelText('Search products'), {
+      target: { value: 'another-product' },
+    });
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(([input]) =>
+          String(input).includes('search=another-product'),
+        ),
+      ).toBe(true),
+    );
+    expect(screen.getAllByText('$15.00').length).toBeGreaterThan(0);
+    expect(screen.getByLabelText('Product for line 1')).toHaveValue(
+      'product-250',
+    );
   });
 });

@@ -1,10 +1,21 @@
-import { apiRequest, newIdempotencyKey } from '../../lib/api-client';
+import type {
+  IntegrationDeliveryRecord,
+  IntegrationDeliveryStatus,
+} from '@stockpilot/contracts';
+import { apiRequest } from '../../lib/api-client';
 
 export const DELIVERIES_RESOURCE = '/integration-deliveries';
 
-export function retryDelivery(id: string): Promise<unknown> {
+export function fetchDelivery(id: string): Promise<IntegrationDeliveryRecord> {
+  return apiRequest(`/integration-deliveries/${id}`);
+}
+
+export function retryDelivery(
+  id: string,
+  idempotencyKey: string,
+): Promise<{ status: IntegrationDeliveryStatus; error?: string }> {
   return apiRequest(`/integration-deliveries/${id}/retry`, {
-    idempotencyKey: newIdempotencyKey('integration-retry'),
+    idempotencyKey,
     method: 'POST',
   });
 }

@@ -1,6 +1,7 @@
 import { createHmac } from 'node:crypto';
 
 import { expect, test } from '@playwright/test';
+import { webOrigin } from './helpers';
 
 test('the same storefront delivery is processed once', async ({ request }) => {
   const payload = {
@@ -19,7 +20,7 @@ test('the same storefront delivery is processed once', async ({ request }) => {
     .update(JSON.stringify(payload))
     .digest('hex');
   const headers = {
-    Origin: 'http://localhost:3000',
+    Origin: webOrigin,
     'x-delivery-id': `delivery-e2e-${Date.now()}`,
     'x-organization-slug': 'stockpilot-demo',
     'x-storefront-signature': `sha256=${signature}`,

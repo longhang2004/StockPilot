@@ -2,6 +2,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 
@@ -36,6 +37,7 @@ export {
 
 @Injectable()
 export class IntegrationService {
+  private readonly logger = new Logger(IntegrationService.name);
   constructor(
     @Inject(ENVIRONMENT) private readonly environment: Environment,
     @Inject(TenantDatabase) private readonly database: TenantDatabase,
@@ -44,7 +46,7 @@ export class IntegrationService {
     @Inject(BillingStatusService)
     private readonly billingStatus: BillingStatusService,
   ) {
-    registerIntegrationRetry(this.jobs, this.database);
+    registerIntegrationRetry(this.jobs, this.database, this.prisma);
   }
 
   receiveMockStorefrontOrder(
@@ -78,13 +80,33 @@ export class IntegrationService {
           owner.userId,
           headers.deliveryId,
           payload,
-        ).then((result) => {
+        ).then(async (result) => {
           if (result.status === 'FAILED') {
-            void this.jobs.enqueueIntegrationRetry({
-              actorUserId: owner.userId,
-              deliveryId: headers.deliveryId,
-              organizationId: organization.id,
-            });
+            try {
+              const delivery = await this.database.withTenant(
+                { actorId: owner.userId, organizationId: organization.id },
+                (transaction) =>
+                  transaction.integrationDelivery.findUniqueOrThrow({
+                    select: { id: true },
+                    where: {
+                      organizationId_externalDeliveryId: {
+                        externalDeliveryId: headers.deliveryId,
+                        organizationId: organization.id,
+                      },
+                    },
+                  }),
+              );
+              await this.jobs.enqueueIntegrationRetry({
+                actorUserId: owner.userId,
+                deliveryId: delivery.id,
+                organizationId: organization.id,
+              });
+            } catch {
+              // FAILED is already durable; scheduled recovery will enqueue it.
+              this.logger.error(
+                'Integration retry enqueue failed; recovery pending.',
+              );
+            }
           }
           return result;
         });
@@ -99,6 +121,24 @@ export class IntegrationService {
         await this.assertIntegrationsEntitled(transaction, organizationId);
         const where = {
           organizationId,
+          ...(query.search
+            ? {
+                OR: [
+                  {
+                    externalDeliveryId: {
+                      contains: query.search,
+                      mode: 'insensitive' as const,
+                    },
+                  },
+                  {
+                    eventType: {
+                      contains: query.search,
+                      mode: 'insensitive' as const,
+                    },
+                  },
+                ],
+              }
+            : {}),
           ...(query.status ? { status: query.status } : {}),
         };
         const [items, total] = await Promise.all([
@@ -117,6 +157,22 @@ export class IntegrationService {
           total,
           totalPages: Math.ceil(total / query.pageSize),
         };
+      },
+    );
+  }
+
+  get(auth: AuthContext, id: string) {
+    const organizationId = requireMembership(auth).organization.id;
+    return this.database.withTenant(
+      { actorId: auth.user.id, organizationId },
+      async (transaction) => {
+        await this.assertIntegrationsEntitled(transaction, organizationId);
+        const delivery = await transaction.integrationDelivery.findFirst({
+          where: { id, organizationId },
+        });
+        if (!delivery)
+          throw new NotFoundException('Integration delivery not found.');
+        return delivery;
       },
     );
   }

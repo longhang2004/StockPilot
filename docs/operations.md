@@ -22,6 +22,11 @@ both statuses. The selected Render profile uses `QUEUE_REQUIRED=false` and
 leaves `QUEUE_DATABASE_URL` unset, so `queue:not_configured` with HTTP 200 is
 expected. Set both values only for a short queue-enabled acceptance run.
 
+Both endpoints also report the deployed `revision`: Render injects
+`RENDER_GIT_COMMIT`, and local runs report `local`. After a deploy, compare
+`revision` with the SHA whose CI checks passed to confirm the release gate
+shipped the intended commit.
+
 Render Free services can sleep after 15 minutes without inbound traffic. The
 UptimeRobot `/v1/health/live` monitor runs every five minutes to keep normal
 demo usage warm. It does not query Neon, so the first real database request

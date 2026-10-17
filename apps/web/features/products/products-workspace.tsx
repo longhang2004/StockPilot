@@ -10,6 +10,7 @@ import {
   EmptyState,
   ErrorState,
   PageHeader,
+  Pagination,
   ResponsiveDataTable,
   SearchFilterBar,
   Skeleton,
@@ -44,6 +45,7 @@ class ProductImageSaveError extends Error {
 
 export function ProductsWorkspace({ role }: { role: Role }) {
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<ProductRecord | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -52,8 +54,9 @@ export function ProductsWorkspace({ role }: { role: Role }) {
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
   const products = usePage<ProductRecord>('/products', {
-    page: 1,
-    pageSize: 100,
+    page,
+    pageSize: 25,
+    includeInactive: true,
     search,
   });
   const canWrite = role === 'MANAGER' || role === 'OWNER';
@@ -137,7 +140,18 @@ export function ProductsWorkspace({ role }: { role: Role }) {
           ) : undefined
         }
       />
-      <SearchFilterBar onSearch={setSearch} search={search} />
+      <SearchFilterBar
+        onSearch={(value) => {
+          setPage(1);
+          setSearch(value);
+        }}
+        search={search}
+      />
+      {products.data ? (
+        <p className="muted-note">
+          {products.data.total} products match this view
+        </p>
+      ) : null}
       {products.isLoading ? (
         <Skeleton lines={5} />
       ) : products.isError ? (
@@ -166,8 +180,12 @@ export function ProductsWorkspace({ role }: { role: Role }) {
         />
       ) : (
         <EmptyState
-          description="Create the first product or import a catalog CSV."
-          title="No products yet"
+          description={
+            search
+              ? 'Try another name or SKU.'
+              : 'Create the first product or import a catalog CSV.'
+          }
+          title={search ? 'No products match this search' : 'No products yet'}
           action={
             canWrite ? (
               <button
@@ -187,6 +205,11 @@ export function ProductsWorkspace({ role }: { role: Role }) {
           }
         />
       )}
+      <Pagination
+        onPageChange={setPage}
+        page={page}
+        totalPages={products.data?.totalPages ?? 0}
+      />
       <ToastRegion toasts={toasts} />
       <ProductDrawer
         editing={editing}

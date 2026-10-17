@@ -64,7 +64,7 @@ export default function CreateWorkspacePage() {
   return (
     <main className="login-page">
       <header className="login-header">
-        <Link className="brand" href="/" aria-label="Back to StockPilot home">
+        <Link className="brand" href="/">
           <span className="brand-mark" aria-hidden="true">
             SP
           </span>

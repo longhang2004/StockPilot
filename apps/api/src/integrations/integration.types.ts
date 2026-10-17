@@ -32,5 +32,6 @@ export interface WebhookHeaders {
 export interface IntegrationListQuery {
   page: number;
   pageSize: number;
+  search?: string | undefined;
   status?: 'RECEIVED' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | undefined;
 }

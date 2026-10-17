@@ -45,10 +45,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Archive safety: env files must never reach a backup archive.
       - run: python3 scripts/compress.py --self-test
-      # Supply-chain gate: fail on high/critical advisories in the full
-      # dependency tree (production and development). Moderate/low findings
-      # are surfaced by Dependabot instead of blocking merges.
-      - run: pnpm audit --audit-level high
       - run: psql "$MIGRATION_DATABASE_URL" -f infra/postgres/init.sql
       - run: pnpm db:generate
       - run: pnpm --filter @stockpilot/api exec prisma migrate deploy
@@ -63,6 +59,12 @@ jobs:
       - run: pnpm typecheck:e2e
       - run: pnpm test:unit
       - run: pnpm --filter @stockpilot/api test:integration
+      - name: Create isolated pg-boss database
+        run: psql "$MIGRATION_DATABASE_URL" -c 'CREATE DATABASE stockpilot_queue'
+      - name: Verify real pg-boss processing
+        env:
+          QUEUE_TEST_DATABASE_URL: postgresql://stockpilot_admin:stockpilot_admin@localhost:5432/stockpilot_queue
+        run: pnpm --filter @stockpilot/api exec vitest run --maxWorkers=1 test/integration-queue.integration.spec.ts
       - run: pnpm --filter @stockpilot/api test:unit:coverage
       - run: pnpm build
       - run: pnpm exec playwright install chromium
@@ -77,6 +79,25 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 14
+
+  # Supply-chain gate in its own job: fail on high/critical advisories in the
+  # full dependency tree (production and development). Moderate/low findings
+  # are surfaced by Dependabot instead of blocking merges. Kept separate from
+  # `verify` so an advisory never hides migration, unit, integration, or E2E
+  # results; both jobs still gate the deploy workflow's success condition.
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4.4.0
+        with:
+          version: 10.13.1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level high
 
   # Production container verification: both Dockerfiles must build from a
   # clean workspace without publishing images. Catches syntax errors and

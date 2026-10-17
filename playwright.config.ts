@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const webPort = process.env.E2E_WEB_PORT ?? '3000';
+const webUrl = `http://localhost:${webPort}`;
+
 export default defineConfig({
   // The E2E suite shares one seeded demo database and mutates it (receipts,
   // orders, and the Owner demo reset which wipes and reseeds the tenant), so
@@ -21,7 +24,7 @@ export default defineConfig({
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
   ],
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: webUrl,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
@@ -36,8 +39,11 @@ export default defineConfig({
     // local servers are never reused — Playwright fails fast with an
     // actionable occupied-port error instead of testing unknown code.
     command: 'node scripts/e2e-server.mjs',
-    url: 'http://localhost:3000',
+    url: webUrl,
     reuseExistingServer: false,
-    timeout: 180_000,
+    // API readiness and web startup each have an independent 180s budget;
+    // mounted WSL checkouts can spend nearly all of the first compiling Nest.
+    timeout: 360_000,
+    gracefulShutdown: { signal: 'SIGTERM', timeout: 10_000 },
   },
 });

@@ -54,7 +54,7 @@ export function PartnerDrawer({
           }
         : { companyName: '', contactName: null, email: null, phone: null },
     );
-  }, [editing, form]);
+  }, [editing, form, kind, open]);
   const close = closeFormSafely(form.formState.isDirty, onClose);
   return (
     <Drawer

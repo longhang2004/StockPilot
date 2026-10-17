@@ -1,5 +1,9 @@
 import { expect, type Page } from '@playwright/test';
 
+export const webOrigin =
+  process.env.WEB_ORIGIN ??
+  `http://localhost:${process.env.E2E_WEB_PORT ?? '3000'}`;
+
 export async function loginAs(page: Page, role: 'manager' | 'staff' | 'owner') {
   const label = role[0]?.toUpperCase() + role.slice(1);
   await page.goto(`/login?role=${role}`);
@@ -21,7 +25,7 @@ export async function apiPost<T>(
     data: body,
     headers: {
       ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
-      Origin: 'http://localhost:3000',
+      Origin: webOrigin,
       'X-CSRF-Token': csrf.csrfToken,
     },
   });

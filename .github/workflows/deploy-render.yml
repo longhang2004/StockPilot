@@ -26,25 +26,12 @@ jobs:
       RENDER_COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
       - name: Check deployment secrets
-        id: config
         shell: bash
         run: |
-          if [[ -n "$MIGRATION_DATABASE_URL" ]]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Migration and seed skipped: configure the MIGRATION_DATABASE_URL repository secret."
-          fi
-
-          if [[ -n "$RENDER_DEPLOY_HOOK_URL" ]]; then
-            echo "render_deploy_enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "render_deploy_enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Render hook skipped: the Render main-branch auto-deploy remains enabled."
-          fi
+          [[ -n "$MIGRATION_DATABASE_URL" ]] || { echo "MIGRATION_DATABASE_URL repository secret is required before deployment." >&2; exit 1; }
+          [[ -n "$RENDER_DEPLOY_HOOK_URL" ]] || { echo "RENDER_DEPLOY_HOOK_URL repository secret is required before deployment." >&2; exit 1; }
 
       - name: Normalize migration database URL
-        if: steps.config.outputs.enabled == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -64,41 +51,31 @@ jobs:
           printf 'DATABASE_URL=%s\n' "$migration_url" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v7
-        if: steps.config.outputs.enabled == 'true'
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
       - uses: pnpm/action-setup@v4.4.0
-        if: steps.config.outputs.enabled == 'true'
         with:
           version: 10.13.1
 
       - uses: actions/setup-node@v7
-        if: steps.config.outputs.enabled == 'true'
         with:
           node-version: 24
           cache: pnpm
 
       - name: Install dependencies
-        if: steps.config.outputs.enabled == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
-        if: steps.config.outputs.enabled == 'true'
         run: pnpm db:generate
 
       - name: Apply production migrations
-        if: steps.config.outputs.enabled == 'true'
         run: pnpm --filter @stockpilot/api exec prisma migrate deploy
 
       - name: Seed canonical demo fixture
-        if: steps.config.outputs.enabled == 'true'
         run: pnpm db:seed
 
       - name: Trigger Render deploy
-        if: >-
-          steps.config.outputs.enabled == 'true' &&
-          steps.config.outputs.render_deploy_enabled == 'true'
         shell: bash
         run: |
           separator='?'

@@ -3,15 +3,46 @@
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 
-import { EmptyState, StatusBadge } from '../../components/ui/operations-ui';
+import {
+  EmptyState,
+  ErrorState,
+  Skeleton,
+  StatusBadge,
+} from '../../components/ui/operations-ui';
 import { fetchAnalytics, overviewKeys } from './api';
 
 export function AnalyticsPanels() {
   const analytics = useQuery({
     queryKey: overviewKeys.analytics,
     queryFn: fetchAnalytics,
+    // Surface the failure immediately with an explicit retry instead of
+    // hiding it behind React Query's silent backoff.
+    retry: false,
   });
-  if (analytics.isLoading || analytics.isError || !analytics.data) return null;
+  if (analytics.isLoading) {
+    return (
+      <div className="analytics-grid" aria-label="Analytics loading">
+        <article className="work-panel">
+          <Skeleton lines={4} />
+        </article>
+        <article className="work-panel">
+          <Skeleton lines={4} />
+        </article>
+      </div>
+    );
+  }
+  if (analytics.isError || !analytics.data) {
+    return (
+      <div className="analytics-grid">
+        <article className="work-panel">
+          <ErrorState
+            description="Fulfillment and demand analytics could not be loaded."
+            onRetry={() => void analytics.refetch()}
+          />
+        </article>
+      </div>
+    );
+  }
   const data = analytics.data;
   const maxStatusCount = Math.max(
     1,

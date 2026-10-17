@@ -11,7 +11,7 @@ const steps: Array<{ href: string; label: string; detail: string }> = [
   },
   {
     detail: 'Confirm it as Manager and watch stock become reserved.',
-    href: '/app/inventory',
+    href: '/app/orders?status=DRAFT',
     label: 'Confirm and reserve inventory',
   },
   {
