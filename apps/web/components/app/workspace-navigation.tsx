@@ -156,7 +156,9 @@ function WorkspaceSwitcher({
     let active = true;
     void apiRequest<WorkspaceSummary[]>('/auth/workspaces')
       .then((items) => {
-        if (active) setWorkspaces(items);
+        // apiRequest substitutes an empty object for missing bodies; only an
+        // array is a real workspace list, anything else hides the switcher.
+        if (active) setWorkspaces(Array.isArray(items) ? items : []);
       })
       .catch(() => {
         if (active) setWorkspaces([]);

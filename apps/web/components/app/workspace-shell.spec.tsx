@@ -12,6 +12,20 @@ const sessionBody = {
   user: { displayName: 'Morgan Manager' },
 };
 
+/**
+ * The shell reads the session and the sidebar reads `/auth/workspaces`; each
+ * endpoint gets its own fresh Response so the stub never relies on one
+ * Response instance being consumed twice (a reused body is unusable and
+ * degrades silently to an unparseable response).
+ */
+function respond(input: RequestInfo | URL, body: string) {
+  const url = input instanceof Request ? input.url : String(input);
+  return new Response(url.includes('/auth/workspaces') ? '[]' : body, {
+    headers: { 'Content-Type': 'application/json' },
+    status: 200,
+  });
+}
+
 describe('WorkspaceShell', () => {
   beforeEach(() => {
     vi.unstubAllGlobals();
@@ -25,21 +39,11 @@ describe('WorkspaceShell', () => {
   it('shows the authenticated operator and their role boundary', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            membership: {
-              organization: {
-                currency: 'USD',
-                name: 'Harbor & Pine Wholesale',
-              },
-              role: 'MANAGER',
-            },
-            user: { displayName: 'Morgan Manager' },
-          }),
-          { headers: { 'Content-Type': 'application/json' }, status: 200 },
+      vi
+        .fn()
+        .mockImplementation(async (input: RequestInfo | URL) =>
+          respond(input, JSON.stringify(sessionBody)),
         ),
-      ),
     );
     const { WorkspaceShell } = await import('./workspace-shell');
 
@@ -103,11 +107,8 @@ describe('WorkspaceShell', () => {
       vi
         .fn()
         .mockRejectedValueOnce(new TypeError('Failed to fetch'))
-        .mockResolvedValue(
-          new Response(JSON.stringify(sessionBody), {
-            headers: { 'Content-Type': 'application/json' },
-            status: 200,
-          }),
+        .mockImplementation(async (input: RequestInfo | URL) =>
+          respond(input, JSON.stringify(sessionBody)),
         ),
     );
     const { WorkspaceShell } = await import('./workspace-shell');
