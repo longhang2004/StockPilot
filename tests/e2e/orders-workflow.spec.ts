@@ -81,7 +81,7 @@ test('a committed Draft whose response is lost recovers after reload without dup
 
   await expect(page).toHaveURL(new RegExp(`order=${committedOrder?.id}`));
   await expect(
-    page.getByRole('heading', { name: committedOrder?.orderNumber }),
+    page.getByRole('heading', { name: committedOrder!.orderNumber }),
   ).toBeVisible();
   expect(attempts).toHaveLength(2);
   expect(attempts[1]).toEqual(attempts[0]);
