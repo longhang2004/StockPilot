@@ -23,9 +23,13 @@ leaves `QUEUE_DATABASE_URL` unset, so `queue:not_configured` with HTTP 200 is
 expected. Set both values only for a short queue-enabled acceptance run.
 
 Both endpoints also report the deployed `revision`: Render injects
-`RENDER_GIT_COMMIT`, and local runs report `local`. After a deploy, compare
-`revision` with the SHA whose CI checks passed to confirm the release gate
-shipped the intended commit.
+`RENDER_GIT_COMMIT`, Docker acceptance images receive `API_REVISION`, and an
+unversioned local run reports `local-working-tree`. The Render deploy workflow
+polls readiness until the database is ready and the API revision equals the
+SHA whose CI checks passed; `queue:not_configured` is accepted only while
+`QUEUE_REQUIRED=false`. Check the web deployment independently with
+`GET /version`; it reports `VERCEL_GIT_COMMIT_SHA` when Vercel exposes its
+system build variables, or the injected `WEB_REVISION` in Docker acceptance.
 
 Render Free services can sleep after 15 minutes without inbound traffic. The
 UptimeRobot `/v1/health/live` monitor runs every five minutes to keep normal
@@ -164,9 +168,12 @@ demo session.
 
 For a migration failure, do not manually mark `_prisma_migrations` complete.
 Read the failed migration log, fix the migration or database state in a
-reviewed change, then rerun the migration/seed workflow. If Render auto-deployed
-the commit before the gate failed, cancel or roll it back before retrying. An
-optional Render deploy hook is only called after those commands succeed.
+reviewed change, then rerun the migration/seed workflow. The required Render
+Deploy Hook is called only after those commands succeed; the workflow then
+waits for exact-SHA readiness. Missing the hook or `RENDER_API_URL` blocks the
+workflow before it can claim a rollout. A local logical backup/restore
+rehearsal does not establish Neon point-in-time restore readiness; provider
+recovery remains a separate acceptance task.
 
 ## Secret rotation
 

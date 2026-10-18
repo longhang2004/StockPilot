@@ -44,6 +44,7 @@ describe('AuditWorkspace detail', () => {
 
   afterEach(() => {
     cleanup();
+    window.history.replaceState(null, '', '/');
     vi.unstubAllGlobals();
   });
 
@@ -64,7 +65,7 @@ describe('AuditWorkspace detail', () => {
   it('shows actor and before/after state in the detail drawer', async () => {
     const view = render(
       <QueryProvider>
-        <AuditWorkspace />
+        <AuditWorkspace role="MANAGER" />
       </QueryProvider>,
     );
 
@@ -87,5 +88,47 @@ describe('AuditWorkspace detail', () => {
     expect(withinDialog.getByText('CONFIRMED')).toBeVisible();
     expect(withinDialog.getByText(/gloves/)).toBeVisible();
     view.unmount();
+  });
+
+  it('uses URL entity scope in the audit API request', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/app/audit?entityType=SalesOrder&entityId=order-1042',
+    );
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(eventsPage, {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    render(
+      <QueryProvider>
+        <AuditWorkspace role="MANAGER" />
+      </QueryProvider>,
+    );
+    expect(
+      (await screen.findAllByText('ORDER_CONFIRMED')).length,
+    ).toBeGreaterThan(0);
+    expect(
+      fetchMock.mock.calls.some(
+        ([input]) =>
+          String(input).includes('entityType=SalesOrder') &&
+          String(input).includes('entityId=order-1042'),
+      ),
+    ).toBe(true);
+  });
+
+  it('does not request audit records for staff', () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    render(
+      <QueryProvider>
+        <AuditWorkspace role="STAFF" />
+      </QueryProvider>,
+    );
+    expect(screen.getByText('Audit access required')).toBeVisible();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

@@ -33,14 +33,13 @@ describe('public SEO contract', () => {
     });
   });
 
-  it('publishes only the public origin and real product images', () => {
+  it('publishes the public origin without stale product screenshots', () => {
     const sitemapEntries = sitemap();
     const imageUrls = sitemapEntries[0]?.images ?? [];
 
     expect(sitemapEntries).toHaveLength(1);
     expect(sitemapEntries[0]?.url).toMatch(/^https?:\/\//);
-    expect(imageUrls).toHaveLength(4);
-    expect(imageUrls.every((url) => url.includes('/assets/'))).toBe(true);
+    expect(imageUrls).toHaveLength(0);
 
     const robotsFile = robots();
     expect(robotsFile.rules).toMatchObject({ userAgent: '*', allow: '/' });
@@ -54,7 +53,7 @@ describe('public SEO contract', () => {
     expect(appManifest.name).toMatch(/StockPilot/);
     expect(appManifest.start_url).toBeTruthy();
     expect(appManifest.start_url).not.toMatch(/\/app/);
-    expect(appManifest.theme_color).toBe('#F2F0EA');
+    expect(appManifest.theme_color).toBe('#F3F6F8');
   });
 
   it('serializes safe WebSite and WebPage JSON-LD', async () => {

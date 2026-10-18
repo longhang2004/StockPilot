@@ -1,6 +1,11 @@
 'use client';
 
-import { type InventorySummary, type Role } from '@stockpilot/contracts';
+import {
+  type InventoryProductTrace,
+  type InventorySummary,
+  type Role,
+  type StockMovementItem,
+} from '@stockpilot/contracts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from '@phosphor-icons/react';
 import Link from 'next/link';
@@ -26,13 +31,19 @@ import { useToasts } from '../../hooks/use-toasts';
 import { ALERTS_RESOURCE, BALANCES_RESOURCE } from './api';
 import { AdjustmentDrawer } from './components/adjustment-drawer';
 import { type AlertRecord, type BalanceRecord } from '../shared/types';
+import { useWorkspaceLocation } from '../shared/use-workspace-location';
+import { fetchProductTrace } from './api';
 
 export function InventoryWorkspace({ role }: { role: Role }) {
+  const { params, update } = useWorkspaceLocation();
+  const productId = params.get('product');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [alertPage, setAlertPage] = useState(1);
   const [alertStatus, setAlertStatus] = useState<'OPEN' | 'RESOLVED'>('OPEN');
   const [adjustOpen, setAdjustOpen] = useState(false);
+  const [reservationsPage, setReservationsPage] = useState(1);
+  const [movementsPage, setMovementsPage] = useState(1);
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
   const balances = usePage<BalanceRecord>(BALANCES_RESOURCE, {
@@ -50,6 +61,12 @@ export function InventoryWorkspace({ role }: { role: Role }) {
     queryFn: () => apiRequest<InventorySummary>('/inventory/summary'),
   });
   const canAdjust = role === 'MANAGER' || role === 'OWNER';
+  const trace = useQuery({
+    queryKey: ['inventory-trace', productId, reservationsPage, movementsPage],
+    queryFn: () =>
+      fetchProductTrace(productId!, { reservationsPage, movementsPage }),
+    enabled: Boolean(productId),
+  });
 
   return (
     <section className="workspace-section-page">
@@ -68,6 +85,17 @@ export function InventoryWorkspace({ role }: { role: Role }) {
           ) : undefined
         }
       />
+      {productId ? (
+        <ProductTraceView
+          error={trace.isError}
+          loading={trace.isLoading}
+          onClose={() => update({ product: null }, 'push')}
+          onMovementPage={setMovementsPage}
+          onReservationPage={setReservationsPage}
+          refetch={() => void trace.refetch()}
+          value={trace.data}
+        />
+      ) : null}
       {summary.isLoading ? (
         <Skeleton lines={3} />
       ) : summary.isError ? (
@@ -208,16 +236,239 @@ export function InventoryWorkspace({ role }: { role: Role }) {
   );
 }
 
+function ProductTraceView({
+  error,
+  loading,
+  onClose,
+  onMovementPage,
+  onReservationPage,
+  refetch,
+  value,
+}: {
+  error: boolean;
+  loading: boolean;
+  onClose: () => void;
+  onMovementPage: (page: number) => void;
+  onReservationPage: (page: number) => void;
+  refetch: () => void;
+  value: InventoryProductTrace | undefined;
+}) {
+  if (loading)
+    return (
+      <article className="work-panel">
+        <Skeleton lines={5} />
+      </article>
+    );
+  if (error)
+    return (
+      <article className="work-panel">
+        <ErrorState
+          description="The product trace could not be loaded."
+          onRetry={refetch}
+        />
+      </article>
+    );
+  if (!value) return null;
+  const movements = value.movements;
+  return (
+    <article
+      className="work-panel detail-stack"
+      aria-label={`Trace for ${value.product.sku}`}
+    >
+      <div className="panel-heading">
+        <div>
+          <p className="eyebrow">SKU trace</p>
+          <h2>
+            {value.product.name}{' '}
+            <span className="mono">{value.product.sku}</span>
+          </h2>
+        </div>
+        <button
+          className="button button-secondary"
+          onClick={onClose}
+          type="button"
+        >
+          Close trace
+        </button>
+      </div>
+      <div className="workspace-grid" aria-label="Current stock balance">
+        <StatCard
+          hint="Physical units in the warehouse"
+          label="On hand"
+          value={value.balance?.onHand ?? 0}
+        />
+        <StatCard
+          hint="Confirmed order lines"
+          label="Reserved"
+          value={value.balance?.reserved ?? 0}
+        />
+        <StatCard
+          hint="Available to promise"
+          label="Available"
+          tone="positive"
+          value={value.balance?.available ?? 0}
+        />
+      </div>
+      <section aria-labelledby="trace-reservations">
+        <div className="panel-heading">
+          <div>
+            <p className="eyebrow">Current commitments</p>
+            <h3 id="trace-reservations">Confirmed reservations</h3>
+          </div>
+        </div>
+        {value.reservations.items.length ? (
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Customer</th>
+                  <th className="numeric">Qty</th>
+                  <th>Confirmed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {value.reservations.items.map((item) => (
+                  <tr key={item.id}>
+                    <td>
+                      <Link
+                        className="mono"
+                        href={`/app/orders?order=${encodeURIComponent(item.orderId)}`}
+                      >
+                        {item.orderNumber}
+                      </Link>
+                    </td>
+                    <td>{item.customerCompanyName}</td>
+                    <td className="numeric mono">{item.quantity}</td>
+                    <td>
+                      {item.confirmedAt
+                        ? formatDateTime(item.confirmedAt)
+                        : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState
+            description="There are no confirmed order lines reserving this SKU."
+            title="No current reservations"
+          />
+        )}
+        <Pagination
+          onPageChange={onReservationPage}
+          page={value.reservations.page}
+          totalPages={value.reservations.totalPages}
+        />
+      </section>
+      <section aria-labelledby="trace-movements">
+        <div className="panel-heading">
+          <div>
+            <p className="eyebrow">Append-only ledger</p>
+            <h3 id="trace-movements">Source movements</h3>
+          </div>
+        </div>
+        {movements.items.length ? (
+          <ResponsiveDataTable
+            ariaLabel="SKU source movements"
+            columns={movementColumns}
+            data={movements.items}
+            getRowLabel={(item) => item.id}
+          />
+        ) : (
+          <EmptyState
+            description="No ledger movements exist for this SKU."
+            title="No movements"
+          />
+        )}
+        <Pagination
+          onPageChange={onMovementPage}
+          page={movements.page}
+          totalPages={movements.totalPages}
+        />
+      </section>
+    </article>
+  );
+}
+
+const movementColumns: TableColumn<StockMovementItem>[] = [
+  {
+    key: 'type',
+    label: 'Movement',
+    render: (item) => <StatusBadge value={item.type} />,
+  },
+  {
+    key: 'createdAt',
+    label: 'When',
+    render: (item) => formatDateTime(item.createdAt),
+  },
+  {
+    key: 'quantityDelta',
+    label: 'Change',
+    align: 'right',
+    render: (item) => (
+      <span className="mono">
+        {item.quantityDelta > 0 ? '+' : ''}
+        {item.quantityDelta}
+      </span>
+    ),
+  },
+  {
+    key: 'onHandAfter',
+    label: 'On hand after',
+    align: 'right',
+    render: (item) => <span className="mono">{item.onHandAfter}</span>,
+  },
+  {
+    key: 'referenceId',
+    label: 'Source',
+    render: (item) =>
+      item.referenceType === 'SALES_ORDER' ? (
+        <Link
+          className="mono"
+          href={`/app/orders?order=${encodeURIComponent(item.referenceId)}`}
+        >
+          Sales order
+        </Link>
+      ) : item.referenceType === 'GOODS_RECEIPT' ? (
+        <Link
+          className="mono"
+          href={`/app/receipts?receipt=${encodeURIComponent(item.referenceId)}`}
+        >
+          Goods receipt
+        </Link>
+      ) : (
+        <span className="mono" title={item.referenceType}>
+          {item.referenceType || 'Unlinked'} · {item.referenceId.slice(0, 8)}
+        </span>
+      ),
+  },
+];
+
 const balanceColumns: TableColumn<BalanceRecord>[] = [
   {
     key: 'sku',
     label: 'SKU',
-    render: (record) => <span className="mono">{record.product.sku}</span>,
+    render: (record) => (
+      <Link
+        className="mono"
+        href={`/app/inventory?product=${encodeURIComponent(record.productId)}`}
+      >
+        {record.product.sku}
+      </Link>
+    ),
   },
   {
     key: 'product',
     label: 'Product',
-    render: (record) => <strong>{record.product.name}</strong>,
+    render: (record) => (
+      <Link
+        href={`/app/inventory?product=${encodeURIComponent(record.productId)}`}
+      >
+        {record.product.name}
+      </Link>
+    ),
   },
   {
     key: 'onHand',

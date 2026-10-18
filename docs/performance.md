@@ -103,12 +103,55 @@ The same session also ran `--rate-limit-check` (100 demo-login requests:
 numbers describe this laptop, this database, this day — nothing else. Use
 them only as a local baseline for change detection.
 
+## Guarded local and staging protocol
+
+The harness validates `API_URL` before it sends requests. Loopback targets are
+allowed; any non-loopback target requires `--allow-staging`,
+`PERF_TARGET=staging`, an exact `PERF_TARGET_HOST` match, and the host-specific
+acknowledgement `PERF_TARGET_ACKNOWLEDGEMENT=I_CONFIRM_<host>_IS_DISPOSABLE_STAGING`.
+Remote mode disables demo-login writes and rate-limit checks. Do not use the
+public demo as a performance target.
+
+For an isolated local production API image and a 100k movement fixture, run
+`pnpm perf:local` (or pass a smaller row count, up to 100000). It allocates a
+unique Compose project and database volume, binds only the configured loopback
+API port (default 4300), seeds only that project's demo tenant, performs an
+authenticated read-only run, captures an app-role `EXPLAIN (ANALYZE, BUFFERS,
+SETTINGS)`, and rehearses a logical database restore into a second database in
+the same disposable container. It refuses reserved/occupied ports and removes
+only the project it created. Compose receives `/dev/null` as its env file so
+the repository `.env` is not imported. The synthetic fixture adjusts the local
+demo balance and ledger together, and the database volume is discarded after
+the run.
+
+The local protocol performs three measured runs. Each run uses 20 sequential
+warmup requests for each selected read route, then 100 concurrent samples per
+route at concurrency 10. It records the observed API revision, request counts,
+p50/p90/p95/p99, throughput and errors. The
+performance run writes JSON, query-plan output, backup, and Compose logs below
+the ignored `test-results-performance/` directory. Preserve that output only
+when it contains no private data; the local fixture is synthetic. The logical
+restore checks the movement count but is not evidence of a managed Neon PITR,
+production rollback, or deployment compatibility rehearsal.
+
+For a staging measurement, start with a disposable staging tenant/database and
+obtain service-owner approval for the target host. Keep all operations
+read-only; capture the staging revision, dataset scale, runtime/instance
+details, warmup and repeat counts, errors, latency percentiles, and the exact
+commands. Run the app-role query plan separately with the correct tenant
+context. Contention and provider failover experiments require a disposable
+environment and are not part of routine demo measurements.
+
+No new measurements are claimed here until the isolated production image and
+browser suites have passed the integrated source gate. The sample below is the
+older historical laptop baseline only.
+
 ## Caveats
 
-- **Not a benchmark.** No warmup phase, no statistical rigor across runs,
-  no internet emulation. It is a smoke harness for reproducibility and
-  change detection (a commit that triples p99 on `orders-list` is a
-  regression signal worth investigating).
+- **Not a benchmark.** The harness supports optional sequential warmup, but
+  default runs have no warmup or repeated-run statistics and do not emulate
+  internet traffic. Treat it as a reproducible smoke probe, not a capacity
+  claim.
 - **Environment-dependent.** `next dev`/`nest start --watch` add
   compile-time overhead to first requests; run against the production build
   (`pnpm build` + `pnpm --filter @stockpilot/api start`) for steadier

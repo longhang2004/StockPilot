@@ -32,11 +32,13 @@ import { createReceipt } from './api';
  */
 export function ReceiptDrawer({
   open,
+  initialProductId,
   onClose,
   onSaved,
   push,
 }: {
   open: boolean;
+  initialProductId?: string;
   onClose: () => void;
   onSaved: () => void;
   push: (message: string, tone?: ToastMessage['tone']) => void;
@@ -46,7 +48,9 @@ export function ReceiptDrawer({
   const form = useForm<z.infer<typeof ReceiptInputSchema>>({
     resolver: zodResolver(ReceiptInputSchema) as never,
     defaultValues: {
-      lines: [{ productId: '', quantity: 1, unitCost: null }],
+      lines: [
+        { productId: initialProductId ?? '', quantity: 1, unitCost: null },
+      ],
       note: null,
       receiptNumber: `WEB-${Date.now()}`,
       receivedAt: new Date().toISOString(),

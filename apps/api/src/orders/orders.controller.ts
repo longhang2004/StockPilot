@@ -99,14 +99,32 @@ export class OrdersController {
   @RequirePermission('order:draft:write')
   @Post()
   @SessionAuthWrite()
-  @ApiOperation({ summary: 'Create a draft order' })
+  @ApiOperation({
+    summary: 'Create a draft order',
+    description:
+      'First-party clients send Idempotency-Key for safe replay. Requests without a key retain legacy non-idempotent behavior during client rollout.',
+  })
+  @ApiHeader({
+    ...IDEMPOTENCY_KEY_HEADER,
+    required: false,
+  })
   @ApiCreatedResponse({
     description: 'The created draft order with lines.',
     schema: schemaRef('SalesOrderDetail'),
   })
   @ApiBody({ schema: schemaRef('SalesOrderInput') })
-  create(@Req() request: AuthenticatedRequest, @Body() body: unknown) {
-    return this.orders.create(request.auth, SalesOrderInputSchema.parse(body));
+  create(
+    @Req() request: AuthenticatedRequest,
+    @Headers('idempotency-key') idempotencyKey: string | undefined,
+    @Body() body: unknown,
+  ) {
+    return this.orders.create(
+      request.auth,
+      SalesOrderInputSchema.parse(body),
+      idempotencyKey === undefined
+        ? undefined
+        : IdempotencyKeySchema.parse(idempotencyKey),
+    );
   }
 
   @RequirePermission('order:draft:write')

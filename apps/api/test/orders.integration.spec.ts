@@ -156,6 +156,21 @@ describe('sales orders API', () => {
       onHand: 6,
       reserved: 4,
     });
+    const traceAfterConfirm = await manager.get(
+      `/v1/inventory/products/${productId}/trace?reservationsPage=1&reservationsPageSize=1`,
+    );
+    expect(traceAfterConfirm.body.balance.reserved).toBe(4);
+    expect(traceAfterConfirm.body.reservations).toMatchObject({
+      total: 1,
+      items: [
+        {
+          id: expect.any(String),
+          orderId: draft.body.id,
+          orderNumber: draft.body.orderNumber,
+          quantity: 4,
+        },
+      ],
+    });
 
     const fulfilled = await staff
       .post(`/v1/orders/${draft.body.id}/fulfill`)
@@ -176,9 +191,27 @@ describe('sales orders API', () => {
     const movements = await staff.get('/v1/inventory/movements');
     expect(
       movements.body.items.some(
-        (movement: { type: string }) => movement.type === 'SALE',
+        (movement: {
+          productId: string;
+          referenceId: string;
+          referenceType: string;
+          type: string;
+        }) =>
+          movement.type === 'SALE' &&
+          movement.productId === productId &&
+          movement.referenceType === 'SALES_ORDER' &&
+          movement.referenceId === draft.body.id,
       ),
     ).toBe(true);
+    const traceAfterFulfillment = await manager.get(
+      `/v1/inventory/products/${productId}/trace`,
+    );
+    expect(traceAfterFulfillment.body.balance).toMatchObject({
+      onHand: 2,
+      reserved: 0,
+      available: 2,
+    });
+    expect(traceAfterFulfillment.body.reservations.total).toBe(0);
   });
 
   it('releases confirmed reservations on cancellation', async () => {
@@ -201,6 +234,39 @@ describe('sales orders API', () => {
     expect(cancelled.body.status).toBe('CANCELLED');
     const balances = await manager.get('/v1/inventory/balances');
     expect(balances.body.items[0].reserved).toBe(0);
+    const trace = await manager.get(
+      `/v1/inventory/products/${productId}/trace`,
+    );
+    expect(trace.body.balance.reserved).toBe(0);
+    expect(trace.body.reservations.total).toBe(0);
+  });
+
+  it('replays Draft creates safely and rejects a changed payload under the same key', async () => {
+    const key = `draft-create-${randomUUID()}`;
+    const payload = { customerId, lines: [{ productId, quantity: 1 }] };
+    const create = () =>
+      manager
+        .post('/v1/orders')
+        .set('Origin', TEST_WEB_ORIGIN)
+        .set('X-CSRF-Token', managerCsrf)
+        .set('Idempotency-Key', key)
+        .send(payload);
+    const [first, retry] = await Promise.all([create(), create()]);
+    expect([first.status, retry.status]).toEqual([201, 201]);
+    expect(retry.body.id).toBe(first.body.id);
+
+    const changedPayload = await manager
+      .post('/v1/orders')
+      .set('Origin', TEST_WEB_ORIGIN)
+      .set('X-CSRF-Token', managerCsrf)
+      .set('Idempotency-Key', key)
+      .send({ customerId, lines: [{ productId, quantity: 2 }] });
+    expect(changedPayload.status).toBe(409);
+
+    const audit = await manager.get(
+      `/v1/audit-events?entityId=${first.body.id}`,
+    );
+    expect(audit.body.total).toBe(1);
   });
 
   it('serializes concurrent confirmations and never reserves more than available', async () => {

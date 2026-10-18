@@ -40,13 +40,13 @@ export function WorkspaceContent({
     case 'partners':
       return <PartnersWorkspace role={role} />;
     case 'receipts':
-      return <ReceiptsWorkspace />;
+      return <ReceiptsWorkspace role={role} />;
     case 'imports':
       return <ImportsWorkspace role={role} />;
     case 'integrations':
       return <IntegrationsWorkspace role={role} />;
     case 'audit':
-      return <AuditWorkspace />;
+      return <AuditWorkspace role={role} />;
     case 'settings':
       return <SettingsWorkspace role={role} />;
     case 'more':

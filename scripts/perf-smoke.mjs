@@ -33,6 +33,7 @@
  * (DEMO_MODE=true). See docs/performance.md.
  */
 import process from 'node:process';
+import { validatePerformanceTarget } from './perf-target.mjs';
 
 const API_URL = process.env.API_URL ?? 'http://localhost:4000';
 // Public writes require a trusted Origin (CSRF defense), so the harness
@@ -40,6 +41,7 @@ const API_URL = process.env.API_URL ?? 'http://localhost:4000';
 const WEB_ORIGIN = process.env.WEB_ORIGIN ?? 'http://localhost:3000';
 const DEFAULT_CONCURRENCY = 10;
 const DEFAULT_REQUESTS = 200;
+const DEFAULT_WARMUP = 0;
 // The rate-limit check crosses the auth-tier threshold (60/min) by design;
 // a dedicated, smaller default keeps a single check run fast while still
 // proving 429 enforcement.
@@ -60,6 +62,8 @@ function argValue(name, fallback) {
 const concurrency = Number(argValue('--concurrency', DEFAULT_CONCURRENCY));
 const includeWrites = args.includes('--include-writes');
 const rateLimitCheck = args.includes('--rate-limit-check');
+const includeMovements = args.includes('--include-movements');
+const warmup = Number(argValue('--warmup', DEFAULT_WARMUP));
 // The rate-limit check has its own smaller default (100) so normal perf
 // runs keep DEFAULT_REQUESTS=200 while a check stays quick and deliberate.
 const requests = Number(
@@ -76,13 +80,35 @@ if (showHelp) {
 
 Usage:
   API_URL=http://localhost:4000 pnpm perf:smoke [--concurrency N] [--requests N] [--json]
+  pnpm perf:smoke -- --include-movements --warmup 20
   pnpm perf:smoke -- --include-writes     # add the demo-login write workload (capped at 40)
   pnpm perf:smoke -- --rate-limit-check   # verify the limiter returns 429 past the threshold
 
 Default workloads: orders-list, balances-list (authenticated reads).
 Reports per-workload throughput, p50/p90/p95/p99 latency, error count, and
-the first error.`);
+the first error. Remote runs require explicit disposable-staging acknowledgement
+and remain read-only; demo writes and rate-limit checks are loopback-only.`);
   process.exit(0);
+}
+
+let target;
+try {
+  target = validatePerformanceTarget(API_URL, args, process.env);
+} catch (error) {
+  console.error(error.message);
+  process.exit(2);
+}
+if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 100) {
+  console.error('--concurrency must be an integer from 1 to 100.');
+  process.exit(2);
+}
+if (!Number.isInteger(requests) || requests < 1 || requests > 10000) {
+  console.error('--requests must be an integer from 1 to 10000.');
+  process.exit(2);
+}
+if (!Number.isInteger(warmup) || warmup < 0 || warmup > 1000) {
+  console.error('--warmup must be an integer from 0 to 1000.');
+  process.exit(2);
 }
 
 function percentile(sortedLatencies, fraction) {
@@ -110,6 +136,7 @@ async function runWorkload(name, requestsToRun, makeRequest) {
       const requestStartedAt = performance.now();
       try {
         const response = await makeRequest(index);
+        await response.arrayBuffer();
         statuses.push(response.status);
         if (!response.ok) {
           errors += 1;
@@ -141,6 +168,16 @@ async function runWorkload(name, requestsToRun, makeRequest) {
     p95: percentile(sorted, 0.95),
     p99: percentile(sorted, 0.99),
   };
+}
+
+async function warmWorkload(makeRequest) {
+  for (let index = 0; index < warmup; index += 1) {
+    const response = await makeRequest(index);
+    await response.arrayBuffer();
+    if (!response.ok) {
+      throw new Error(`Warmup failed with HTTP ${response.status}.`);
+    }
+  }
 }
 
 function formatRow(row) {
@@ -199,6 +236,23 @@ async function authenticate() {
   process.exit(1);
 }
 
+async function readApiRevision() {
+  const response = await fetch(`${API_URL}/v1/health/ready`, {
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  const payload = await response.json();
+  if (
+    !response.ok ||
+    payload?.status !== 'ready' ||
+    payload?.checks?.database !== 'ok'
+  ) {
+    throw new Error(
+      'API must report ready with a healthy database before the performance run.',
+    );
+  }
+  return typeof payload.revision === 'string' ? payload.revision : 'unknown';
+}
+
 async function main() {
   if (rateLimitCheck) {
     const result = await runWorkload('demo-login', requests, demoLoginRequest);
@@ -241,6 +295,8 @@ async function main() {
     process.exit(0);
   }
 
+  const revision = await readApiRevision();
+
   // Authenticate once: demo-login sets an HttpOnly session cookie that the
   // read workloads replay. The rate limiter counts this single request.
   const cookieHeader = await authenticate();
@@ -249,20 +305,38 @@ async function main() {
     'Content-Type': 'application/json',
   };
 
+  const ordersRequest = () =>
+    fetch(`${API_URL}/v1/orders?page=1&pageSize=25&search=`, {
+      headers: authHeaders,
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+  const balancesRequest = () =>
+    fetch(`${API_URL}/v1/inventory/balances?page=1&pageSize=25`, {
+      headers: authHeaders,
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+  const movementsRequest = () =>
+    fetch(`${API_URL}/v1/inventory/movements?page=1&pageSize=25`, {
+      headers: authHeaders,
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+
+  if (warmup > 0) {
+    await warmWorkload(ordersRequest);
+    await warmWorkload(balancesRequest);
+    if (includeMovements) await warmWorkload(movementsRequest);
+  }
+
   const results = [
-    await runWorkload('orders-list', requests, () =>
-      fetch(`${API_URL}/v1/orders?page=1&pageSize=25&search=`, {
-        headers: authHeaders,
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-      }),
-    ),
-    await runWorkload('balances-list', requests, () =>
-      fetch(`${API_URL}/v1/inventory/balances?page=1&pageSize=25`, {
-        headers: authHeaders,
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-      }),
-    ),
+    await runWorkload('orders-list', requests, ordersRequest),
+    await runWorkload('balances-list', requests, balancesRequest),
   ];
+
+  if (includeMovements) {
+    results.push(
+      await runWorkload('movements-list', requests, movementsRequest),
+    );
+  }
 
   if (includeWrites) {
     const writeRequests = Math.min(requests, WRITE_WORKLOAD_REQUEST_CAP);
@@ -278,8 +352,11 @@ async function main() {
     console.log(
       JSON.stringify(
         {
-          apiUrl: API_URL,
           concurrency,
+          revision,
+          targetHost: target.hostname,
+          target: target.isLoopback ? 'loopback' : 'staging',
+          warmupRequestsPerWorkload: warmup,
           ranAt: new Date().toISOString(),
           results,
           failed: anyFailed,
@@ -290,7 +367,7 @@ async function main() {
     );
   } else {
     console.log(
-      `API: ${API_URL}  concurrency: ${concurrency}  requests per workload: ${requests}`,
+      `API host: ${target.hostname}  revision: ${revision}  target: ${target.isLoopback ? 'loopback' : 'staging'}  concurrency: ${concurrency}  requests per workload: ${requests}  warmup: ${warmup}`,
     );
     if (includeWrites) {
       console.log(

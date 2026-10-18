@@ -1,76 +1,100 @@
 # StockPilot Design System Master
 
-> Quiet-industrial operations console for a small wholesale team. This file is
-> the source of truth for visual tokens and interaction rules. Page-specific
-> guidance may extend these rules, but must not replace the semantic contract.
+> Source of truth for StockPilot's visual design and interaction rules. Page-specific notes may add context but must retain this contract.
 
 **Project:** StockPilot
-**Updated:** 2026-08-15
-**Direction:** quiet industrial / high-density / data-first / accessible
-**Design dials:** Variance 4/10 · Motion 2/10 · Density 8/10
+**Updated:** 2026-10-18
+**Direction:** enterprise-clear, SAP Fiori-informed operations workspace
+**Design dials:** Decoration 1/10 · Motion 1/10 · Density 7/10
 
 ## Design intent
 
-StockPilot should feel calm, precise, and ready for the next warehouse action:
+StockPilot helps wholesale operators find the next exception, process receipts and orders, and explain inventory from reservations and source documents. The interface should feel direct, precise, and dependable:
 
-- Warm neutral surfaces and dark ink console structure keep the workspace quiet and focused.
-- Terracotta is the sole brand accent; emerald, ochre/amber, and rust/red are reserved for semantic status feedback.
-- High-density operations tables use tabular numerals, right-aligned monetary/quantity values, and ~40px row heights.
-- Desktop features an integrated 228px ink sidebar and docked horizontal statistic strips with vertical hairline dividers (no floating card soup).
-- Mobile features sticky bottom navigation with safe-area padding and single-column touch-friendly records (>= 44px touch targets).
+- Cool light canvas and white data surfaces, with a full-width navy top shell bar. Keep desktop grouped navigation on a light, narrow side rail with a blue active indicator; the operational workspace remains white/light beneath it.
+- Tables, readable labels, explicit state, and contextual actions carry the interface. Use few containers and no decorative chrome.
+- Adopt SAP Fiori's worklist, list-report, and object-page patterns as workflow references. Implement with StockPilot's existing React components and native HTML controls; this is not a SAPUI5 migration.
+- Preserve tenant, role, ledger, and command semantics. Visual state never implies a permission or a successful mutation that the server has not confirmed.
 
-## Token contract
+## Color tokens
 
-Tokens follow three layers: primitives hold values, semantic tokens assign meaning, and component tokens define local behavior. Feature components must consume semantic/component tokens rather than hardcoded colors.
+| Role           | Token                      |     Value | Use                                                                     |
+| -------------- | -------------------------- | --------: | ----------------------------------------------------------------------- |
+| Canvas         | `--color-background`       | `#F3F6F8` | Main workspace background                                               |
+| Surface        | `--color-surface`          | `#FFFFFF` | Tables, forms, drawers, dialogs                                         |
+| Subtle surface | `--surface-subtle`         | `#E8EEF4` | Selected navigation, table header, quiet grouping                       |
+| Navy           | `--color-foreground`       | `#102A43` | Primary text, headings, desktop shell                                   |
+| Action         | `--color-accent`           | `#1769AA` | Primary actions, links, selected navigation, focus ring                 |
+| Secondary text | `--color-muted-foreground` | `#526272` | Supporting labels and metadata                                          |
+| Control border | `--color-border-strong`    | `#7D8C9B` | Input/control boundaries and essential dividers                         |
+| Row rule       | `--line-subtle`            | `#CDD6DF` | Table row separators and nonessential rules                             |
+| Disabled text  | `--color-disabled`         | `#647789` | Disabled labels on `#E8EEF4`; disabled controls remain visibly inactive |
+| Success        | `--color-success`          | `#20734A` | Confirmed/received/succeeded states                                     |
+| Success tint   | `--surface-success`        | `#E7F4EC` | Low-emphasis success background                                         |
+| Warning        | `--color-warning`          | `#8C5C00` | Draft/pending/attention states                                          |
+| Warning tint   | `--surface-warning`        | `#FFF7E0` | Low-emphasis warning background                                         |
+| Danger         | `--color-danger`           | `#B42318` | Failed/cancelled/low-stock error states                                 |
+| Danger tint    | `--surface-danger`         | `#FDECEA` | Low-emphasis error background                                           |
 
-### Core colors
+Contrast ratios calculated with the WCAG relative-luminance formula for these text pairs: navy on white **14.64:1**; secondary text on white **6.27:1**; action blue on white **5.77:1** and on canvas **5.32:1**; white on navy **14.64:1**; success on white **5.81:1** and success on success tint **5.13:1**; warning on white **5.76:1** and warning on warning tint **5.38:1**; danger on white **6.57:1** and danger on danger tint **5.75:1**; disabled text on subtle surface **3.96:1**. These meet 4.5:1 for normal text, except disabled text is intentionally inactive and still exceeds 3:1. Action blue is the focus indicator; its listed contrast exceeds 3:1 against both white and canvas. The strong control border `#7D8C9B` on white is **3.44:1**. Ratios are pair-specific: check any new color/background combination before using it.
 
-| Role         | Token                      | Value     | Contrast / Purpose                                                                                                                                   |
-| ------------ | -------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Canvas       | `--color-background`       | `#F2F0EA` | Neutral bone off-white background                                                                                                                    |
-| Surface      | `--color-surface`          | `#FCFBF7` | Paper white container surface                                                                                                                        |
-| Surface Alt  | `--surface-subtle`         | `#EAE7DE` | Subtle background tone for headers/tags                                                                                                              |
-| Ink          | `--color-foreground`       | `#17201F` | Deep slate ink for typography                                                                                                                        |
-| Muted text   | `--color-muted-foreground` | `#5D6562` | Secondary labels and metadata                                                                                                                        |
-| Divider      | `--color-border`           | `#D9D6CE` | 1px hairlines for table and card borders                                                                                                             |
-| Divider Thin | `--line-subtle`            | `#E5E2DA` | 1px internal row hairlines                                                                                                                           |
-| Accent       | `--color-accent`           | `#B34718` | Quiet terracotta for interactive accents and large/display text (4.4:1 on canvas — not AA for small text; use `--color-accent-hover` for small text) |
-| Accent Deep  | `--color-accent-hover`     | `#963910` | Darker terracotta for hover states and small accent text (5.9:1 on canvas)                                                                           |
-| Success      | `--color-success`          | `#2D6B4F` | Inbound receipts, confirmed status                                                                                                                   |
-| Warning      | `--color-warning`          | `#A7701E` | Draft orders, pending items                                                                                                                          |
-| Danger       | `--color-danger`           | `#B34638` | Low stock exceptions, cancelled/failed                                                                                                               |
+Status color must always be paired with a word, icon, or both; never rely on color alone. Keep the listed business semantics distinct: order lifecycle (Draft, Confirmed, Fulfilled, Cancelled), integration delivery (Received, Processing, Succeeded, Failed), inventory alert (Open, Resolved), and product/partner lifecycle (Active, Inactive). Do not use red/green as general brand colors.
 
-### Typography
+## Typography
 
-- IBM Plex Sans is the interface family; IBM Plex Mono is used for SKU, order numbers, quantities, timestamps, and currency with tabular numerals (`.mono`). Both are bundled locally via `next/font/local` in `apps/web/app/layout.tsx`.
-- Token type scale: `11px` (`--text-2xs`), `12px` (`--text-xs`), `13.5px` (`--text-sm`), `15px` (`--text-md`), `18px` (`--text-lg`), `22px` (`--text-xl`), `26px` (`--text-2xl`).
-- Marketing display headings are fluid: hero `h1` `clamp(2.35rem, 4.2vw, 3.5rem)`, section headings `clamp(1.85rem, 3vw, 2.5rem)` — these are page-level, not tokens.
+- **Interface family:** self-host **Source Sans 3** from Adobe's official release at `https://github.com/adobe-fonts/source-sans/tree/release/WOFF2` (or its variable-font release). Use regular 400, semibold 600, and bold 700, or one variable WOFF2. No runtime font request to Google Fonts or another third party.
+- Retain Adobe's [SIL Open Font License 1.1](https://github.com/adobe-fonts/source-sans/blob/release/LICENSE.md) alongside the bundled files under `apps/web/app/fonts/`. Record provenance in the font directory. If font software is modified, comply with the OFL reserved-font-name terms. Do not redistribute the font without its license notice.
+- Use `font-variant-numeric: tabular-nums` for quantity, currency, dates, and identifiers where columns need stable alignment. Verify the bundled face renders the feature in the browser before treating it as confirmed.
+- Type roles: page title 28/36, section title 20/26, body 14/20, table/body compact 14/20, supporting metadata 12/16, buttons/field labels 14/20 semibold. Use 16/24 for mobile form body/help text where it improves readability. Keep headings sentence case and content left aligned.
+- Do not use a second display family, oversized marketing type inside authenticated pages, or monospace as general interface typography. Use a system monospace fallback only for content whose meaning requires code-like formatting.
 
-### Spacing, Shape, and Motion
+## Layout, density, shape, and motion
 
-- Spacing grid: 4px base (`0.25rem`, `0.5rem`, `0.75rem`, `1rem`, `1.25rem`, `1.5rem`).
-- Border Radii: `4px` (`--radius-xs` for controls/tags), `6px` (`--radius-sm` for buttons/inputs), `8px` (`--radius-md` for cards/tables), `10px` (`--radius-lg` for panels/drawers), `999px` (`--radius-pill`).
-- Control Heights:
-  - Dense desktop mouse/keyboard controls: buttons and form fields use `min-height: 2.25rem` (36px) via `--button-min-height`; search/filter bars and table rows run ~40px. The operations console intentionally favors density over 44px desktop targets.
-  - Mobile/touch: buttons in page headers, selectors, and bottom navigation grow to >= 44px touch targets (see `responsive.css`).
-- Motion — two contexts:
-  - **Authenticated application**: dense operations UI. Durations from tokens: `120ms` (`--motion-fast`), `160ms` (`--motion-normal`), `200ms` (`--motion-slow`). Motion is minimal — interaction/state feedback via `background-color`, `border-color`, and `color` transitions; no layout movement.
-  - **Public marketing page**: restrained entrance motion only — `heroCopyFade` / `heroShotFade` animate `opacity` 0→1 with a small `translateY` (8–14px) over ~350ms; micro-interactions use `--motion-fast` (120ms) and may animate `transform`. `prefers-reduced-motion: reduce` is honored globally (`foundation.css` kill-switch) and by the hero specifically.
-- Shadows: low, restrained shadows (`--shadow-sm`, `--shadow-md`, `--shadow-overlay`, `--shadow-dropdown`, `--shadow-bottom-nav`) on panels, modals, dropdowns, and bottom navigation; data surfaces use hairlines and spacing for hierarchy.
+- Use a 4px base spacing grid, with 8px as the common control/gap increment and 16/24/32px section rhythm.
+- Controls use 2–4px corners. Data workspace surfaces are square or nearly square; reserve modest rounding for dialogs and overlays. Avoid pill-shaped controls except short status markers where they remain compact.
+- Target desktop table rows around 44px, with clear horizontal rules. Align quantities and currency to the right; align names, references, and statuses to the left. Keep one logical table toolbar with title/count and related actions.
+- Use hairlines, spacing, and type scale for page hierarchy. Shadows are limited to menus, dialogs, drawers, and other overlays. No card grid as the default container for operational data.
+- Motion is functional only: 120–200ms color/opacity feedback, no page entrance choreography or layout movement. Respect `prefers-reduced-motion` and keep feedback clear with motion disabled.
+- Keep content operable at 200% zoom and at narrow widths. Do not hide core operations behind hover; all actions work by keyboard and touch.
 
-### Status Semantics
+## App shell and page patterns
 
-Status keys represent distinct business domains and must not be overloaded:
+### Global shell
 
-- **Lifecycle (Products, Partners)**: `ACTIVE` ("Active"), `INACTIVE` ("Inactive")
-- **Integration Deliveries**: `RECEIVED` ("Received"), `PROCESSING` ("Processing"), `SUCCEEDED` ("Succeeded"), `FAILED` ("Failed")
-- **Orders**: `DRAFT` ("Draft"), `CONFIRMED` ("Confirmed"), `FULFILLED` ("Fulfilled"), `CANCELLED` ("Cancelled")
-- **Inventory Alerts**: `OPEN` ("Open"), `RESOLVED` ("Resolved")
-- **Stock Ledger Movements**: `RECEIPT` ("Receipt"), `SALE` ("Sale"), `ADJUSTMENT_IN` ("Adjustment in"), `ADJUSTMENT_OUT` ("Adjustment out")
+- **Desktop:** use a full-width navy top bar for brand, organization, and session controls. Place grouped functional navigation in a light narrow left rail beneath the bar; keep the main list-report/object workspace white/light. Show current location with a restrained blue active indicator, text, and accessible selected state.
+- **Mobile:** show four labeled primary destinations—Overview, Orders, Inventory, and More—with at least 44×44px touch targets and safe-area padding. Put secondary routes under More. Prioritize identity, status, and next action in record views; no page-level horizontal overflow.
+- Navigation labels and icons stay consistent across routes. Use one icon family and visibly label icon-only actions for assistive technology.
 
-## Layout and Responsive Behavior
+### Worklist and list report
 
-- Tested & validated at 390px (mobile), 768px (tablet), 1024px (laptop), and 1440px (desktop).
-- Desktop uses a fixed 228px ink sidebar with integrated organization header and active terracotta indicators.
-- At 768px and below, hide the sidebar, render primary data as flat record cards, and display sticky bottom navigation with safe-area insets.
-- Zero horizontal overflow on mobile viewports.
+- **Overview:** make the operational queue the primary content. Put approvals, low-stock exceptions, failed integrations, and recent work in a prioritized worklist with clear next actions. Analytics and summary values are supporting context, not a wall of KPI cards.
+- **Orders, catalog/partners, and inventory:** use list-report hierarchy: page title/actions, search and useful filters, one dominant data table, count, and row navigation. Keep common filters visible in the filter region. Search and filters must have persistent labels and preserve their state in the URL when already supported by the route.
+- **Approvals and integration failures:** use focused worklists for “find next item and act.” Show queue title/count, table search, status, and selection-dependent actions. Keep secondary actions in an overflow menu; keep the main action visible.
+- Put bulk actions in context when rows are selected. Disable irrelevant actions with an explanation where useful. Show active filters and selected-row count. Loading, empty, error, stale, and success states must be explicit and preserve retry/recovery paths.
+- On mobile, show the identifying fields, lifecycle state, and next action first. Present secondary fields in a compact detail area. Never shrink a wide desktop table until text is unreadable.
+
+### Object page and task forms
+
+- A selected order, receipt, product/SKU, or partner uses a contextual object header with name/reference, lifecycle state, key values, breadcrumbs when useful, and global actions.
+- Organize details into concise labeled sections: core facts, line items, movement/reservation history, source documents, and audit context as applicable. Add anchor navigation only when several substantial sections need direct access; simple objects use a flat page.
+- Display-mode global actions belong with the object header. Create/edit dialogs or pages use a clear form hierarchy, persistent field labels, inline errors, and explicit Save/Cancel placement. Preserve focus on open, constrain focus in a modal, and restore focus on close.
+- Receipt documents and stock movements are different objects. A receipt page summarizes its supplier/reference and all lines; movement history records ledger events. Reservations are a separate derived view of confirmed order quantities, never a fabricated movement.
+- After a command, show confirmed success only after the server confirms it. On unknown outcome, preserve the command reference and offer safe status recovery/retry behavior; do not tell users to repeat a non-idempotent action blindly.
+
+### Public and authentication pages
+
+- Landing page uses a concise product introduction, concrete task descriptions, current product evidence, and immediate Manager/Staff/Owner demo entry. Avoid oversized hero claims or decorative landing-page sections that obscure the application.
+- Login, signup, workspace creation, and invitation acceptance are focused forms with clear labels, validation, and recovery links. Keep visual tokens consistent with the app while allowing more whitespace than the dense operations workspace.
+- Refresh favicon, app icons, social previews, and browser theme metadata to match the new cool-light/navy system; do not feature obsolete screenshots as proof of the redesigned UI.
+
+## Interaction states and accessibility
+
+- Define distinct default, hover, active, focus-visible, selected, disabled, pending/loading, success, warning, and error states for controls, rows, navigation, and dialogs.
+- Focus is always visible: use a 2px action-blue outline with 2px offset on white/canvas controls. Do not remove browser focus without an equally visible replacement.
+- Use semantic buttons, links, forms, table headers, and dialog roles. Tab order follows visible reading order. Icon-only controls have accessible names and keyboard operation.
+- Keep loading and unknown outcomes distinguishable from failure and confirmed success. Give inline validation beside its field and a summary when the form has multiple errors.
+- Support reduced motion, text zoom, keyboard-only use, screen readers, and touch. Color is never the sole carrier of status or selection.
+
+## Anti-patterns
+
+Do not reintroduce warm bone surfaces, terracotta brand accents, IBM Plex, or the previous soft dashboard aesthetic. Avoid repeated rounded-card compositions, card grids for table data, oversized metric tiles, gradients, glass effects, ornamental animation, heavy shadows, excessive pills, decorative labels/eyebrows, low-contrast gray text, hover-only actions, color-only status, or mobile horizontal overflow. Do not mix SAP and Fluent visual components; use the selected SAP-inspired workflow structure with the project's native components.

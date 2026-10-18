@@ -5,7 +5,10 @@ import type {
 } from '@stockpilot/contracts';
 
 import { requireMembership, type AuthContext } from '../auth/auth-context.js';
-import { TenantDatabase } from '../database/tenant-database.js';
+import {
+  TenantDatabase,
+  type TenantTransactionOptions,
+} from '../database/tenant-database.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import { executeIdempotent } from '../idempotency/idempotency.js';
 import { adjustTransaction } from './adjustment-command.service.js';
@@ -16,11 +19,16 @@ import {
   listBalances,
   listMovements,
   inventorySummary,
+  listReceipts,
+  findReceiptDetail,
+  findProductTrace,
 } from './inventory-query.service.js';
 import type {
   AlertStatusFilter,
   InventoryListQuery,
   MovementListQuery,
+  ProductTraceQuery,
+  ReceiptListQuery,
 } from './inventory.types.js';
 
 export type {
@@ -117,17 +125,40 @@ export class InventoryService {
     );
   }
 
+  listReceipts(auth: AuthContext, query: ReceiptListQuery) {
+    return this.inTenant(auth, (transaction, organizationId) =>
+      listReceipts(transaction, organizationId, query),
+    );
+  }
+
+  getReceipt(auth: AuthContext, id: string) {
+    return this.inTenant(auth, (transaction, organizationId) =>
+      findReceiptDetail(transaction, organizationId, id),
+    );
+  }
+
+  productTrace(auth: AuthContext, productId: string, query: ProductTraceQuery) {
+    return this.inTenant(
+      auth,
+      (transaction, organizationId) =>
+        findProductTrace(transaction, organizationId, productId, query),
+      { isolationLevel: 'RepeatableRead' },
+    );
+  }
+
   private inTenant<T>(
     auth: AuthContext,
     work: (
       transaction: Prisma.TransactionClient,
       organizationId: string,
     ) => Promise<T>,
+    options?: TenantTransactionOptions,
   ) {
     const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       (transaction) => work(transaction, organizationId),
+      options,
     );
   }
 }

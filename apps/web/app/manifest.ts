@@ -7,12 +7,12 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'StockPilot — Inventory & B2B Order Operations',
     short_name: 'StockPilot',
     description:
-      'A calm, ledger-backed workspace for wholesale inventory and B2B order operations.',
+      'A role-aware workspace for wholesale inventory and B2B order operations.',
     start_url: siteOrigin,
     scope: '/',
     display: 'standalone',
-    background_color: '#F2F0EA',
-    theme_color: '#F2F0EA',
+    background_color: '#F3F6F8',
+    theme_color: '#F3F6F8',
     icons: [
       {
         src: '/icon',

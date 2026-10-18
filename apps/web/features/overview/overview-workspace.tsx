@@ -1,6 +1,5 @@
 'use client';
 
-import { ArrowRight } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 
@@ -10,7 +9,6 @@ import {
   PageHeader,
   ResponsiveDataTable,
   Skeleton,
-  StatCard,
   StatusBadge,
   type TableColumn,
 } from '../../components/ui/operations-ui';
@@ -22,6 +20,7 @@ import {
 import { fetchOverview, overviewKeys } from './api';
 import { AnalyticsPanels } from './analytics-panels';
 import { DemoQuickGuide } from './demo-quick-guide';
+import { ExceptionsWorklist } from './exceptions-worklist';
 import { MovementChart } from './movement-chart';
 
 export function OverviewWorkspace({
@@ -32,205 +31,134 @@ export function OverviewWorkspace({
   const overview = useQuery({
     queryKey: overviewKeys.overview,
     queryFn: fetchOverview,
+    refetchOnMount: 'always',
+    retry: false,
   });
-  if (overview.isLoading) {
-    return (
-      <section className="workspace-section-page">
-        <PageHeader
-          title="Operations overview"
-          description={`One clear queue for ${session.membership.organization.name}.`}
-        />
-        <Skeleton lines={6} />
-      </section>
-    );
-  }
-  if (overview.isError) {
-    return (
-      <section className="workspace-section-page">
-        <PageHeader
-          title="Operations overview"
-          description={`One clear queue for ${session.membership.organization.name}.`}
-        />
-        <ErrorState
-          description="The operational overview is temporarily unavailable."
-          onRetry={() => void overview.refetch()}
-        />
-      </section>
-    );
-  }
-  const data = {
-    exceptions: {
-      failedIntegrations: overview.data?.exceptions?.failedIntegrations ?? 0,
-      openLowStockAlerts: overview.data?.exceptions?.openLowStockAlerts ?? 0,
-      ordersAwaitingApproval:
-        overview.data?.exceptions?.ordersAwaitingApproval ?? 0,
-    },
-    openOrderValue: overview.data?.openOrderValue ?? '0.00',
-    recentMovements: overview.data?.recentMovements ?? [],
-    recentOrders: overview.data?.recentOrders ?? [],
-    fourteenDayMovements: overview.data?.fourteenDayMovements ?? [],
-  };
-  const summaryRows = data.fourteenDayMovements.map((row) => ({
+  const data = overview.data;
+  const summaryRows = data?.fourteenDayMovements?.map((row) => ({
     date: row.day,
     inbound: row.inbound,
     outbound: row.outbound,
   }));
+
   return (
-    <section
-      className="workspace-section-page"
-      aria-labelledby="overview-title"
-    >
+    <section className="workspace-section-page">
       <PageHeader
-        description={`One clear queue for ${session.membership.organization.name}. Keep exceptions moving and stock promises honest.`}
+        description="Track draft orders, low-stock alerts, and failed deliveries from one queue."
         title="Operations overview"
         action={
-          <>
-            <span
-              className={`plan-badge plan-badge-${(overview.data?.plan ?? 'PRO').toLowerCase()}`}
-            >
-              {overview.data?.plan ?? 'PRO'}
-            </span>
-            <Link className="button button-primary" href="/app/orders?new=1">
-              Create draft order <ArrowRight size={15} />
-            </Link>
-          </>
+          <Link className="button button-primary" href="/app/orders?new=1">
+            Create draft order
+          </Link>
         }
       />
-      <div className="workspace-grid" aria-label="Operational summary">
-        <StatCard
-          hint="Draft orders need a Manager"
-          label="Awaiting approval"
-          tone="attention"
-          value={data.exceptions.ordersAwaitingApproval}
-        />
-        <StatCard
-          hint="Available stock at or below threshold"
-          label="Low-stock alerts"
-          tone="danger"
-          value={data.exceptions.openLowStockAlerts}
-        />
-        <StatCard
-          hint="Draft and confirmed orders"
-          label="Open order value"
-          tone="positive"
-          value={`$${data.openOrderValue}`}
-        />
-        <StatCard
-          hint="Delivery retries need review"
-          label="Integration failures"
-          tone="danger"
-          value={data.exceptions.failedIntegrations}
-        />
-      </div>
-      {session.membership.organization.isDemo ? <DemoQuickGuide /> : null}
-      <div className="workspace-panels">
-        <article className="work-panel">
-          <div className="panel-heading">
-            <div>
-              <p className="eyebrow">Needs attention</p>
-              <h2>Priority work queue</h2>
-            </div>
-            <Link className="button button-secondary" href="/app/orders">
-              View orders
-            </Link>
-          </div>
-          <div className="work-row">
-            <StatusBadge value="OPEN" />
-            <span>
-              <strong>
-                {data.exceptions.openLowStockAlerts} products below reorder
-                point
-              </strong>
-              <small>Receive stock to resolve an alert</small>
-            </span>
-            <Link href="/app/receipts">Receive stock</Link>
-          </div>
-          <div className="work-row">
-            <StatusBadge value="DRAFT" />
-            <span>
-              <strong>
-                {data.exceptions.ordersAwaitingApproval} draft orders
-              </strong>
-              <small>Review before reservation</small>
-            </span>
-            <Link href="/app/orders?status=DRAFT">Review orders</Link>
-          </div>
-          <div className="work-row">
-            <StatusBadge value="FAILED" />
-            <span>
-              <strong>
-                {data.exceptions.failedIntegrations} failed deliveries
-              </strong>
-              <small>Retry safely after inspecting the payload</small>
-            </span>
-            <Link href="/app/integrations">Inspect events</Link>
-          </div>
-        </article>
-        <article className="work-panel recent-panel">
-          <div className="panel-heading">
-            <div>
-              <p className="eyebrow">Recent activity</p>
-              <h2>Stock movements</h2>
-            </div>
-            <Link className="button button-secondary" href="/app/inventory">
-              Inventory
-            </Link>
-          </div>
-          {data.recentMovements.length ? (
-            data.recentMovements.map((movement) => (
-              <div className="movement-row" key={movement.id}>
-                <span
-                  className={
-                    movement.quantityDelta >= 0
-                      ? 'movement-positive'
-                      : 'movement-negative'
-                  }
-                >
-                  {movement.quantityDelta >= 0 ? '+' : '−'}
-                  {Math.abs(movement.quantityDelta)}
-                </span>
-                <span>
-                  <strong>{movement.product?.name ?? 'Unknown product'}</strong>
-                  <small>
-                    {movement.type} · {formatDateTime(movement.createdAt)}
-                  </small>
-                </span>
-              </div>
-            ))
-          ) : (
-            <EmptyState
-              description="New receipt and sale movements will appear here."
-              title="No movements yet"
-            />
-          )}
-        </article>
-      </div>
-      <article className="work-panel overview-orders-panel">
-        <div className="panel-heading">
+
+      <ExceptionsWorklist role={session.membership.role} />
+
+      {session.membership.organization.isDemo ? (
+        <DemoQuickGuide role={session.membership.role} />
+      ) : null}
+
+      <section
+        className="overview-support"
+        aria-labelledby="overview-support-title"
+      >
+        <header className="overview-support-heading">
           <div>
-            <p className="eyebrow">Order pulse</p>
-            <h2>Recent orders</h2>
+            <h2 id="overview-support-title">Recent activity and performance</h2>
+            <p>Supporting context for the active worklist.</p>
           </div>
-          <Link className="button button-secondary" href="/app/orders">
-            Open queue
-          </Link>
-        </div>
-        {data.recentOrders.length ? (
-          <ResponsiveDataTable
-            ariaLabel="Recent orders"
-            columns={recentOrderColumns}
-            data={data.recentOrders}
-            getRowLabel={(record) => record.orderNumber}
+          {data && !overview.isRefetching && !overview.isError ? (
+            <p className="overview-open-value">
+              <span>Open order value</span>
+              <strong className="mono">${data.openOrderValue}</strong>
+            </p>
+          ) : null}
+        </header>
+
+        {overview.isLoading || overview.isRefetching ? (
+          <Skeleton lines={5} />
+        ) : overview.isError ? (
+          <ErrorState
+            description="Recent activity and its summary could not be loaded. The actionable worklist remains available."
+            onRetry={() => void overview.refetch()}
           />
-        ) : (
-          <EmptyState
-            description="Start a draft order to see customer demand here."
-            title="No recent orders"
-          />
-        )}
-      </article>
-      <MovementChart rows={summaryRows} />
-      <AnalyticsPanels />
+        ) : data ? (
+          <>
+            <div className="workspace-panels overview-support-panels">
+              <article className="work-panel recent-panel">
+                <div className="panel-heading">
+                  <div>
+                    <h3>Recent stock movements</h3>
+                  </div>
+                  <Link
+                    className="button button-secondary"
+                    href="/app/inventory"
+                  >
+                    Inventory
+                  </Link>
+                </div>
+                {data.recentMovements.length ? (
+                  data.recentMovements.map((movement) => (
+                    <div className="movement-row" key={movement.id}>
+                      <span
+                        className={
+                          movement.quantityDelta >= 0
+                            ? 'movement-positive'
+                            : 'movement-negative'
+                        }
+                      >
+                        {movement.quantityDelta >= 0 ? '+' : '−'}
+                        {Math.abs(movement.quantityDelta)}
+                      </span>
+                      <span>
+                        <strong>
+                          {movement.product?.name ?? 'Unknown product'}
+                        </strong>
+                        <small>
+                          {movement.type} · {formatDateTime(movement.createdAt)}
+                        </small>
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <EmptyState
+                    description="New receipt and sale movements will appear here."
+                    title="No movements yet"
+                  />
+                )}
+              </article>
+
+              <article className="work-panel overview-orders-panel">
+                <div className="panel-heading">
+                  <div>
+                    <h3>Recent orders</h3>
+                  </div>
+                  <Link className="button button-secondary" href="/app/orders">
+                    Open orders
+                  </Link>
+                </div>
+                {data.recentOrders.length ? (
+                  <ResponsiveDataTable
+                    ariaLabel="Recent orders"
+                    columns={recentOrderColumns}
+                    data={data.recentOrders}
+                    getRowLabel={(record) => record.orderNumber}
+                  />
+                ) : (
+                  <EmptyState
+                    description="Create a draft to see recent customer orders here."
+                    title="No recent orders"
+                  />
+                )}
+              </article>
+            </div>
+            <MovementChart rows={summaryRows ?? []} />
+          </>
+        ) : null}
+
+        <AnalyticsPanels />
+      </section>
     </section>
   );
 }
@@ -239,7 +167,11 @@ const recentOrderColumns: TableColumn<OverviewRecentOrder>[] = [
   {
     key: 'orderNumber',
     label: 'Order',
-    render: (record) => <span className="mono">{record.orderNumber}</span>,
+    render: (record) => (
+      <Link href={`/app/orders?order=${encodeURIComponent(record.id)}`}>
+        {record.orderNumber}
+      </Link>
+    ),
   },
   { key: 'customerCompanyName', label: 'Customer' },
   {

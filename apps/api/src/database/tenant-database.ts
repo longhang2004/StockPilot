@@ -5,12 +5,19 @@ export interface TenantContext {
   actorId?: string;
 }
 
+export interface TenantTransactionOptions {
+  isolationLevel?: Prisma.TransactionIsolationLevel;
+  maxWait?: number;
+  timeout?: number;
+}
+
 export class TenantDatabase {
   constructor(private readonly prisma: PrismaClient) {}
 
   withTenant<T>(
     context: TenantContext,
     work: (transaction: Prisma.TransactionClient) => Promise<T>,
+    options?: TenantTransactionOptions,
   ): Promise<T> {
     return this.prisma.$transaction(async (transaction) => {
       await transaction.$executeRaw`
@@ -21,6 +28,6 @@ export class TenantDatabase {
       `;
 
       return work(transaction);
-    });
+    }, options);
   }
 }

@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { QueryProvider } from '../../lib/query-provider';
+import { ExceptionsWorklist } from './exceptions-worklist';
 import { OverviewWorkspace } from './overview-workspace';
 import type { WorkspaceSessionView } from '../shared/types';
 
@@ -226,5 +227,330 @@ describe('OverviewWorkspace movement summary', () => {
     expect(await screen.findByText('Craggy Oat Milk')).toBeVisible();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     view.unmount();
+  });
+});
+
+describe('OverviewWorkspace actionable worklist', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it('links seeded draft, alert, and failed delivery identities to their records', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = String(input);
+        const body = url.includes('/analytics')
+          ? {
+              averageFulfilledOrderValue: '0.00',
+              fulfilledOrderCount: 0,
+              fulfilledOrderValue: '0.00',
+              lowStockSkuCount: 0,
+              ordersByStatus: [],
+              topFulfilledProducts: [],
+            }
+          : url.includes('/dashboard/overview')
+            ? {
+                exceptions: {
+                  failedIntegrations: 1,
+                  openLowStockAlerts: 1,
+                  ordersAwaitingApproval: 1,
+                },
+                fourteenDayMovements: [],
+                openOrderValue: '0.00',
+                recentMovements: [],
+                recentOrders: [],
+              }
+            : url.includes('/orders?')
+              ? {
+                  items: [
+                    {
+                      id: 'draft-1',
+                      orderNumber: 'SO-2042',
+                      status: 'DRAFT',
+                      customerCompanyName: 'Northwind Supply',
+                      createdAt: '2026-10-18T08:30:00.000Z',
+                    },
+                  ],
+                  page: 1,
+                  pageSize: 5,
+                  total: 1,
+                  totalPages: 1,
+                }
+              : url.includes('/alerts?')
+                ? {
+                    items: [
+                      {
+                        id: 'alert-1',
+                        productId: 'product-9',
+                        status: 'OPEN',
+                        availableAtOpen: 1,
+                        reorderPoint: 8,
+                        openedAt: '2026-10-18T07:00:00.000Z',
+                        product: { name: 'Oat Milk', sku: 'OAT-12' },
+                      },
+                    ],
+                    page: 1,
+                    pageSize: 5,
+                    total: 1,
+                    totalPages: 1,
+                  }
+                : url.includes('/integration-deliveries?')
+                  ? {
+                      items: [
+                        {
+                          id: 'delivery-5',
+                          externalDeliveryId: 'ext-55',
+                          eventType: 'stock.adjusted',
+                          status: 'FAILED',
+                          attempts: 2,
+                          lastError: 'Remote endpoint unavailable',
+                          payload: {},
+                          createdAt: '2026-10-18T06:15:00.000Z',
+                          processedAt: null,
+                        },
+                      ],
+                      page: 1,
+                      pageSize: 5,
+                      total: 1,
+                      totalPages: 1,
+                    }
+                  : {
+                      exceptions: {
+                        failedIntegrations: 1,
+                        openLowStockAlerts: 1,
+                        ordersAwaitingApproval: 1,
+                      },
+                      fourteenDayMovements: [],
+                      openOrderValue: '0.00',
+                      recentMovements: [],
+                      recentOrders: [],
+                    };
+
+        return Promise.resolve(
+          new Response(JSON.stringify(body), {
+            headers: { 'Content-Type': 'application/json' },
+            status: 200,
+          }),
+        );
+      }),
+    );
+
+    render(
+      <QueryProvider>
+        <OverviewWorkspace session={managerSession} />
+      </QueryProvider>,
+    );
+
+    expect(
+      await screen.findByRole('link', { name: 'SO-2042' }),
+    ).toHaveAttribute('href', '/app/orders?status=DRAFT&order=draft-1');
+    expect(screen.getByRole('link', { name: 'Review draft' })).toHaveAttribute(
+      'href',
+      '/app/orders?status=DRAFT&order=draft-1',
+    );
+    expect(screen.getByRole('link', { name: 'Oat Milk' })).toHaveAttribute(
+      'href',
+      '/app/inventory?product=product-9',
+    );
+    expect(
+      screen.getByText(/Available when opened: 1 · reorder point: 8/),
+    ).toBeVisible();
+    expect(screen.queryByText(/available now/i)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Delivery ext-55' }),
+    ).toHaveAttribute(
+      'href',
+      '/app/integrations?status=FAILED&delivery=delivery-5',
+    );
+    expect(screen.getByText(/Remote endpoint unavailable/)).toBeVisible();
+  });
+
+  it('shows a staff-appropriate draft action without requesting manager-only deliveries', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes('/analytics')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                averageFulfilledOrderValue: '0.00',
+                fulfilledOrderCount: 0,
+                fulfilledOrderValue: '0.00',
+                lowStockSkuCount: 0,
+                ordersByStatus: [],
+                topFulfilledProducts: [],
+              }),
+              { headers: { 'Content-Type': 'application/json' }, status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/dashboard/overview')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                exceptions: {
+                  failedIntegrations: 0,
+                  openLowStockAlerts: 0,
+                  ordersAwaitingApproval: 1,
+                },
+                fourteenDayMovements: [],
+                openOrderValue: '0.00',
+                recentMovements: [],
+                recentOrders: [],
+              }),
+              { headers: { 'Content-Type': 'application/json' }, status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/orders?')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                items: [
+                  {
+                    id: 'draft-staff',
+                    orderNumber: 'SO-STAFF',
+                    status: 'DRAFT',
+                    customerCompanyName: 'Wholesale Co',
+                    createdAt: '2026-10-18T08:30:00.000Z',
+                  },
+                ],
+                page: 1,
+                pageSize: 5,
+                total: 1,
+                totalPages: 1,
+              }),
+              { headers: { 'Content-Type': 'application/json' }, status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/alerts?')) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                items: [
+                  {
+                    id: 'staff-alert',
+                    productId: 'staff-product',
+                    status: 'OPEN',
+                    availableAtOpen: 1,
+                    reorderPoint: 8,
+                    openedAt: '2026-10-18T07:00:00.000Z',
+                    product: { name: 'Staff item', sku: 'STF-8' },
+                  },
+                ],
+                page: 1,
+                pageSize: 5,
+                total: 1,
+                totalPages: 1,
+              }),
+              { headers: { 'Content-Type': 'application/json' }, status: 200 },
+            ),
+          );
+        }
+        if (url.includes('/integration-deliveries?')) {
+          return Promise.resolve(
+            new Response('unexpected request', { status: 403 }),
+          );
+        }
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              exceptions: {
+                failedIntegrations: 0,
+                openLowStockAlerts: 0,
+                ordersAwaitingApproval: 0,
+              },
+              fourteenDayMovements: [],
+              openOrderValue: '0.00',
+              recentMovements: [],
+              recentOrders: [],
+            }),
+            { headers: { 'Content-Type': 'application/json' }, status: 200 },
+          ),
+        );
+      }),
+    );
+
+    render(
+      <QueryProvider>
+        <OverviewWorkspace
+          session={{
+            ...managerSession,
+            membership: { ...managerSession.membership, role: 'STAFF' },
+          }}
+        />
+      </QueryProvider>,
+    );
+
+    expect(
+      await screen.findByRole('link', { name: 'Edit draft' }),
+    ).toHaveAttribute('href', '/app/orders?status=DRAFT&order=draft-staff');
+    expect(
+      screen.queryByRole('link', { name: 'Review draft' }),
+    ).not.toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        /Delivery review is available to Managers and Owners/,
+      ),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole('link', { name: 'Inspect delivery' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'View stock' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Receive stock' }),
+    ).not.toBeInTheDocument();
+    expect(
+      vi
+        .mocked(fetch)
+        .mock.calls.some(([input]) =>
+          String(input).includes('/integration-deliveries'),
+        ),
+    ).toBe(false);
+  });
+
+  it('reports a manager source failure without rendering a zero count', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes('/alerts?')) {
+          return Promise.resolve(new Response('unavailable', { status: 503 }));
+        }
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              items: [],
+              page: 1,
+              pageSize: 5,
+              total: 0,
+              totalPages: 0,
+            }),
+            { headers: { 'Content-Type': 'application/json' }, status: 200 },
+          ),
+        );
+      }),
+    );
+
+    render(
+      <QueryProvider>
+        <ExceptionsWorklist role="MANAGER" />
+      </QueryProvider>,
+    );
+
+    expect(
+      await screen.findByText(/Low-stock alerts could not be loaded/i),
+    ).toBeVisible();
+    expect(screen.queryByText('0 open alerts')).not.toBeInTheDocument();
   });
 });

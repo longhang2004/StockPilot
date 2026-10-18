@@ -87,4 +87,36 @@ test.describe('SaaS onboarding', () => {
     await page.getByRole('button', { name: 'Create account' }).click();
     await expect(page.getByText(/already exists/i)).toBeVisible();
   });
+
+  test('signs out of a new workspace and signs back into that same workspace', async ({
+    page,
+  }) => {
+    const suffix = randomUUID().slice(0, 8);
+    const email = `signin-${suffix}@e2e.test`;
+    const password = 'PlaywrightPass1!';
+    const workspaceName = `Sign-in Workspace ${suffix}`;
+
+    await page.goto('/signup');
+    await page.getByLabel('Full name').fill('Sign In E2E');
+    await page.getByLabel('Work email').fill(email);
+    await page.getByLabel('Password').fill(password);
+    await page.getByRole('button', { name: 'Create account' }).click();
+    await expect(page).toHaveURL(/\/create-workspace/);
+    await page.getByLabel('Workspace name').fill(workspaceName);
+    await page.getByRole('button', { name: 'Create workspace' }).click();
+    await expect(page).toHaveURL(/\/app/);
+    await expect(page.getByText(workspaceName, { exact: true })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Sign out' }).click();
+    await expect(page).toHaveURL(/\/login/);
+    await page.getByLabel('Work email').fill(email);
+    await page.getByLabel('Password').fill(password);
+    await page.getByRole('button', { name: 'Sign in' }).click();
+
+    await expect(page).toHaveURL(/\/app/);
+    await expect(page.getByText(workspaceName, { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /operations overview/i }),
+    ).toBeVisible();
+  });
 });

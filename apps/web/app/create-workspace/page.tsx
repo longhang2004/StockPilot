@@ -81,25 +81,11 @@ export default function CreateWorkspacePage() {
         aria-label="Create a StockPilot workspace"
       >
         <div className="login-context">
-          <h1>Create your first workspace.</h1>
+          <h1>Create a workspace</h1>
           <p>
             Naming the workspace atomically creates the organization, its main
             warehouse, and your Owner membership — all in one transaction.
           </p>
-          <ul>
-            <li>
-              <strong>Owner</strong>
-              <span>Full team and billing control</span>
-            </li>
-            <li>
-              <strong>Warehouse</strong>
-              <span>One tenant-scoped warehouse per workspace</span>
-            </li>
-            <li>
-              <strong>Isolation</strong>
-              <span>PostgreSQL RLS keeps workspaces apart</span>
-            </li>
-          </ul>
         </div>
         <div className="login-card">
           <div className="login-card-heading">

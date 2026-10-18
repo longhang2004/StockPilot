@@ -78,13 +78,8 @@ test.describe.serial('manager receipt and order confirmation', () => {
     await page.getByRole('button', { name: /save draft/i }).click();
     await expect(page.getByText(/draft order created/i)).toBeVisible();
     confirmedCustomer = `E2E Customer ${suffix}`;
-    const orderRecord = page
-      .locator(
-        '.operations-table tbody tr:visible, .mobile-record-card:visible',
-      )
-      .filter({ hasText: `E2E Customer ${suffix}` });
-    await expect(orderRecord).toHaveCount(1);
-    await orderRecord.getByRole('button', { name: /open/i }).click();
+    // The redesigned flow opens the created order's object view; confirm it
+    // from the object header actions.
     await page.getByRole('button', { name: /confirm order/i }).click();
     await expect(page.getByText(/order status updated/i)).toBeVisible();
   });

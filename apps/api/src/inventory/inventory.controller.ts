@@ -4,6 +4,7 @@ import {
   Get,
   Headers,
   Inject,
+  Param,
   Post,
   Query,
   Req,
@@ -14,6 +15,7 @@ import {
   ApiHeader,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -27,9 +29,12 @@ import { RequirePermission } from '../auth/permission.decorator.js';
 import { IDEMPOTENCY_KEY_HEADER, schemaRef } from '../openapi/schemas.js';
 import {
   AlertListQuerySchema,
+  IdentifierSchema,
   IdempotencyKeySchema,
   InventoryListQuerySchema,
   MovementListQuerySchema,
+  ProductTraceQuerySchema,
+  ReceiptListQuerySchema,
 } from './inventory-schemas.js';
 import { InventoryService } from './inventory.service.js';
 import {
@@ -89,6 +94,49 @@ export class InventoryController {
   }
 
   @RequirePermission('inventory:read')
+  @Get('products/:id/trace')
+  @ApiOperation({
+    summary: 'Explain a SKU balance with its reservations and movements',
+  })
+  @ApiParam({ name: 'id', schema: { type: 'string', format: 'uuid' } })
+  @ApiQuery({
+    name: 'reservationsPage',
+    required: false,
+    schema: { type: 'integer', minimum: 1, default: 1 },
+  })
+  @ApiQuery({
+    name: 'reservationsPageSize',
+    required: false,
+    schema: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
+  })
+  @ApiQuery({
+    name: 'movementsPage',
+    required: false,
+    schema: { type: 'integer', minimum: 1, default: 1 },
+  })
+  @ApiQuery({
+    name: 'movementsPageSize',
+    required: false,
+    schema: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
+  })
+  @ApiOkResponse({
+    description:
+      'A SKU balance, current confirmed-order reservations and source-bearing movements.',
+    schema: schemaRef('InventoryProductTrace'),
+  })
+  trace(
+    @Req() request: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Query() query: unknown,
+  ) {
+    return this.inventory.productTrace(
+      request.auth,
+      IdentifierSchema.parse(id),
+      ProductTraceQuerySchema.parse(query),
+    );
+  }
+
+  @RequirePermission('inventory:read')
   @Get('movements')
   @ApiOperation({
     summary: 'List stock movements',
@@ -107,6 +155,11 @@ export class InventoryController {
       type: 'string',
       enum: ['RECEIPT', 'SALE', 'ADJUSTMENT_IN', 'ADJUSTMENT_OUT'],
     },
+  })
+  @ApiQuery({
+    name: 'productId',
+    required: false,
+    schema: { type: 'string', format: 'uuid' },
   })
   @ApiQuery({
     name: 'page',
@@ -163,6 +216,47 @@ export class ReceiptsController {
   constructor(
     @Inject(InventoryService) private readonly inventory: InventoryService,
   ) {}
+
+  @RequirePermission('inventory:read')
+  @Get()
+  @ApiOperation({
+    summary: 'List receipt documents',
+    description:
+      'Searchable, paginated receipt documents, not stock movements.',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    schema: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    schema: { type: 'string', maxLength: 160 },
+  })
+  @ApiOkResponse({
+    description: 'Paginated receipt document list.',
+    schema: schemaRef('ReceiptList'),
+  })
+  list(@Req() request: AuthenticatedRequest, @Query() query: unknown) {
+    return this.inventory.listReceipts(
+      request.auth,
+      ReceiptListQuerySchema.parse(query),
+    );
+  }
+
+  @RequirePermission('inventory:read')
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a receipt document with its lines' })
+  @ApiParam({ name: 'id', schema: { type: 'string', format: 'uuid' } })
+  @ApiOkResponse({
+    description: 'Receipt document with supplier and product identities.',
+    schema: schemaRef('ReceiptDetail'),
+  })
+  get(@Req() request: AuthenticatedRequest, @Param('id') id: string) {
+    return this.inventory.getReceipt(request.auth, IdentifierSchema.parse(id));
+  }
 
   @RequirePermission('inventory:receive')
   @Post()

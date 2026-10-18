@@ -14,9 +14,9 @@ export default async function AppleIcon(): Promise<Response> {
     <div
       style={{
         alignItems: 'center',
-        background: '#17201F',
+        background: '#102A43',
         borderRadius: 38,
-        color: '#FCFBF7',
+        color: '#FFFFFF',
         display: 'flex',
         fontFamily: 'Arial',
         fontSize: 64,

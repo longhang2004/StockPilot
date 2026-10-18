@@ -64,13 +64,39 @@ describe('ReceiptsWorkspace multi-line receipt entry', () => {
       'fetch',
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
         const url = String(input);
+        const detail = url.includes('/receipts/receipt-deep')
+          ? {
+              id: 'receipt-deep',
+              organizationId: 'org',
+              warehouseId: 'warehouse',
+              supplierId: 'supplier-a',
+              supplier: { id: 'supplier-a', companyName: 'Bulk Source Co' },
+              receiptNumber: 'GR-204',
+              receivedAt: '2026-10-17T00:00:00.000Z',
+              note: 'Dock 2',
+              actorUserId: null,
+              createdAt: '2026-10-17T00:00:00.000Z',
+              lineCount: 1,
+              totalQuantity: 7,
+              lines: [
+                {
+                  id: 'line-1',
+                  goodsReceiptId: 'receipt-deep',
+                  productId: 'product-gloves',
+                  quantity: 7,
+                  unitCost: '3.25',
+                  product: { name: 'Nitrile Gloves L', sku: 'NTR-GLV-L' },
+                },
+              ],
+            }
+          : null;
         const body = url.includes('/products')
           ? productPage
           : url.includes('/suppliers')
             ? supplierPage
-            : emptyPage;
+            : (detail ?? emptyPage);
         return Promise.resolve(
-          new Response(body, {
+          new Response(typeof body === 'string' ? body : JSON.stringify(body), {
             headers: { 'Content-Type': 'application/json' },
             status: 200,
           }),
@@ -81,13 +107,14 @@ describe('ReceiptsWorkspace multi-line receipt entry', () => {
 
   afterEach(() => {
     cleanup();
+    window.history.replaceState(null, '', '/');
     vi.unstubAllGlobals();
   });
 
   it('adds receipt lines and computes the total cost', async () => {
     const view = render(
       <QueryProvider>
-        <ReceiptsWorkspace />
+        <ReceiptsWorkspace role="MANAGER" />
       </QueryProvider>,
     );
 
@@ -123,5 +150,28 @@ describe('ReceiptsWorkspace multi-line receipt entry', () => {
     });
     expect(screen.getAllByText('$38.50').length).toBeGreaterThan(0);
     view.unmount();
+  });
+
+  it('loads a receipt object from its URL and links its SKU to inventory trace', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/app/receipts?receipt=receipt-deep&keep=1',
+    );
+    render(
+      <QueryProvider>
+        <ReceiptsWorkspace role="STAFF" />
+      </QueryProvider>,
+    );
+    expect(await screen.findByText('GR-204')).toBeVisible();
+    expect(screen.getByText('Bulk Source Co')).toBeVisible();
+    expect(screen.getByText('Dock 2')).toBeVisible();
+    expect(screen.getByRole('link', { name: 'NTR-GLV-L' })).toHaveAttribute(
+      'href',
+      '/app/inventory?product=product-gloves',
+    );
+    expect(
+      screen.queryByRole('button', { name: /Receive stock/ }),
+    ).not.toBeInTheDocument();
   });
 });

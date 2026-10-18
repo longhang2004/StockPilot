@@ -6,6 +6,7 @@ import { TenantDatabase } from '../database/tenant-database.js';
 export interface AuditListQuery {
   page: number;
   pageSize: number;
+  entityId?: string | undefined;
   entityType?: string | undefined;
 }
 
@@ -20,9 +21,14 @@ export class AuditService {
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       async (transaction) => {
-        const where: { entityType?: string; organizationId: string } = {
+        const where: {
+          entityId?: string;
+          entityType?: string;
+          organizationId: string;
+        } = {
           organizationId,
         };
+        if (query.entityId) where.entityId = query.entityId;
         if (query.entityType) where.entityType = query.entityType;
         const [items, total] = await Promise.all([
           transaction.auditEvent.findMany({

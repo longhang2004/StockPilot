@@ -2,9 +2,8 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Demo login',
-  description:
-    'Choose a StockPilot demo role and explore the seeded workspace.',
+  title: 'Sign in',
+  description: 'Sign in to a StockPilot workspace or open the demo.',
   robots: {
     index: false,
     follow: false,

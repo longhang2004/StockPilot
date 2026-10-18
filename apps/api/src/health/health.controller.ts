@@ -74,6 +74,10 @@ export class HealthController {
    * passed CI. Render exposes RENDER_GIT_COMMIT; local runs report "local".
    */
   private revision(): string {
-    return process.env.RENDER_GIT_COMMIT ?? 'local';
+    return (
+      process.env.RENDER_GIT_COMMIT ??
+      process.env.API_REVISION ??
+      'local-working-tree'
+    );
   }
 }

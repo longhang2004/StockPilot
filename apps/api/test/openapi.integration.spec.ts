@@ -113,6 +113,10 @@ describe('OpenAPI contract surface', () => {
       'SalesOrder',
       'SalesOrderDetail',
       'ReceiptResult',
+      'ReceiptSummary',
+      'ReceiptDetail',
+      'ReceiptList',
+      'InventoryProductTrace',
       'AdjustmentResult',
       'ImportPreviewInput',
       'ImportPreviewResult',
@@ -157,9 +161,13 @@ describe('OpenAPI contract surface', () => {
     expect(create.requestBody?.content?.['application/json'].schema).toEqual({
       $ref: '#/components/schemas/SalesOrderInput',
     });
-    // Draft create/update are NOT idempotent at runtime: they must not
-    // advertise a required Idempotency-Key.
+    // Draft create keeps a legacy no-key path while supporting safe replay.
     expect(hasRequiredIdempotencyKey(create)).toBe(false);
+    expect(
+      create.parameters?.find(
+        (parameter) => parameter.name === 'Idempotency-Key',
+      ),
+    ).toMatchObject({ in: 'header', required: false });
 
     const update = operation(document, '/v1/orders/{id}', 'patch');
     expect(hasRequiredIdempotencyKey(update)).toBe(false);
@@ -223,6 +231,15 @@ describe('OpenAPI contract surface', () => {
       $ref: '#/components/schemas/InventoryAdjustmentInput',
     });
     expect(hasRequiredIdempotencyKey(adjustment)).toBe(true);
+
+    const receiptList = operation(document, '/v1/receipts', 'get');
+    expect(jsonBody(receiptList, '200')?.schema).toEqual({
+      $ref: '#/components/schemas/ReceiptList',
+    });
+    const receiptDetail = operation(document, '/v1/receipts/{id}', 'get');
+    expect(jsonBody(receiptDetail, '200')?.schema).toEqual({
+      $ref: '#/components/schemas/ReceiptDetail',
+    });
   });
 
   it('documents inventory read shapes that match the runtime serializers', async () => {
@@ -273,6 +290,20 @@ describe('OpenAPI contract surface', () => {
       resolvedAt: {},
       product: {},
     });
+
+    const trace = operation(
+      document,
+      '/v1/inventory/products/{id}/trace',
+      'get',
+    );
+    expect(jsonBody(trace, '200')?.schema).toEqual({
+      $ref: '#/components/schemas/InventoryProductTrace',
+    });
+    expect(
+      operation(document, '/v1/audit-events', 'get').parameters?.some(
+        (parameter) => parameter.name === 'entityId',
+      ),
+    ).toBe(true);
   });
 
   it('declares session-cookie auth on protected operations and none on public routes', async () => {

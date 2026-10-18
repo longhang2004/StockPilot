@@ -33,8 +33,10 @@ RUN pnpm --filter @stockpilot/api deploy --prod --legacy /workspace/runtime
 
 FROM node:24-bookworm-slim AS runtime
 
+ARG API_REVISION=local-working-tree
 ENV NODE_ENV=production
 ENV PORT=4000
+ENV API_REVISION=$API_REVISION
 WORKDIR /app
 
 # Runtime requirements: openssl for Prisma's query engine, ca-certificates

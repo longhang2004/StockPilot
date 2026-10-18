@@ -14,6 +14,7 @@ import {
 import type { Role } from '@stockpilot/contracts';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import type { WorkspaceSessionView } from '../../features/shared/types';
 import {
@@ -21,7 +22,11 @@ import {
   WORKSPACE_SECTION_LABELS,
   type WorkspaceSection,
 } from '../../features/workspace/sections';
-import { apiRequest, type WorkspaceSummary } from '../../lib/api-client';
+import {
+  apiRequest,
+  clearCsrfToken,
+  type WorkspaceSummary,
+} from '../../lib/api-client';
 
 export type SessionView = WorkspaceSessionView;
 
@@ -72,6 +77,12 @@ const navigation: Array<{
   },
   { label: WORKSPACE_SECTION_LABELS.audit, section: 'audit', icon: GearSix },
 ];
+
+const navigationGroups = [
+  { label: 'Operations', sections: ['overview', 'orders', 'inventory'] },
+  { label: 'Records', sections: ['products', 'partners', 'receipts'] },
+  { label: 'Review', sections: ['imports', 'integrations', 'audit'] },
+] as const;
 
 const roleLabels: Record<Role, string> = {
   MANAGER: 'Manager',
@@ -197,66 +208,117 @@ function WorkspaceSwitcher({
   );
 }
 
-export function WorkspaceSidebar({
-  section,
-  session,
-}: {
-  section: WorkspaceSection;
-  session: SessionView;
-}) {
+export function WorkspaceSidebar({ section }: { section: WorkspaceSection }) {
+  return (
+    <aside className="workspace-sidebar">
+      <nav aria-label="Workspace navigation">
+        {navigationGroups.map((group) => (
+          <div className="workspace-nav-group" key={group.label}>
+            <span className="workspace-nav-group-label">{group.label}</span>
+            {group.sections.map((groupSection) => {
+              const item = navigation.find(
+                ({ section: itemSection }) => itemSection === groupSection,
+              );
+              if (!item) return null;
+              const { section: navSection, icon: Icon, label } = item;
+              const href = workspaceSectionHref(navSection);
+              return (
+                <Link
+                  aria-current={isActive(href, section) ? 'page' : undefined}
+                  className={`workspace-nav-link${isActive(href, section) ? ' workspace-nav-active' : ''}`}
+                  href={href}
+                  key={href}
+                >
+                  <Icon size={16} weight="regular" aria-hidden="true" />
+                  <span>{label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        ))}
+      </nav>
+    </aside>
+  );
+}
+
+export function WorkspaceHeader({ session }: { session: SessionView }) {
   const initials = session.user.displayName
     .split(' ')
     .map((part) => part[0])
     .join('')
     .slice(0, 2);
+  const { organization } = session.membership;
 
   return (
-    <aside className="workspace-sidebar">
+    <header className="workspace-topbar">
       <Link className="brand workspace-brand" href="/app">
         <span className="brand-mark" aria-hidden="true">
           SP
         </span>
         <span>StockPilot</span>
       </Link>
-      <div className="organization-switcher">
-        <span>Organization</span>
-        <WorkspaceSwitcher
-          currentOrganizationId={session.membership.organization.id}
-        />
-        <strong>{session.membership.organization.name}</strong>
-        <small>
-          Main Warehouse · {session.membership.organization.currency}
-        </small>
+      <div className="topbar-organization">
+        <span>Workspace</span>
+        <WorkspaceSwitcher currentOrganizationId={organization.id} />
+        <strong>{organization.name}</strong>
+        <small>{organization.currency} · Main Warehouse</small>
       </div>
-      <nav aria-label="Workspace navigation">
-        {navigation.map(({ section: navSection, icon: Icon, label }) => {
-          const href = workspaceSectionHref(navSection);
-          return (
-            <Link
-              aria-current={isActive(href, section) ? 'page' : undefined}
-              className={`workspace-nav-link${isActive(href, section) ? ' workspace-nav-active' : ''}`}
-              href={href}
-              key={href}
-            >
-              <Icon size={16} weight="regular" aria-hidden="true" />
-              <span>{label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-      {session.membership.organization.isDemo ? (
-        <DemoRoleSwitcher currentRole={session.membership.role} />
+      <div className="topbar-session">
+        {organization.isDemo ? (
+          <DemoRoleSwitcher currentRole={session.membership.role} compact />
+        ) : null}
+        <div className="workspace-user">
+          <span className="user-avatar" aria-hidden="true">
+            {initials}
+          </span>
+          <span className="user-identity">
+            <strong>{session.user.displayName}</strong>
+            <small>{roleLabels[session.membership.role]}</small>
+          </span>
+        </div>
+        <WorkspaceSignOut />
+      </div>
+    </header>
+  );
+}
+
+export function WorkspaceSignOut() {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function signOut() {
+    if (pending) return;
+    setPending(true);
+    setError(null);
+    try {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      clearCsrfToken();
+      router.replace('/login');
+      router.refresh();
+    } catch {
+      setError('Sign out did not complete. Try again.');
+      setPending(false);
+    }
+  }
+
+  return (
+    <div className="workspace-sign-out-wrap">
+      <button
+        aria-busy={pending}
+        className="workspace-sign-out"
+        disabled={pending}
+        onClick={() => void signOut()}
+        type="button"
+      >
+        {pending ? 'Signing out…' : 'Sign out'}
+      </button>
+      {error ? (
+        <span className="workspace-sign-out-error" role="alert">
+          {error}
+        </span>
       ) : null}
-      <div className="workspace-user">
-        <span className="user-avatar" aria-hidden="true">
-          {initials}
-        </span>
-        <span className="user-identity">
-          <strong>{session.user.displayName}</strong>
-          <small>{roleLabels[session.membership.role]}</small>
-        </span>
-      </div>
-    </aside>
+    </div>
   );
 }
 

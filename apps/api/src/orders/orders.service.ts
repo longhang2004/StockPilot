@@ -27,13 +27,25 @@ export class OrdersService {
     private readonly reconciliation: InventoryReconciliationService,
   ) {}
 
-  create(auth: AuthContext, input: SalesOrderInput) {
+  create(auth: AuthContext, input: SalesOrderInput, idempotencyKey?: string) {
     const organizationId = requireMembership(auth).organization.id;
     return this.database.withTenant(
       { actorId: auth.user.id, organizationId },
       async (transaction) => {
-        const order = await createDraftOrder(transaction, auth, input);
-        return findOrderDetail(transaction, organizationId, order.id);
+        const work = async () => {
+          const order = await createDraftOrder(transaction, auth, input);
+          return findOrderDetail(transaction, organizationId, order.id);
+        };
+        if (!idempotencyKey) return work();
+        const result = await executeIdempotent(transaction, {
+          key: idempotencyKey,
+          organizationId,
+          payload: input,
+          responseStatus: 201,
+          scope: 'order:draft:create',
+          work,
+        });
+        return result.body;
       },
     );
   }

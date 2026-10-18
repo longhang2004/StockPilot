@@ -1,112 +1,116 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
-
 import { ImageResponse } from 'next/og';
 
-const overviewPath = join(process.cwd(), 'public/assets/overview-desktop.png');
-
-// Same single-render cache as app/icon.tsx: next/og's WASM rasterizer
-// corrupts on repeated renders in dev on Linux x86_64, so render once and
-// serve the cached PNG bytes. Production prerenders these routes at build
-// time.
+// Cache the static response in development; see app/icon.tsx for the reason.
 let socialImagePng: Promise<Uint8Array<ArrayBuffer>> | undefined;
 
 export async function createSocialImage(): Promise<Response> {
-  socialImagePng ??= (async () => {
-    const overview = await readFile(overviewPath, 'base64');
-
-    const rendered = await new ImageResponse(
+  socialImagePng ??= new ImageResponse(
+    <div
+      style={{
+        background: '#F3F6F8',
+        color: '#102A43',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: 'Arial',
+        height: '100%',
+        padding: 54,
+        width: '100%',
+      }}
+    >
+      <div style={{ alignItems: 'center', display: 'flex', gap: 14 }}>
+        <div
+          style={{
+            alignItems: 'center',
+            background: '#102A43',
+            borderRadius: 4,
+            color: '#FFFFFF',
+            display: 'flex',
+            fontSize: 21,
+            fontWeight: 700,
+            height: 48,
+            justifyContent: 'center',
+            width: 48,
+          }}
+        >
+          SP
+        </div>
+        <div style={{ fontSize: 27, fontWeight: 700 }}>StockPilot</div>
+      </div>
       <div
         style={{
-          background: '#F2F0EA',
-          color: '#17201F',
           display: 'flex',
+          flex: 1,
           flexDirection: 'column',
-          fontFamily: 'Arial',
-          height: '100%',
-          padding: 64,
-          width: '100%',
+          paddingTop: 48,
         }}
       >
-        <div style={{ alignItems: 'center', display: 'flex', gap: 18 }}>
+        <div style={{ fontSize: 22, fontWeight: 600 }}>
+          Inventory and B2B order operations
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            fontSize: 48,
+            fontWeight: 700,
+            lineHeight: 1.12,
+            paddingTop: 18,
+          }}
+        >
+          Review available stock. Trace the work.
+        </div>
+        <div
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid #CDD6DF',
+            display: 'flex',
+            flexDirection: 'column',
+            marginTop: 40,
+            width: '100%',
+          }}
+        >
           <div
             style={{
-              alignItems: 'center',
-              background: '#17201F',
-              borderRadius: 14,
-              color: '#FCFBF7',
+              background: '#E8EEF4',
               display: 'flex',
-              fontSize: 24,
+              fontSize: 16,
               fontWeight: 700,
-              height: 56,
-              justifyContent: 'center',
-              width: 56,
+              padding: '12px 18px',
             }}
           >
-            SP
+            <span style={{ flex: 1 }}>Product</span>
+            <span style={{ width: 160 }}>Available</span>
+            <span style={{ width: 180 }}>Reorder point</span>
           </div>
-          <div style={{ fontSize: 28, fontWeight: 700 }}>StockPilot</div>
+          {[
+            ['Arabica coffee, 1 kg', '152', '80'],
+            ['Cold brew bottles', '8', '24'],
+            ['Paper cups, 500 count', '0', '40'],
+          ].map(([name, available, reorder]) => (
+            <div
+              key={name}
+              style={{
+                borderTop: '1px solid #CDD6DF',
+                display: 'flex',
+                fontSize: 16,
+                padding: '13px 18px',
+              }}
+            >
+              <span style={{ flex: 1 }}>{name}</span>
+              <span style={{ width: 160 }}>{available}</span>
+              <span style={{ width: 180 }}>{reorder}</span>
+            </div>
+          ))}
         </div>
-        <div style={{ display: 'flex', flex: 1, gap: 54, paddingTop: 44 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', width: 430 }}>
-            <div
-              style={{
-                color: '#5D6562',
-                fontSize: 20,
-                fontWeight: 700,
-                letterSpacing: 2,
-                textTransform: 'uppercase',
-              }}
-            >
-              Inventory · Orders · Trust
-            </div>
-            <div
-              style={{
-                fontSize: 54,
-                fontWeight: 700,
-                letterSpacing: -2,
-                lineHeight: 1.05,
-                paddingTop: 24,
-              }}
-            >
-              Operations, under control.
-            </div>
-            <div
-              style={{
-                color: '#5D6562',
-                fontSize: 24,
-                lineHeight: 1.35,
-                paddingTop: 24,
-              }}
-            >
-              A working B2B inventory operations demo for small wholesale teams.
-            </div>
-          </div>
-          <div
-            style={{
-              border: '1px solid #D9D6CE',
-              borderRadius: 12,
-              display: 'flex',
-              overflow: 'hidden',
-              width: 650,
-            }}
-          >
-            <img
-              alt="StockPilot operations overview"
-              src={`data:image/png;base64,${overview}`}
-              style={{ height: 'auto', objectFit: 'cover', width: '100%' }}
-            />
-          </div>
-        </div>
-      </div>,
-      { width: 1200, height: 630 },
-    );
-    return new Uint8Array(await rendered.arrayBuffer());
-  })().catch((error) => {
-    // Allow a retry on a transient first-render failure.
-    socialImagePng = undefined;
-    throw error;
-  });
+      </div>
+    </div>,
+    { width: 1200, height: 630 },
+  )
+    .arrayBuffer()
+    .then((buffer) => new Uint8Array(buffer))
+    .catch((error) => {
+      socialImagePng = undefined;
+      throw error;
+    });
 
   const png = await socialImagePng;
   return new Response(png, {

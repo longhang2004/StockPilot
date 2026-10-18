@@ -1,94 +1,101 @@
 :root {
-  /* Primitive palette: warm neutral surfaces with a single terracotta accent. */
-  --color-white: #fcfbf7;
-  --color-slate-950: #141b1a;
-  --color-slate-900: #1c2624;
-  --color-slate-800: #2b3834;
-  --color-slate-700: #3e4c47;
-  --color-slate-600: #55605c;
-  --color-slate-500: #717c77;
-  --color-slate-400: #939d98;
-  --color-slate-300: #bcc2bd;
-  --color-slate-200: #d9d6ce;
-  --color-slate-100: #e8e5dc;
-  --color-slate-50: #f2f0ea;
+  color-scheme: light;
 
-  --color-emerald-800: #1b4532;
-  --color-emerald-700: #23563e;
-  --color-emerald-600: #2d6b4f;
-  --color-emerald-200: #b5d4c2;
-  --color-emerald-100: #e2ede5;
-  --color-emerald-50: #f0f6f2;
+  /* Cool, restrained palette for a data-first wholesale workspace. */
+  --color-white: #fff;
+  --color-slate-950: #102a43;
+  --color-slate-900: #163a59;
+  --color-slate-800: #244867;
+  --color-slate-700: #526272;
+  --color-slate-600: #526272;
+  --color-slate-500: #647789;
+  --color-slate-400: #7d8c9b;
+  --color-slate-300: #9eacb9;
+  --color-slate-200: #cdd6df;
+  --color-slate-100: #e8eef4;
+  --color-slate-50: #f3f6f8;
 
-  --color-amber-800: #68410e;
-  --color-amber-700: #8a5a16;
-  --color-amber-600: #a7701e;
-  --color-amber-200: #ebd8af;
-  --color-amber-100: #f6eedb;
-  --color-amber-50: #faf6ed;
+  --color-emerald-800: #175b39;
+  --color-emerald-700: #20734a;
+  --color-emerald-600: #20734a;
+  --color-emerald-200: #b6d8c3;
+  --color-emerald-100: #e7f4ec;
+  --color-emerald-50: #f3faf5;
 
-  --color-red-800: #7a261c;
-  --color-red-700: #963529;
-  --color-red-600: #b34638;
-  --color-red-200: #eac5be;
-  --color-red-100: #f6e3df;
-  --color-red-50: #faf0ee;
+  --color-amber-800: #704800;
+  --color-amber-700: #8c5c00;
+  --color-amber-600: #a56d00;
+  --color-amber-200: #ead8a5;
+  --color-amber-100: #fff7e0;
+  --color-amber-50: #fffbf0;
 
-  --color-blue-800: #2b4559;
-  --color-blue-700: #3d5f78;
-  --color-blue-600: #527a98;
-  --color-blue-200: #bfd4e2;
-  --color-blue-100: #e5edf3;
+  --color-red-800: #8f1d14;
+  --color-red-700: #a51d16;
+  --color-red-600: #b42318;
+  --color-red-200: #efc1bd;
+  --color-red-100: #fdecea;
+  --color-red-50: #fff6f5;
 
-  /* Semantic tokens: components consume these aliases, not raw hex. */
-  --color-background: #f2f0ea;
-  --color-surface: var(--color-white);
-  --color-surface-subtle: #eae7de;
-  --color-surface-hover: #f5f3ec;
-  --color-foreground: #17201f;
-  --color-muted-foreground: #5d6562;
-  --color-border: #d9d6ce;
-  --color-border-subtle: #e5e2d9;
-  --color-primary: var(--color-foreground);
-  --color-primary-hover: var(--color-slate-900);
-  --color-on-primary: var(--color-white);
-  --color-secondary: var(--color-slate-600);
-  --color-accent: #b34718;
-  --color-accent-hover: #963910;
-  --color-accent-subtle: #faece4;
-  --color-accent-border: #e8b49e;
-  --color-success: var(--color-emerald-600);
-  --color-success-surface: var(--color-emerald-100);
-  --color-success-border: var(--color-emerald-200);
-  --color-success-foreground: var(--color-emerald-800);
-  --color-warning: var(--color-amber-700);
-  --color-warning-surface: var(--color-amber-100);
-  --color-warning-border: var(--color-amber-200);
-  --color-warning-foreground: var(--color-amber-800);
-  --color-danger: var(--color-red-600);
-  --color-danger-hover: var(--color-red-700);
-  --color-danger-surface: var(--color-red-100);
-  --color-danger-surface-strong: var(--color-red-50);
-  --color-danger-border: var(--color-red-200);
-  --color-danger-foreground: var(--color-red-800);
-  --color-info: var(--color-blue-700);
-  --color-info-surface: var(--color-blue-100);
-  --color-info-foreground: var(--color-blue-800);
-  --color-ring: var(--color-accent);
-  --color-overlay: rgb(20 27 26 / 45%);
-  --color-surface-translucent: rgb(252 251 247 / 96%);
+  --color-blue-800: #123d63;
+  --color-blue-700: #1769aa;
+  --color-blue-600: #1769aa;
+  --color-blue-200: #b8d5ec;
+  --color-blue-100: #e7f1f9;
 
-  /* Semantic aliases retained for existing route styles. */
+  /* Semantic palette. Components should consume these aliases. */
+  --color-background: #f3f6f8;
+  --color-surface: #fff;
+  --color-surface-subtle: #e8eef4;
+  --color-surface-hover: #f5f8fa;
+  --color-foreground: #102a43;
+  --color-muted-foreground: #526272;
+  --color-border: #7d8c9b;
+  --color-border-strong: #7d8c9b;
+  --color-border-subtle: #cdd6df;
+  --color-primary: #102a43;
+  --color-primary-hover: #163a59;
+  --color-on-primary: #fff;
+  --color-secondary: #526272;
+  --color-accent: #1769aa;
+  --color-accent-hover: #12558c;
+  --color-accent-subtle: #e7f1f9;
+  --color-accent-border: #8fb9d9;
+  --color-success: #20734a;
+  --color-success-surface: #e7f4ec;
+  --surface-success: var(--color-success-surface);
+  --color-success-border: #b6d8c3;
+  --color-success-foreground: #175b39;
+  --color-warning: #8c5c00;
+  --color-warning-surface: #fff7e0;
+  --surface-warning: var(--color-warning-surface);
+  --color-warning-border: #ead8a5;
+  --color-warning-foreground: #704800;
+  --color-danger: #b42318;
+  --color-danger-hover: #a51d16;
+  --color-danger-surface: #fdecea;
+  --surface-danger: var(--color-danger-surface);
+  --color-danger-surface-strong: #fff6f5;
+  --color-danger-border: #efc1bd;
+  --color-danger-foreground: #8f1d14;
+  --color-info: #1769aa;
+  --color-info-surface: #e7f1f9;
+  --color-info-foreground: #123d63;
+  --color-ring: #1769aa;
+  --color-overlay: rgb(16 42 67 / 46%);
+  --color-surface-translucent: rgb(255 255 255 / 96%);
+  --color-disabled: #647789;
+
+  /* Compatibility aliases for existing route components. */
   --ink: var(--color-foreground);
   --muted: var(--color-muted-foreground);
-  --line: var(--color-border);
+  --line: var(--color-border-subtle);
   --line-subtle: var(--color-border-subtle);
   --surface: var(--color-surface);
   --surface-subtle: var(--color-surface-subtle);
   --surface-hover: var(--color-surface-hover);
   --brand: var(--color-primary);
   --brand-dark: var(--color-primary-hover);
-  --brand-soft: var(--color-slate-100);
+  --brand-soft: var(--color-surface-subtle);
   --success: var(--color-success);
   --success-soft: var(--color-success-surface);
   --warning: var(--color-warning);
@@ -96,7 +103,6 @@
   --danger: var(--color-danger);
   --danger-soft: var(--color-danger-surface);
 
-  /* Primitive scales. Compact scale for data-dense wholesale console. */
   --space-0: 0;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -107,17 +113,17 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
 
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
   --radius-pill: 999px;
 
-  --shadow-sm: 0 1px 2px rgba(20, 27, 26, 0.04);
-  --shadow-md: 0 4px 12px rgba(20, 27, 26, 0.06);
-  --shadow-overlay: -8px 0 32px rgba(20, 27, 26, 0.12);
-  --shadow-dropdown: 0 6px 20px rgba(20, 27, 26, 0.09);
-  --shadow-bottom-nav: 0 -2px 10px rgba(20, 27, 26, 0.05);
+  --shadow-sm: none;
+  --shadow-md: 0 4px 12px rgb(16 42 67 / 8%);
+  --shadow-overlay: -8px 0 32px rgb(16 42 67 / 18%);
+  --shadow-dropdown: 0 6px 20px rgb(16 42 67 / 13%);
+  --shadow-bottom-nav: 0 -2px 10px rgb(16 42 67 / 8%);
   --shadow: var(--shadow-md);
 
   --motion-fast: 120ms;
@@ -125,45 +131,43 @@
   --motion-slow: 200ms;
 
   --font-sans:
-    var(--font-ibm-plex-sans), 'IBM Plex Sans', ui-sans-serif, system-ui,
+    var(--font-source-sans), 'Source Sans 3', ui-sans-serif, system-ui,
     -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono:
-    var(--font-ibm-plex-mono), 'IBM Plex Mono', ui-monospace, SFMono-Regular,
-    Menlo, monospace;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
 
-  /* Typography scale calibrated for dense desktop operations */
-  --text-2xs: 11px;
-  --text-xs: 12px;
-  --text-sm: 13.5px;
-  --text-md: 15px;
-  --text-lg: 18px;
-  --text-xl: 22px;
-  --text-2xl: 26px;
-  --text-3xl: 34px;
+  --text-2xs: 12px;
+  --text-xs: 13px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 20px;
+  --text-xl: 28px;
+  --text-2xl: 32px;
+  --text-3xl: 40px;
 
-  /* Component tokens. */
   --button-radius: var(--radius-sm);
-  --button-min-height: 2.25rem; /* 36px */
-  --button-height-md: 2.5rem; /* 40px */
+  --button-min-height: 2.5rem;
+  --button-height-md: 2.75rem;
   --input-radius: var(--radius-sm);
-  --input-min-height: 2.25rem; /* 36px */
-  --input-height-md: 2.5rem; /* 40px */
+  --input-min-height: 2.5rem;
+  --input-height-md: 2.75rem;
   --focus-ring: 2px solid var(--color-ring);
-  color-scheme: light;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   background: var(--color-background);
-  color: var(--ink);
+  color: var(--color-foreground);
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   line-height: 1.45;
@@ -175,6 +179,7 @@ button,
 input,
 select,
 textarea {
+  color: inherit;
   font: inherit;
 }
 
