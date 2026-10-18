@@ -37,4 +37,49 @@ describe('apiRequest', () => {
     expect(requestHeaders.get('Content-Type')).toBeNull();
     expect(requestHeaders.get('X-CSRF-Token')).toBe('csrf-token');
   });
+
+  it('adopts the rotated CSRF token from session-creating responses', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        // GET /auth/csrf for the pre-organization signup session.
+        new Response(JSON.stringify({ csrfToken: 'signup-token' }), {
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        // POST /organizations rotates the session and returns the new token.
+        new Response(
+          JSON.stringify({ csrfToken: 'rotated-token', membership: {} }),
+          { headers: { 'Content-Type': 'application/json' } },
+        ),
+      )
+      .mockResolvedValueOnce(
+        // A later authenticated write must send the rotated token without
+        // refetching /auth/csrf against the now-current session.
+        new Response(JSON.stringify({ id: 'o-1' }), {
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await apiRequest<{ membership: unknown }>('/organizations', {
+      body: JSON.stringify({ name: 'Rotating Workspace' }),
+      method: 'POST',
+    });
+    await apiRequest<{ id: string }>('/workspaces/example', {
+      body: JSON.stringify({ name: 'example' }),
+      method: 'POST',
+    });
+
+    const rotationHeaders = fetchMock.mock.calls[1]?.[1]?.headers as Headers;
+    expect(rotationHeaders.get('X-CSRF-Token')).toBe('signup-token');
+    const followUpHeaders = fetchMock.mock.calls[2]?.[1]?.headers as Headers;
+    expect(followUpHeaders.get('X-CSRF-Token')).toBe('rotated-token');
+    expect(
+      fetchMock.mock.calls.filter(([input]) =>
+        String(input).includes('/auth/csrf'),
+      ),
+    ).toHaveLength(1);
+  });
 });

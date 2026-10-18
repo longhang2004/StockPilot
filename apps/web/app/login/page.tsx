@@ -2,6 +2,7 @@ import type { Role } from '@stockpilot/contracts';
 import Link from 'next/link';
 
 import { DemoLoginCard } from '../../components/auth/demo-login-card';
+import { LoginForm } from '../../components/auth/login-form';
 import { MarketingArrowLeftIcon } from '../../components/ui/marketing-icons';
 
 const queryRoleMap: Record<string, Role> = {
@@ -16,7 +17,8 @@ export default async function LoginPage({
   searchParams: Promise<{ role?: string }>;
 }) {
   const { role } = await searchParams;
-  const initialRole = queryRoleMap[role?.toLowerCase() ?? ''] ?? 'MANAGER';
+  const initialRole = queryRoleMap[role?.toLowerCase() ?? ''];
+  const isDemo = Boolean(initialRole);
 
   return (
     <main className="login-page">
@@ -27,36 +29,39 @@ export default async function LoginPage({
           </span>
           <span>StockPilot</span>
         </Link>
-        <Link className="text-link" href="/">
-          <MarketingArrowLeftIcon />
-          Back to product overview
-        </Link>
+        <div className="auth-header-links">
+          <Link className="text-link" href="/">
+            <MarketingArrowLeftIcon />
+            Back to product overview
+          </Link>
+          <Link
+            className="text-link"
+            href={isDemo ? '/login' : '/login?role=manager'}
+          >
+            {isDemo ? 'Sign in to an account' : 'Open demo'}
+          </Link>
+        </div>
       </header>
 
-      <section className="login-layout" aria-label="StockPilot demo login">
+      <section
+        className="login-layout"
+        aria-label={isDemo ? 'StockPilot demo login' : 'Sign in to StockPilot'}
+      >
         <div className="login-context">
-          <h1>A working operation, ready to explore.</h1>
+          <h1>
+            {isDemo ? 'Explore the demo workspace' : 'Access your workspace'}
+          </h1>
           <p>
-            Enter a seeded Harbor &amp; Pine Wholesale workspace with live
-            inventory, supplier receipts, B2B orders, and an immutable activity
-            history.
+            {isDemo
+              ? 'Choose a role for the seeded wholesale operation.'
+              : 'Sign in with the email and password for your StockPilot account.'}
           </p>
-          <ul>
-            <li>
-              <strong>Trace every unit</strong>
-              <span>Ledger-backed stock history</span>
-            </li>
-            <li>
-              <strong>Respect every boundary</strong>
-              <span>Tenant and role-aware access</span>
-            </li>
-            <li>
-              <strong>Retry without duplicates</strong>
-              <span>Idempotent operations</span>
-            </li>
-          </ul>
         </div>
-        <DemoLoginCard initialRole={initialRole} />
+        {initialRole ? (
+          <DemoLoginCard initialRole={initialRole} />
+        ) : (
+          <LoginForm />
+        )}
       </section>
     </main>
   );

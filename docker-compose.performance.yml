@@ -1,0 +1,4 @@
+services:
+  api:
+    ports:
+      - 127.0.0.1:${PERF_API_PORT:-4300}:4000

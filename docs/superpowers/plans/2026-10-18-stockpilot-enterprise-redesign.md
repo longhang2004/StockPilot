@@ -67,6 +67,12 @@ Scope: `app/page.tsx`, login/signup/create-workspace/invitation pages, auth comp
 
 Verify: unit tests for useful product content/demo destinations (avoid brittle full-copy snapshots), production build/SEO tests, public/auth axe and visual inspection. No stale IBM/warm-color tokens or old screenshot masquerading as the new UI.
 
+**A1. Complete real-account sign-in and sign-out** (discovered during preview; API already exists)
+
+The current signup links users to `/login`, but that page only offers seeded demo roles. Add a focused email/password sign-in form backed by existing `POST /auth/login`; route users with no membership to workspace creation and existing members to `/app`. `/login?role=manager|staff|owner` continues to open the one-click demo flow, while plain `/login` is real sign-in with a clear demo link. Remove the old marketing-context slogan/three-promise composition from auth pages in favor of concise task instructions. Expose working sign-out in the app header using existing CSRF-protected logout, with pending/error states. Never persist passwords or add fake password-reset links. Keep the private/public trust boundary unchanged.
+
+Verify: invalid credential feedback and successful login with an existing account; signup/workspace creation → logout → UI sign-in reaches that same workspace; no-membership route; demo role entry remains compatible with existing tests; session/header keyboard and mobile behavior. Add meaningful unit/browser checks on the disposable test environment. This is a newly confirmed user-flow gap, not a new auth backend or provider integration.
+
 ### Phase 2 — Backend read models and Draft command safety
 
 Can run alongside Phase 1 after D2. One backend owner controls shared contracts/OpenAPI and publishes exact response shapes before Phase 3 starts.
@@ -91,7 +97,7 @@ Verify: same key/payload gives the same order once; changed payload returns 409;
 
 ### Phase 3 — Complete product workflows with the new design
 
-Depends F1 and B1/B2 contracts. Feature owner controls `features/overview`, `orders`, `inventory`, `receipts`, integration/audit deep-link behavior and an optional small shared URL helper. Coordinate CSS ownership with F1; do not overwrite shared foundation.
+Depends on the reviewed, stable F1 shared-component/token interface and verified B1/B2 contracts. The final all-route visual/accessibility pass remains Q1; F1 is not marked DONE merely to unlock feature work. This separates the foundation handoff from integrated product acceptance without a circular dependency. Feature owner controls `features/overview`, `orders`, `inventory`, `receipts`, integration/audit deep-link behavior and an optional small shared URL helper. Coordinate CSS ownership with F1; do not overwrite shared foundation.
 
 **U1. URL-aware orders, editing and create recovery**
 
@@ -150,7 +156,7 @@ After Q1 capture new desktop/mobile screenshots for README/public assets/social 
 
 ### Phase 5 — Integration, verification and checkpoint
 
-**Q1. Verify the integrated product** (depends F1/F2/B1/B2/U1/U2/U3/O1/O2)
+**Q1. Verify the integrated product** (depends F1/F2/A1/B1/B2/U1/U2/U3/O1/O2)
 
 Run once against settled code, then rerun only affected checks after any fixes:
 

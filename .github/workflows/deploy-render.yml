@@ -23,6 +23,7 @@ jobs:
     env:
       MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
       RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      RENDER_API_URL: ${{ vars.RENDER_API_URL }}
       RENDER_COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
       - name: Check deployment secrets
@@ -30,6 +31,8 @@ jobs:
         run: |
           [[ -n "$MIGRATION_DATABASE_URL" ]] || { echo "MIGRATION_DATABASE_URL repository secret is required before deployment." >&2; exit 1; }
           [[ -n "$RENDER_DEPLOY_HOOK_URL" ]] || { echo "RENDER_DEPLOY_HOOK_URL repository secret is required before deployment." >&2; exit 1; }
+          [[ -n "$RENDER_API_URL" ]] || { echo "RENDER_API_URL repository variable is required before deployment." >&2; exit 1; }
+          [[ "$RENDER_API_URL" =~ ^https://[A-Za-z0-9.-]+(:[0-9]+)?$ ]] || { echo "RENDER_API_URL must be an HTTPS origin without a path or credentials." >&2; exit 1; }
 
       - name: Normalize migration database URL
         shell: bash
@@ -85,3 +88,10 @@ jobs:
           curl --fail --silent --show-error \
             --request POST \
             "${RENDER_DEPLOY_HOOK_URL}${separator}ref=${RENDER_COMMIT_SHA}"
+
+      - name: Wait for ready API at the requested commit
+        env:
+          API_HEALTH_READY_URL: ${{ vars.RENDER_API_URL }}/v1/health/ready
+          EXPECTED_REVISION: ${{ github.event.workflow_run.head_sha }}
+          READINESS_TIMEOUT_MS: 600000
+        run: pnpm exec node scripts/check-release-readiness.mjs

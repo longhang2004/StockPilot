@@ -2,7 +2,7 @@
 
 import { type Role } from '@stockpilot/contracts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Drawer,
@@ -24,24 +24,31 @@ import { useToasts } from '../../hooks/use-toasts';
 import { useCommandMutation } from '../../hooks/use-command-mutation';
 import { type IntegrationRecord } from '../shared/types';
 import { ExpiredCommandResolution } from '../shared/expired-command-resolution';
+import { useWorkspaceLocation } from '../shared/use-workspace-location';
 
 export function IntegrationsWorkspace({ role }: { role: Role }) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('');
+  const { params, update } = useWorkspaceLocation();
+  const selectedId = params.get('delivery');
+  const [page, setPage] = useState(Number(params.get('page') || 1));
+  const [search, setSearch] = useState(params.get('search') || '');
+  const [status, setStatus] = useState(params.get('status') || '');
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
-  const deliveries = usePage<IntegrationRecord>('/integration-deliveries', {
-    page,
-    pageSize: 25,
-    search,
-    status,
-  });
+  const canRetry = role === 'MANAGER' || role === 'OWNER';
+  const deliveries = usePage<IntegrationRecord>(
+    '/integration-deliveries',
+    {
+      page,
+      pageSize: 25,
+      search,
+      status,
+    },
+    { enabled: canRetry },
+  );
   const detail = useQuery({
     queryKey: ['integration-delivery', selectedId],
     queryFn: () => fetchDelivery(selectedId!),
-    enabled: Boolean(selectedId),
+    enabled: Boolean(selectedId) && canRetry,
   });
   const selected = detail.data;
   const retry = useCommandMutation({
@@ -72,7 +79,24 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
       }
     },
   });
-  const canRetry = role === 'MANAGER' || role === 'OWNER';
+  useEffect(() => {
+    setPage(Number(params.get('page') || 1));
+    setSearch(params.get('search') || '');
+    setStatus(params.get('status') || '');
+  }, [params]);
+  if (!canRetry)
+    return (
+      <section className="workspace-section-page">
+        <PageHeader
+          description="Delivery payloads and retry controls are available to managers and owners."
+          title="Integrations"
+        />
+        <EmptyState
+          description="Ask a manager or owner to inspect this delivery."
+          title="Integration access required"
+        />
+      </section>
+    );
   return (
     <section className="workspace-section-page">
       <PageHeader
@@ -83,6 +107,7 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
         onSearch={(value) => {
           setPage(1);
           setSearch(value);
+          update({ search: value || null, page: null }, 'replace');
         }}
         placeholder="Search delivery ID or event"
         search={search}
@@ -92,6 +117,10 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
           onChange={(event) => {
             setPage(1);
             setStatus(event.target.value);
+            update(
+              { status: event.target.value || null, page: null },
+              'replace',
+            );
           }}
           value={status}
         >
@@ -139,7 +168,7 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
           columns={integrationColumns}
           data={deliveries.data.items}
           getRowLabel={(record) => record.externalDeliveryId}
-          onRowClick={(record) => setSelectedId(record.id)}
+          onRowClick={(record) => update({ delivery: record.id }, 'push')}
           selectedId={selectedId}
         />
       ) : (
@@ -153,7 +182,10 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
         />
       )}
       <Pagination
-        onPageChange={setPage}
+        onPageChange={(value) => {
+          setPage(value);
+          update({ page: value === 1 ? null : String(value) }, 'replace');
+        }}
         page={page}
         totalPages={deliveries.data?.totalPages ?? 0}
       />
@@ -163,7 +195,7 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
           selected?.lastError ??
           'Inspect the delivery payload and processing state.'
         }
-        onClose={() => setSelectedId(null)}
+        onClose={() => update({ delivery: null }, 'push')}
         open={Boolean(selectedId)}
         title={selected?.externalDeliveryId ?? 'Delivery detail'}
       >

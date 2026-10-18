@@ -21,25 +21,11 @@ export default async function SignupPage() {
 
       <section className="login-layout" aria-label="StockPilot signup">
         <div className="login-context">
-          <h1>Your workspace starts with an account.</h1>
+          <h1>Create your account</h1>
           <p>
             Sign up, create a workspace, and you are its Owner. Then invite
             teammates as Managers and Staff.
           </p>
-          <ul>
-            <li>
-              <strong>Signup</strong>
-              <span>Secure Argon2id password hashing</span>
-            </li>
-            <li>
-              <strong>Workspace</strong>
-              <span>Atomic organization + Owner membership</span>
-            </li>
-            <li>
-              <strong>Team</strong>
-              <span>Invitation links with hashed, expiring tokens</span>
-            </li>
-          </ul>
         </div>
         <SignupForm />
       </section>

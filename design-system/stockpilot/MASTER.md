@@ -11,7 +11,7 @@
 
 StockPilot helps wholesale operators find the next exception, process receipts and orders, and explain inventory from reservations and source documents. The interface should feel direct, precise, and dependable:
 
-- Cool light canvas and white data surfaces, with navy used for global structure and hierarchy.
+- Cool light canvas and white data surfaces, with a full-width navy top shell bar. Keep desktop grouped navigation on a light, narrow side rail with a blue active indicator; the operational workspace remains white/light beneath it.
 - Tables, readable labels, explicit state, and contextual actions carry the interface. Use few containers and no decorative chrome.
 - Adopt SAP Fiori's worklist, list-report, and object-page patterns as workflow references. Implement with StockPilot's existing React components and native HTML controls; this is not a SAPUI5 migration.
 - Preserve tenant, role, ledger, and command semantics. Visual state never implies a permission or a successful mutation that the server has not confirmed.
@@ -61,7 +61,7 @@ Status color must always be paired with a word, icon, or both; never rely on col
 
 ### Global shell
 
-- **Desktop:** use a navy global structure with a clear organization/session area and grouped functional navigation; keep the main data workspace white/light and visually distinct. Show current location with a restrained blue active indicator, text, and accessible selected state.
+- **Desktop:** use a full-width navy top bar for brand, organization, and session controls. Place grouped functional navigation in a light narrow left rail beneath the bar; keep the main list-report/object workspace white/light. Show current location with a restrained blue active indicator, text, and accessible selected state.
 - **Mobile:** show four labeled primary destinations—Overview, Orders, Inventory, and More—with at least 44×44px touch targets and safe-area padding. Put secondary routes under More. Prioritize identity, status, and next action in record views; no page-level horizontal overflow.
 - Navigation labels and icons stay consistent across routes. Use one icon family and visibly label icon-only actions for assistive technology.
 

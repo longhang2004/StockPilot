@@ -31,6 +31,10 @@ use the production origin.
 - Set `SITE_URL` to the chosen custom production origin, without a trailing
   slash. Use the same value for Production and Preview environments so preview
   builds keep production canonical URLs.
+- Keep Vercel's **Automatically expose System Environment Variables** option
+  enabled so `/version` can return `VERCEL_GIT_COMMIT_SHA` for the web build.
+  The checked-in web deploy is separate from Render, so verify its SHA
+  independently from API readiness.
 - Do not expose `API_INTERNAL_URL` as a client-side variable. The rewrite keeps
   browser requests on the canonical web origin so session cookies and CSRF
   checks are same-origin.
@@ -137,6 +141,13 @@ never copied into the Render runtime:
 | `MIGRATION_DATABASE_URL` | Direct Neon owner/migration URL for Prisma migrations and seed.                   |
 | `RENDER_DEPLOY_HOOK_URL` | Render Deploy Hook URL, required to trigger the rollout after migration and seed. |
 
+The workflow also requires the repository variable `RENDER_API_URL`, set to
+the Render service's HTTPS origin without a path or credentials. It uses
+`/v1/health/ready` to wait up to ten minutes for a ready database and the exact
+workflow commit SHA. The free profile accepts `queue:not_configured` because
+`QUEUE_REQUIRED=false`. A successful hook request alone is not treated as
+proof that the API has finished deploying.
+
 ## First deployment order
 
 1. Choose the custom domain, attach it to Vercel, and make it the primary
@@ -148,14 +159,16 @@ never copied into the Render runtime:
    migration and seed, so do not run them twice.
 3. Create the Render Blueprint from `main`, fill the `sync: false` variables,
    and add both `MIGRATION_DATABASE_URL` and `RENDER_DEPLOY_HOOK_URL` as GitHub
-   repository secrets. Create the Render Deploy Hook in the service settings;
-   keep it secret. Sync the Blueprint and confirm the dashboard shows automatic
+   repository secrets, and set the `RENDER_API_URL` repository variable. Create
+   the Render Deploy Hook in the service settings; keep it secret. Sync the Blueprint and confirm the dashboard shows automatic
    deploys disabled before merging deployment changes.
 4. Merge or push a commit to `main` after CI is green. The
    [`deploy-render.yml`](../.github/workflows/deploy-render.yml) workflow then
    applies migrations and seeds the canonical fixture, then triggers Render
-   for that commit. The workflow fails clearly if either required secret is
-   missing.
+   for that commit and polls `/v1/health/ready` for its exact revision. The
+   workflow fails clearly if a required secret or repository variable is
+   missing, dependencies remain degraded, or the API does not report the
+   expected SHA.
 5. Set Render's public URL as Vercel `API_INTERNAL_URL`, set Vercel `SITE_URL`
    to the custom origin, and redeploy Vercel.
 6. Set Render `WEB_ORIGIN` to that same custom origin, redeploy the API, then
@@ -176,10 +189,10 @@ hook into source code or chat.
 1. Merge a reviewed change to protected `main` after CI is green.
 2. GitHub Actions runs `prisma migrate deploy` followed by the idempotent seed
    against Neon, then triggers Render for the workflow's exact `main` commit.
-3. Confirm readiness (`queue:not_configured` is expected on the free profile)
-   and the Render release log. If the opt-in queue profile is enabled, also
-   confirm pg-boss scheduling. Vercel deploys through its separately configured
-   Git integration; verify its deployment details show the same commit SHA.
+3. CI confirms API readiness and exact expected SHA (`queue:not_configured` is
+   expected on the free profile). Confirm the Render release log. Check
+   `GET /version` on the web domain and verify its SHA independently. If the
+   opt-in queue profile is enabled, also confirm pg-boss scheduling.
 4. Run the smoke paths that touch the changed area and record the release URL
    in the test report.
 
@@ -208,9 +221,10 @@ curl -fsS "$API_URL/docs" >/dev/null
 curl -fsS "$API_URL/openapi.json" >/dev/null
 ```
 
-For a release check, confirm the `revision` field in either health payload
-equals the merged commit SHA that passed CI, so the rollout is provably tied to
-the checked revision.
+For a release check, confirm the API `revision` in readiness equals the merged
+commit SHA that passed CI, and check `GET /version` for the independently
+deployed web SHA. This verifies application revisions and dependency readiness;
+it does not replace a provider restore rehearsal.
 
 Then verify through the canonical production origin configured in `SITE_URL`:
 
@@ -236,7 +250,9 @@ Render instance, Sentry DSN, and narrated video are optional follow-up work.
 
 Official provider references: [Render Blueprint spec](https://render.com/docs/blueprint-spec),
 [Render free services](https://render.com/docs/free),
+[Render deploy hooks](https://render.com/docs/deploy-hooks),
 [Render deploys](https://render.com/docs/deploys),
+[Vercel system environment variables](https://vercel.com/docs/environment-variables/system-environment-variables),
 [UptimeRobot Free plan](https://help.uptimerobot.com/en/articles/11604710-who-should-use-uptimerobot-s-free-plan),
 [Neon scale-to-zero](https://neon.com/docs/introduction/scale-to-zero),
 [Neon pooling](https://neon.com/docs/connect/connection-pooling), and

@@ -123,6 +123,88 @@ export const InventorySummarySchema = z.object({
 });
 export type InventorySummary = z.infer<typeof InventorySummarySchema>;
 
+const ReceiptSupplierBriefSchema = z.object({
+  id: UuidSchema,
+  companyName: z.string(),
+});
+
+const ReceiptProductBriefSchema = z.object({
+  name: z.string(),
+  sku: z.string(),
+});
+
+/** Document-level summary returned by GET /v1/receipts. */
+export const ReceiptSummarySchema = z.object({
+  id: UuidSchema,
+  organizationId: UuidSchema,
+  warehouseId: UuidSchema,
+  supplierId: UuidSchema,
+  supplier: ReceiptSupplierBriefSchema,
+  receiptNumber: z.string(),
+  receivedAt: DateTimeSchema,
+  note: z.string().nullable(),
+  actorUserId: UuidSchema.nullable(),
+  createdAt: DateTimeSchema,
+  lineCount: z.number().int().nonnegative(),
+  totalQuantity: z.number().int().nonnegative(),
+});
+export type ReceiptSummary = z.infer<typeof ReceiptSummarySchema>;
+
+/** Receipt detail returned by GET /v1/receipts/:id. */
+export const ReceiptDetailSchema = ReceiptSummarySchema.extend({
+  lines: z.array(
+    z.object({
+      id: UuidSchema,
+      goodsReceiptId: UuidSchema,
+      productId: UuidSchema,
+      quantity: z.number().int().positive(),
+      unitCost: MoneyStringSchema.nullable(),
+      product: ReceiptProductBriefSchema,
+    }),
+  ),
+});
+export type ReceiptDetail = z.infer<typeof ReceiptDetailSchema>;
+
+export const ReceiptListSchema = PageShapeSchema.extend({
+  items: z.array(ReceiptSummarySchema),
+});
+export type ReceiptList = z.infer<typeof ReceiptListSchema>;
+
+const ReservationRecordSchema = z.object({
+  id: UuidSchema,
+  orderId: UuidSchema,
+  orderNumber: z.string(),
+  customerCompanyName: z.string(),
+  quantity: z.number().int().positive(),
+  confirmedAt: DateTimeSchema.nullable(),
+});
+
+const ReservationListSchema = PageShapeSchema.extend({
+  items: z.array(ReservationRecordSchema),
+});
+
+/** SKU, current balance, confirmed-order reservations and ledger trace. */
+export const InventoryProductTraceSchema = z.object({
+  product: z.object({
+    id: UuidSchema,
+    name: z.string(),
+    sku: z.string(),
+    reorderPoint: z.number().int().nonnegative(),
+  }),
+  balance: z
+    .object({
+      warehouseId: UuidSchema,
+      onHand: z.number().int().nonnegative(),
+      reserved: z.number().int().nonnegative(),
+      available: z.number().int().nonnegative(),
+      updatedAt: DateTimeSchema,
+    })
+    .nullable(),
+  reservations: ReservationListSchema,
+  movements: StockMovementListSchema,
+});
+export type InventoryProductTrace = z.infer<typeof InventoryProductTraceSchema>;
+
 /** Item returned by GET /v1/alerts (raw LowStockAlert row plus product brief). */
 export const LowStockAlertSchema = z.object({
   id: UuidSchema,
@@ -154,7 +236,6 @@ export const ReceiptResultSchema = z.object({
   note: z.string().nullable(),
   actorUserId: UuidSchema.nullable(),
   createdAt: DateTimeSchema,
-  updatedAt: DateTimeSchema,
   balances: z.array(BalanceSummarySchema),
   lines: z.array(
     z.object({

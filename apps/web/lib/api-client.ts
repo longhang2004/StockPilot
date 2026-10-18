@@ -102,6 +102,17 @@ export async function apiRequest<T>(
     if (parsed.success) throw new ApiProblem(parsed.data);
     throw new Error('The request could not be completed.');
   }
+  // Session-creating/rotating endpoints (signup, organization create,
+  // demo/login/switch-workspace) return a fresh CSRF token inline. Adopting
+  // it here keeps later writes from replaying a stale token tied to the
+  // replaced session.
+  if (
+    body !== null &&
+    typeof body === 'object' &&
+    typeof (body as { csrfToken?: unknown }).csrfToken === 'string'
+  ) {
+    csrfToken = (body as { csrfToken: string }).csrfToken;
+  }
   return (body ?? {}) as T;
 }
 

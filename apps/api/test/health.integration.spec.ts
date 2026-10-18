@@ -85,7 +85,10 @@ describe('health endpoints', () => {
             userWritesPerMinute: 240,
           },
         },
-        revision: process.env.RENDER_GIT_COMMIT ?? 'local',
+        revision:
+          process.env.RENDER_GIT_COMMIT ??
+          process.env.API_REVISION ??
+          'local-working-tree',
         status: 'degraded',
       });
     } finally {

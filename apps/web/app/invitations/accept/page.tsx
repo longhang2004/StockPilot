@@ -140,25 +140,11 @@ export default function AcceptInvitationPage({
         aria-label="Accept a StockPilot invitation"
       >
         <div className="login-context">
-          <h1>Join your team&apos;s workspace.</h1>
+          <h1>Accept your invitation</h1>
           <p>
             Accepting creates your membership with the role the Owner chose,
             records the acceptance in the audit trail, and signs you in.
           </p>
-          <ul>
-            <li>
-              <strong>Single use</strong>
-              <span>An invitation can be accepted exactly once</span>
-            </li>
-            <li>
-              <strong>Hashed token</strong>
-              <span>Only a SHA-256 digest is stored</span>
-            </li>
-            <li>
-              <strong>Expiring</strong>
-              <span>Links stop working after seven days</span>
-            </li>
-          </ul>
         </div>
         <div className="login-card">
           <div className="login-card-heading">

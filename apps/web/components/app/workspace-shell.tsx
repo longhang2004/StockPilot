@@ -7,6 +7,7 @@ import { CommandIntentScope } from '../../hooks/use-command-mutation';
 import { WorkspaceContent, type WorkspaceSection } from './workspace-content';
 import {
   MobileWorkspaceNavigation,
+  WorkspaceHeader,
   WorkspaceSidebar,
   type SessionView,
 } from './workspace-navigation';
@@ -77,16 +78,19 @@ export function WorkspaceShell({
     <QueryProvider>
       <CommandIntentScope.Provider key={commandScope} value={commandScope}>
         <div className="workspace">
-          <WorkspaceSidebar section={section} session={workspaceSession} />
-          <main className="workspace-main">
-            {organization.isDemo ? (
-              <div className="demo-banner">
-                <span>Demo workspace</span>Data resets every six hours. Changes
-                are safe to explore.
-              </div>
-            ) : null}
-            <WorkspaceContent section={section} session={workspaceSession} />
-          </main>
+          <WorkspaceHeader session={workspaceSession} />
+          <div className="workspace-layout">
+            <WorkspaceSidebar section={section} />
+            <main className="workspace-main">
+              {organization.isDemo ? (
+                <div className="demo-banner">
+                  <span>Demo workspace</span>Data resets every six hours.
+                  Changes are safe to explore.
+                </div>
+              ) : null}
+              <WorkspaceContent section={section} session={workspaceSession} />
+            </main>
+          </div>
           <MobileWorkspaceNavigation section={section} />
         </div>
       </CommandIntentScope.Provider>

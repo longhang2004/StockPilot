@@ -1,5 +1,6 @@
 'use client';
 
+import type { Role } from '@stockpilot/contracts';
 import { useState } from 'react';
 
 import {
@@ -7,6 +8,7 @@ import {
   EmptyState,
   ErrorState,
   PageHeader,
+  Pagination,
   ResponsiveDataTable,
   Skeleton,
   type TableColumn,
@@ -15,6 +17,7 @@ import { formatDateTime } from '../../lib/formatters';
 import { usePage } from '../../hooks/use-page-query';
 import { AUDIT_RESOURCE } from './api';
 import { type AuditRecord } from '../shared/types';
+import { useWorkspaceLocation } from '../shared/use-workspace-location';
 
 export interface AuditChangeEntry {
   key: string;
@@ -46,18 +49,69 @@ export function auditChangeEntries(
   });
 }
 
-export function AuditWorkspace() {
-  const [selected, setSelected] = useState<AuditRecord | null>(null);
-  const audit = usePage<AuditRecord>(AUDIT_RESOURCE, {
-    page: 1,
-    pageSize: 100,
-  });
+export function AuditWorkspace({ role }: { role: Role }) {
+  const { params, update } = useWorkspaceLocation();
+  const entityType = params.get('entityType') || '';
+  const entityId = params.get('entityId') || '';
+  const eventId = params.get('eventId');
+  const page = Number(params.get('page') || 1);
+  const canRead = role === 'MANAGER' || role === 'OWNER';
+  const [selectedRecord, setSelectedRecord] = useState<AuditRecord | null>(
+    null,
+  );
+  const audit = usePage<AuditRecord>(
+    AUDIT_RESOURCE,
+    {
+      entityId: entityId || undefined,
+      entityType: entityType || undefined,
+      page,
+      pageSize: 100,
+    },
+    { enabled: canRead },
+  );
+  const selected =
+    selectedRecord ??
+    audit.data?.items?.find((record) => record.id === eventId) ??
+    null;
+  if (role === 'STAFF')
+    return (
+      <section className="workspace-section-page">
+        <PageHeader
+          description="Audit history is available to managers and owners."
+          title="Audit trail"
+        />
+        <EmptyState
+          description="Ask a manager or owner to review the scoped audit history."
+          title="Audit access required"
+        />
+      </section>
+    );
   return (
     <section className="workspace-section-page">
       <PageHeader
         description="Trace actor, action, entity, and time behind every operational change."
         title="Audit trail"
       />
+      {entityType || entityId ? (
+        <div className="work-panel panel-heading">
+          <p className="muted-note">
+            Scoped to <strong>{entityType || 'any entity'}</strong> ·{' '}
+            <span className="mono">{entityId || 'all IDs'}</span>
+          </p>
+          <button
+            className="button button-secondary"
+            onClick={() =>
+              update(
+                { entityType: null, entityId: null, eventId: null },
+                'push',
+              )
+            }
+            type="button"
+          >
+            Clear scope
+          </button>
+        </div>
+      ) : null}
       {audit.isLoading ? (
         <Skeleton lines={5} />
       ) : audit.isError ? (
@@ -70,8 +124,18 @@ export function AuditWorkspace() {
           columns={auditColumns}
           data={audit.data.items}
           getRowLabel={(record) => record.action}
-          onRowClick={setSelected}
-          selectedId={selected?.id}
+          onRowClick={(record) => {
+            setSelectedRecord(record);
+            update(
+              {
+                entityType: record.entityType,
+                entityId: record.entityId,
+                eventId: record.id,
+              },
+              'push',
+            );
+          }}
+          selectedId={eventId ?? undefined}
         />
       ) : (
         <EmptyState
@@ -79,8 +143,18 @@ export function AuditWorkspace() {
           title="No audit events yet"
         />
       )}
+      <Pagination
+        onPageChange={(value) =>
+          update({ page: value === 1 ? null : String(value) }, 'replace')
+        }
+        page={page}
+        totalPages={audit.data?.totalPages ?? 0}
+      />
       <AuditDetailDrawer
-        onClose={() => setSelected(null)}
+        onClose={() => {
+          setSelectedRecord(null);
+          update({ eventId: null }, 'push');
+        }}
         open={Boolean(selected)}
         record={selected}
       />

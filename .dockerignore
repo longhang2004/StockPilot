@@ -12,4 +12,7 @@ node_modules
 coverage
 playwright-report
 test-results
+playwright-report-production
+test-results-production
+test-results-performance
 

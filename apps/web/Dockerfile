@@ -40,17 +40,20 @@ COPY apps/web apps/web
 COPY packages/contracts packages/contracts
 
 ARG API_INTERNAL_URL=http://localhost:4000
+ARG SITE_URL=http://localhost:3000
 ENV API_INTERNAL_URL=$API_INTERNAL_URL
 ENV NODE_ENV=production
-ENV SITE_URL=http://localhost:3000
+ENV SITE_URL=$SITE_URL
 
 RUN pnpm --filter @stockpilot/contracts build && pnpm --filter @stockpilot/web build
 
 FROM node:24-bookworm-slim AS runtime
 
+ARG WEB_REVISION=local-working-tree
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
+ENV WEB_REVISION=$WEB_REVISION
 # Read server-side for metadata/robots/sitemap at runtime; deployments set
 # the canonical origin explicitly.
 ENV SITE_URL=http://localhost:3000

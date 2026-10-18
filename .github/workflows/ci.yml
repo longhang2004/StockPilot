@@ -57,6 +57,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm typecheck:e2e
+      - run: pnpm test:ops-guards
       - run: pnpm test:unit
       - run: pnpm --filter @stockpilot/api test:integration
       - name: Create isolated pg-boss database
@@ -69,11 +70,11 @@ jobs:
       - run: pnpm build
       - run: pnpm exec playwright install chromium
       - run: pnpm test:e2e
-      - name: Upload Playwright report and traces
-        if: failure()
+      - name: Upload development Playwright report and traces
+        if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report
+          name: playwright-report-dev
           path: |
             playwright-report/
             test-results/
@@ -99,11 +100,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level high
 
-  # Production container verification: both Dockerfiles must build from a
-  # clean workspace without publishing images. Catches syntax errors and
-  # dependency drift that unit tests cannot see.
+  # Build and exercise the production images together. This job owns one
+  # disposable Compose project and retains browser artifacts even when a test
+  # only passes on retry.
   docker-build:
     runs-on: ubuntu-latest
+    env:
+      API_REVISION: ${{ github.sha }}
+      WEB_REVISION: ${{ github.sha }}
+      PRODUCTION_E2E_PORT: 4187
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4.4.0
@@ -114,11 +119,16 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Build API production image
-        run: docker build -f apps/api/Dockerfile -t stockpilot-api:ci .
-      - name: Build web production image
-        run: docker build -f apps/web/Dockerfile -t stockpilot-web:ci .
-      - name: Verify images run as non-root
-        run: |
-          test "$(docker image inspect --format '{{.Config.User}}' stockpilot-api:ci)" = "node"
-          test "$(docker image inspect --format '{{.Config.User}}' stockpilot-web:ci)" = "node"
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Build and run production-image browser acceptance
+        run: pnpm test:e2e:production
+      - name: Upload production Playwright report, traces, and container logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-production
+          path: |
+            playwright-report-production/
+            test-results-production/
+          if-no-files-found: ignore
+          retention-days: 14

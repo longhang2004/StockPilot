@@ -32,8 +32,13 @@ export function toListPath(resource: string, params: PageParams = {}): string {
  * Caching is per-resource-and-params; invalidation targets the resource
  * prefix instead of matching path strings.
  */
-export function usePage<T>(resource: string, params: PageParams = {}) {
+export function usePage<T>(
+  resource: string,
+  params: PageParams = {},
+  options: { enabled?: boolean } = {},
+) {
   return useQuery({
+    enabled: options.enabled ?? true,
     queryKey: ['page', resource, params],
     queryFn: () => apiRequest<PageResponse<T>>(toListPath(resource, params)),
   });

@@ -33,7 +33,7 @@ receiving stock, preventing overselling, and fulfilling customer orders.
 
 ## Screenshots
 
-These images were captured from the current seeded demo deployment on 15 August 2026. They are cropped to the application viewport so the UI, rather than
+These images were captured from the current seeded demo deployment on 18 October 2026. They are cropped to the application viewport so the UI, rather than
 browser chrome, is the focus.
 
 | Overview · desktop                                                  | Orders · mobile                                                  |

@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: stockpilot_admin
+      POSTGRES_PASSWORD: stockpilot_admin
+      POSTGRES_DB: stockpilot
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U stockpilot_admin -d stockpilot']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - production-e2e-postgres:/var/lib/postgresql
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/001-roles.sql:ro
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: build
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://stockpilot_app:stockpilot_app@postgres:5432/stockpilot
+      MIGRATION_DATABASE_URL: postgresql://stockpilot_admin:stockpilot_admin@postgres:5432/stockpilot
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        pnpm --filter @stockpilot/api exec prisma migrate deploy &&
+        pnpm --filter @stockpilot/api prisma:seed
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      args:
+        API_REVISION: ${API_REVISION:-local-working-tree}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      API_REVISION: ${API_REVISION:-local-working-tree}
+      CSRF_SECRET: local-production-e2e-csrf-secret-at-least-32-characters
+      DATABASE_URL: postgresql://stockpilot_app:stockpilot_app@postgres:5432/stockpilot
+      DEMO_MODE: 'true'
+      DEMO_ORGANIZATION_SLUG: stockpilot-demo
+      NODE_ENV: production
+      PORT: 4000
+      QUEUE_REQUIRED: 'false'
+      WEB_ORIGIN: http://127.0.0.1:${PRODUCTION_E2E_PORT:-4187}
+      WEBHOOK_SIGNING_SECRET: ${WEBHOOK_SIGNING_SECRET:-local-production-e2e-webhook-secret}
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:4000/v1/health/ready')
+          .then(async r => process.exit(r.ok && (await r.json()).status === 'ready' ? 0 : 1))
+          .catch(() => process.exit(1))
+      interval: 5s
+      timeout: 5s
+      retries: 24
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        API_INTERNAL_URL: http://api:4000
+        SITE_URL: http://127.0.0.1:${PRODUCTION_E2E_PORT:-4187}
+        WEB_REVISION: ${WEB_REVISION:-local-working-tree}
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      API_INTERNAL_URL: http://api:4000
+      NODE_ENV: production
+      SITE_URL: http://127.0.0.1:${PRODUCTION_E2E_PORT:-4187}
+      WEB_REVISION: ${WEB_REVISION:-local-working-tree}
+    ports:
+      - 127.0.0.1:${PRODUCTION_E2E_PORT:-4187}:3000
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:3000/version')
+          .then(r => process.exit(r.ok ? 0 : 1))
+          .catch(() => process.exit(1))
+      interval: 5s
+      timeout: 5s
+      retries: 24
+
+volumes:
+  production-e2e-postgres:

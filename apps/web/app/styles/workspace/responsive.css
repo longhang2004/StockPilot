@@ -1,7 +1,7 @@
 /* Responsive adjustments for 1024px, 768px, and 390px mobile viewports */
 
 @media (max-width: 1024px) {
-  .workspace {
+  .workspace-layout {
     grid-template-columns: 200px minmax(0, 1fr);
   }
 
@@ -21,6 +21,84 @@
     padding-bottom: 5rem;
   }
 
+  .workspace-layout {
+    display: block;
+    min-height: auto;
+  }
+
+  .workspace-topbar {
+    gap: 0.5rem;
+    min-height: 3.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  .workspace-topbar .workspace-brand {
+    font-size: var(--text-sm);
+    gap: 0.4rem;
+  }
+
+  .workspace-topbar .brand-mark {
+    height: 1.55rem;
+    width: 1.55rem;
+  }
+
+  .topbar-organization {
+    border-left: 0;
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .topbar-organization > span,
+  .topbar-organization small {
+    display: none;
+  }
+
+  .topbar-organization strong {
+    font-size: var(--text-xs);
+    max-width: 6.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .topbar-session {
+    flex-shrink: 0;
+    gap: 0.35rem;
+  }
+
+  .topbar-session .workspace-user .user-identity {
+    display: none;
+  }
+
+  .workspace-sign-out {
+    font-size: var(--text-2xs);
+    min-height: 2.75rem;
+    padding-inline: 0.4rem;
+  }
+
+  .workspace-topbar .demo-role-compact .demo-role-label,
+  .workspace-topbar .demo-role-compact label > span {
+    display: none;
+  }
+
+  .workspace-topbar .demo-role-compact select {
+    max-width: 6.75rem;
+    padding-inline: 0.3rem;
+  }
+
+  .topbar-session .workspace-user {
+    gap: 0.35rem;
+  }
+
+  .topbar-session .user-identity strong {
+    font-size: var(--text-2xs);
+    max-width: 5.5rem;
+  }
+
+  .topbar-session .user-identity small {
+    display: none;
+  }
+
   .workspace-sidebar {
     display: none;
   }
@@ -30,8 +108,8 @@
   }
 
   .demo-banner {
-    margin-inline: -0.85rem;
-    padding-inline: 0.85rem;
+    margin-inline: 0;
+    padding-inline: 0.65rem;
   }
 
   .page-header,
@@ -148,7 +226,7 @@
   }
 
   .mobile-record-card.mobile-record-selected {
-    background: var(--color-accent-subtle, #faebe4);
+    background: var(--color-accent-subtle);
     border-color: var(--color-accent);
   }
 
@@ -190,7 +268,6 @@
     font-size: var(--text-2xs);
     font-weight: 600;
     margin-bottom: 0.1rem;
-    text-transform: uppercase;
   }
 
   .mobile-record-card dd {

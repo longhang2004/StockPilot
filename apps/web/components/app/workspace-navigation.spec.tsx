@@ -6,11 +6,20 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useRouter } from 'next/navigation';
 
-import { DemoRoleSwitcher } from './workspace-navigation';
+import { clearCsrfToken } from '../../lib/api-client';
+import { DemoRoleSwitcher, WorkspaceSignOut } from './workspace-navigation';
+
+vi.mock('next/navigation', () => ({ useRouter: vi.fn() }));
 
 describe('DemoRoleSwitcher', () => {
   beforeEach(() => {
+    clearCsrfToken();
+    vi.mocked(useRouter).mockReturnValue({
+      replace: vi.fn(),
+      refresh: vi.fn(),
+    } as never);
     vi.stubGlobal(
       'fetch',
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
@@ -39,6 +48,8 @@ describe('DemoRoleSwitcher', () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
+    vi.clearAllMocks();
+    clearCsrfToken();
   });
 
   it('switches the demo role through the server-side demo login', async () => {
@@ -73,5 +84,77 @@ describe('DemoRoleSwitcher', () => {
     ).toEqual({ role: 'STAFF' });
     await waitFor(() => expect(assign).toHaveBeenCalledWith('/app'));
     view.unmount();
+  });
+});
+
+describe('WorkspaceSignOut', () => {
+  const replace = vi.fn();
+  const refresh = vi.fn();
+
+  beforeEach(() => {
+    clearCsrfToken();
+    vi.mocked(useRouter).mockReturnValue({ replace, refresh } as never);
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+    vi.clearAllMocks();
+    clearCsrfToken();
+  });
+
+  it('sends CSRF-protected logout and returns to sign in', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((input: RequestInfo | URL) =>
+        Promise.resolve(
+          String(input).includes('/auth/csrf')
+            ? new Response(JSON.stringify({ csrfToken: 'logout-token' }), {
+                headers: { 'Content-Type': 'application/json' },
+                status: 200,
+              })
+            : new Response(null, { status: 204 }),
+        ),
+      ),
+    );
+
+    render(<WorkspaceSignOut />);
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
+    expect(refresh).toHaveBeenCalledOnce();
+    const logoutCall = vi
+      .mocked(fetch)
+      .mock.calls.find(([input]) => String(input).includes('/auth/logout'));
+    const request = logoutCall?.[1] as RequestInit | undefined;
+    expect(request?.method).toBe('POST');
+    expect(new Headers(request?.headers).get('X-CSRF-Token')).toBe(
+      'logout-token',
+    );
+  });
+
+  it('shows a retryable error if logout does not complete', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((input: RequestInfo | URL) =>
+        Promise.resolve(
+          String(input).includes('/auth/csrf')
+            ? new Response(JSON.stringify({ csrfToken: 'logout-token' }), {
+                headers: { 'Content-Type': 'application/json' },
+                status: 200,
+              })
+            : new Response('unavailable', { status: 503 }),
+        ),
+      ),
+    );
+
+    render(<WorkspaceSignOut />);
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      /Sign out did not complete/,
+    );
+    expect(replace).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeEnabled();
   });
 });

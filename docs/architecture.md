@@ -22,9 +22,12 @@ unset (`QUEUE_REQUIRED=false`) so an always-on polling worker does not consume
 Neon Free compute hours. Manual integration retries remain synchronous; the
 automatic retry and scheduled reconciliation jobs are enabled only for a short
 queue-enabled acceptance run. The free-tier deployment uses a GitHub Actions
-migration/seed gate while Render auto-deploys commits on `main`; an optional
-Render deploy hook can be used for an explicit rollout because Render Free does
-not provide the paid-service pre-deploy command.
+migration/seed gate followed by a required Render Deploy Hook for the exact
+CI-passed commit. Render auto-deploy is disabled so migrations finish before
+the application rollout. After the hook, CI polls `/v1/health/ready` for
+dependency readiness and the requested API revision. The independently built
+web service exposes `/version` so its own deployment revision can be checked
+separately.
 
 Every tenant mutation follows the same shape:
 

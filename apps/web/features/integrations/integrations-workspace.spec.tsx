@@ -51,6 +51,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  window.history.replaceState(null, '', '/');
   vi.unstubAllGlobals();
 });
 
@@ -90,5 +91,44 @@ describe('integration retry feedback', () => {
       screen.queryByText('Delivery processed successfully.'),
     ).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Next page' })).toBeEnabled();
+  });
+
+  it('resolves a URL-selected delivery by ID even when it is outside the visible page', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/app/integrations?delivery=delivery-beyond-first-page&status=FAILED',
+    );
+    vi.mocked(fetchDelivery).mockResolvedValue({
+      ...delivery,
+      id: 'delivery-beyond-first-page',
+      externalDeliveryId: 'storefront-101',
+    });
+    render(
+      <QueryProvider>
+        <IntegrationsWorkspace role="MANAGER" />
+      </QueryProvider>,
+    );
+    expect(await screen.findByRole('dialog')).toBeVisible();
+    expect(await screen.findByText('storefront-101')).toBeVisible();
+    expect(fetchDelivery).toHaveBeenCalledWith('delivery-beyond-first-page');
+  });
+
+  it('does not load protected delivery data for staff', () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/app/integrations?delivery=delivery-a',
+    );
+    const listFetch = vi.fn();
+    vi.stubGlobal('fetch', listFetch);
+    render(
+      <QueryProvider>
+        <IntegrationsWorkspace role="STAFF" />
+      </QueryProvider>,
+    );
+    expect(screen.getByText('Integration access required')).toBeVisible();
+    expect(listFetch).not.toHaveBeenCalled();
+    expect(fetchDelivery).not.toHaveBeenCalled();
   });
 });
