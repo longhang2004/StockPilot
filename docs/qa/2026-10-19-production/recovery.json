@@ -1,0 +1,70 @@
+{
+  "started": "2026-10-19T04:52:12.711Z",
+  "device": "mobile",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "fault": "Browser drops the first successful adjustment response after the production server commits it",
+  "status": "PASS",
+  "screens": [
+    {
+      "device": "mobile",
+      "name": "command-outcome-unknown",
+      "file": "images/mobile-command-outcome-unknown.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "at": "2026-10-19T04:52:17.161Z"
+    },
+    {
+      "device": "mobile",
+      "name": "command-restored-after-reload",
+      "file": "images/mobile-command-restored-after-reload.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "at": "2026-10-19T04:52:19.274Z"
+    },
+    {
+      "device": "mobile",
+      "name": "command-recovered-once",
+      "file": "images/mobile-command-recovered-once.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "at": "2026-10-19T04:52:20.209Z"
+    },
+    {
+      "device": "mobile",
+      "name": "command-recovery-stock-trace",
+      "file": "images/mobile-command-recovery-stock-trace.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory?product=5d33d102-f896-46ea-9863-1bb326dca29c",
+      "at": "2026-10-19T04:54:14.692Z"
+    }
+  ],
+  "product": {
+    "id": "5d33d102-f896-46ea-9863-1bb326dca29c",
+    "sku": "QA-IMP-MOBILE-1792385305115"
+  },
+  "committedBeforeResponseLoss": true,
+  "recovery": {
+    "requestKeyAndPayloadUnchanged": true,
+    "attempts": 2,
+    "inboundMovements": 1,
+    "onHandAfterRecovery": 3
+  },
+  "cleanup": {
+    "onHand": 0,
+    "reserved": 0,
+    "available": 0,
+    "method": "Compensating outbound adjustment; history retained"
+  },
+  "harnessDiagnostics": [
+    {
+      "reason": "Final screenshot originally expected a dialog; inventory trace is an inline labeled article. Recovery and compensating stock checks had already passed.",
+      "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog') with timeout 5000ms\n  - waiting for getByRole('dialog')\n"
+    }
+  ],
+  "revalidated": {
+    "onHand": 0,
+    "reserved": 0,
+    "inboundMovements": 1,
+    "outboundMovements": 1
+  },
+  "finished": "2026-10-19T04:54:14.692Z"
+}

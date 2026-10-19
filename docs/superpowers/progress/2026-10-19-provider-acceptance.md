@@ -1,5 +1,11 @@
 # Provider acceptance — 19 October 2026
 
+Subsequent expanded production UI/feature verification is recorded in
+[the 82-image QA report](../../qa/2026-10-19-production/README.md). It preserves the
+release/role/recovery evidence here but finds six open UI/UX issues. Foundation
+acceptance is reopened under F1/U4; operational X1/X2/X4 evidence does not imply
+that every production screen is accessibility-clean or visually complete.
+
 Timezone: Asia/Saigon. This note records dashboard work and observed results, not planned acceptance.
 
 ## Authorization and release provenance

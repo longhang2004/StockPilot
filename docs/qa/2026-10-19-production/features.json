@@ -1,0 +1,1601 @@
+{
+  "started": "2026-10-19T04:42:50.638Z",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "origin": "https://stock-pilot-web-five.vercel.app",
+  "revision": "4b97984b3edd387ad29d9be5b64e3f695e602556",
+  "checks": [
+    {
+      "device": "desktop",
+      "name": "empty search and clear recovery",
+      "status": "PASS",
+      "details": {
+        "emptyState": true,
+        "clearRecovers": true
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "drawer keyboard escape and focus",
+      "status": "PASS",
+      "details": {
+        "tabsTrapped": 12,
+        "escapeCloses": true,
+        "focusAfter": "New draft"
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "receipt UI writes one inbound movement",
+      "status": "PASS",
+      "details": {
+        "id": "fe9fb699-a887-4321-b1a2-6849dc0c9669",
+        "primaryButtonRect": {
+          "x": 1292.953125,
+          "y": 687.296875,
+          "width": 127.046875,
+          "height": 40
+        },
+        "balance": {
+          "available": 17,
+          "id": "8aa0086c-8c05-513b-8be8-f33486bee788",
+          "onHand": 21,
+          "product": {
+            "name": "Packing Tape 48mm",
+            "sku": "HP-1001"
+          },
+          "productId": "ac5f60b3-bffa-52e8-a38b-a90ed8d596f9",
+          "reserved": 4,
+          "updatedAt": "2026-10-19T04:43:06.950Z",
+          "warehouseId": "f3b77a7b-7d24-44d4-94fb-890d63c1a4cf"
+        }
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "create Draft, URL history and edit persist after reload",
+      "status": "PASS",
+      "details": {
+        "id": "60bf4678-218c-4870-b08a-9a84cfc0db97",
+        "quantity": 1,
+        "notePersisted": true,
+        "deepLinkReloadHistory": true
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "Manager confirm reserves exactly one unit",
+      "status": "PASS",
+      "details": {
+        "status": "CONFIRMED",
+        "balance": {
+          "available": 16,
+          "id": "8aa0086c-8c05-513b-8be8-f33486bee788",
+          "onHand": 21,
+          "product": {
+            "name": "Packing Tape 48mm",
+            "sku": "HP-1001"
+          },
+          "productId": "ac5f60b3-bffa-52e8-a38b-a90ed8d596f9",
+          "reserved": 5,
+          "updatedAt": "2026-10-19T04:45:20.343Z",
+          "warehouseId": "f3b77a7b-7d24-44d4-94fb-890d63c1a4cf"
+        }
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "Staff access boundaries and fulfillment",
+      "status": "PASS",
+      "details": {
+        "deniedAPI": 403,
+        "status": "FULFILLED",
+        "stockRestored": {
+          "onHand": 20,
+          "reserved": 4,
+          "available": 16
+        },
+        "oneMovementEach": true
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "drawer keyboard escape and focus",
+      "status": "PASS",
+      "details": {
+        "tabsTrapped": 12,
+        "escapeCloses": true,
+        "focusAfter": "New draft"
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "receipt UI writes one inbound movement",
+      "status": "PASS",
+      "details": {
+        "id": "5de0de36-caed-49f9-bd3d-0fe9ce98ebdd",
+        "primaryButtonRect": {
+          "x": 242.953125,
+          "y": 779.921875,
+          "width": 127.046875,
+          "height": 44
+        },
+        "balance": {
+          "available": 17,
+          "id": "8aa0086c-8c05-513b-8be8-f33486bee788",
+          "onHand": 21,
+          "product": {
+            "name": "Packing Tape 48mm",
+            "sku": "HP-1001"
+          },
+          "productId": "ac5f60b3-bffa-52e8-a38b-a90ed8d596f9",
+          "reserved": 4,
+          "updatedAt": "2026-10-19T04:45:58.068Z",
+          "warehouseId": "f3b77a7b-7d24-44d4-94fb-890d63c1a4cf"
+        }
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "create Draft, URL history and edit persist after reload",
+      "status": "PASS",
+      "details": {
+        "id": "63ffeda2-58b4-4e36-8e1a-fd60b4113451",
+        "quantity": 1,
+        "notePersisted": true,
+        "deepLinkReloadHistory": true
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "Manager confirm reserves exactly one unit",
+      "status": "PASS",
+      "details": {
+        "status": "CONFIRMED",
+        "balance": {
+          "available": 16,
+          "id": "8aa0086c-8c05-513b-8be8-f33486bee788",
+          "onHand": 21,
+          "product": {
+            "name": "Packing Tape 48mm",
+            "sku": "HP-1001"
+          },
+          "productId": "ac5f60b3-bffa-52e8-a38b-a90ed8d596f9",
+          "reserved": 5,
+          "updatedAt": "2026-10-19T04:46:12.364Z",
+          "warehouseId": "f3b77a7b-7d24-44d4-94fb-890d63c1a4cf"
+        }
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "Staff access boundaries and fulfillment",
+      "status": "PASS",
+      "details": {
+        "deniedAPI": 403,
+        "status": "FULFILLED",
+        "stockRestored": {
+          "onHand": 20,
+          "reserved": 4,
+          "available": 16
+        },
+        "oneMovementEach": true
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "Owner audit actors, detail and Escape",
+      "status": "PASS",
+      "details": {
+        "actions": [
+          {
+            "action": "ORDER_FULFILLED",
+            "actor": "Sam Staff"
+          },
+          {
+            "action": "ORDER_CONFIRMED",
+            "actor": "Morgan Manager"
+          },
+          {
+            "action": "ORDER_UPDATED",
+            "actor": "Morgan Manager"
+          },
+          {
+            "action": "ORDER_UPDATED",
+            "actor": "Morgan Manager"
+          },
+          {
+            "action": "ORDER_CREATED",
+            "actor": "Morgan Manager"
+          }
+        ],
+        "escapeCloses": true
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "CSV invalid preview and valid commit/export",
+      "status": "PASS",
+      "details": {
+        "invalidRowsBlocked": true,
+        "created": 1,
+        "importedSku": "QA-IMP-DESKTOP-1792385251901",
+        "export": "downloads/desktop-catalog.csv"
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "manual integration retry has durable outcome",
+      "status": "PASS",
+      "details": {
+        "delivery": "a301eaa2-4837-51ae-86b9-1cd1a3fb6761",
+        "outcome": {
+          "duplicate": false,
+          "orderId": "c44e89fc-f5d0-4a4d-8f9f-5012f00f4383",
+          "status": "SUCCEEDED"
+        },
+        "storedStatus": "SUCCEEDED",
+        "queueNotRequiredForManualRetry": true
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "browser-only read error and retry",
+      "status": "PASS",
+      "details": {
+        "browserOnlyFault": true,
+        "productionServerUnaffected": true,
+        "retryRecovered": true
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "empty search and clear recovery",
+      "status": "PASS",
+      "details": {
+        "emptyState": true,
+        "clearRecovers": true
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "Owner audit actors, detail and Escape",
+      "status": "PASS",
+      "details": {
+        "actions": [
+          {
+            "action": "ORDER_FULFILLED",
+            "actor": "Sam Staff"
+          },
+          {
+            "action": "ORDER_CONFIRMED",
+            "actor": "Morgan Manager"
+          },
+          {
+            "action": "ORDER_UPDATED",
+            "actor": "Morgan Manager"
+          },
+          {
+            "action": "ORDER_CREATED",
+            "actor": "Morgan Manager"
+          }
+        ],
+        "escapeCloses": true
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "CSV invalid preview and valid commit/export",
+      "status": "PASS",
+      "details": {
+        "invalidRowsBlocked": true,
+        "created": 1,
+        "importedSku": "QA-IMP-MOBILE-1792385305115",
+        "export": "downloads/mobile-catalog.csv"
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "manual integration retry has durable outcome",
+      "status": "PASS",
+      "details": {
+        "status": "SUCCEEDED",
+        "alreadyProcessed": true,
+        "noUnsafeRetryForSucceeded": true
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "browser-only read error and retry",
+      "status": "PASS",
+      "details": {
+        "browserOnlyFault": true,
+        "productionServerUnaffected": true,
+        "retryRecovered": true
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "reflow at 320px",
+      "status": "FAIL",
+      "details": {
+        "innerWidth": 320,
+        "clientWidth": 320,
+        "scrollWidth": 353,
+        "visualViewportWidth": 320,
+        "visualScale": 1,
+        "headerWidth": 320,
+        "headerChildren": [
+          {
+            "class": "brand workspace-brand",
+            "width": 116.5625,
+            "right": 128.5625,
+            "text": "SPStockPilot"
+          },
+          {
+            "class": "topbar-organization",
+            "width": 0,
+            "right": 136.5625,
+            "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+          },
+          {
+            "class": "topbar-session",
+            "width": 208.75,
+            "right": 353.3125,
+            "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+          }
+        ],
+        "overflow": true
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "reflow at 390px",
+      "status": "PASS",
+      "details": {
+        "innerWidth": 390,
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "visualViewportWidth": 390,
+        "visualScale": 1,
+        "headerWidth": 390,
+        "headerChildren": [
+          {
+            "class": "brand workspace-brand",
+            "width": 116.5625,
+            "right": 128.5625,
+            "text": "SPStockPilot"
+          },
+          {
+            "class": "topbar-organization",
+            "width": 24.6875,
+            "right": 161.25,
+            "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+          },
+          {
+            "class": "topbar-session",
+            "width": 208.75,
+            "right": 378,
+            "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+          }
+        ],
+        "overflow": false
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "reflow at 550px",
+      "status": "PASS",
+      "details": {
+        "innerWidth": 550,
+        "clientWidth": 550,
+        "scrollWidth": 550,
+        "visualViewportWidth": 550,
+        "visualScale": 1,
+        "headerWidth": 550,
+        "headerChildren": [
+          {
+            "class": "brand workspace-brand",
+            "width": 116.5625,
+            "right": 128.5625,
+            "text": "SPStockPilot"
+          },
+          {
+            "class": "topbar-organization",
+            "width": 104,
+            "right": 240.5625,
+            "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+          },
+          {
+            "class": "topbar-session",
+            "width": 208.75,
+            "right": 538,
+            "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+          }
+        ],
+        "overflow": false
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "sign out returns real account login",
+      "status": "PASS",
+      "details": {
+        "logout": true,
+        "accountLoginVisible": true,
+        "sessionStatusAfterLogout": 401
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "reflow at 320px",
+      "status": "FAIL",
+      "details": {
+        "innerWidth": 353,
+        "clientWidth": 320,
+        "scrollWidth": 353,
+        "visualViewportWidth": 320,
+        "visualScale": 1,
+        "headerWidth": 320,
+        "headerChildren": [
+          {
+            "class": "brand workspace-brand",
+            "width": 116.5625,
+            "right": 128.5625,
+            "text": "SPStockPilot"
+          },
+          {
+            "class": "topbar-organization",
+            "width": 0,
+            "right": 136.5625,
+            "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+          },
+          {
+            "class": "topbar-session",
+            "width": 208.75,
+            "right": 353.3125,
+            "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+          }
+        ],
+        "overflow": true
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "reflow at 390px",
+      "status": "PASS",
+      "details": {
+        "innerWidth": 390,
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "visualViewportWidth": 390,
+        "visualScale": 1,
+        "headerWidth": 390,
+        "headerChildren": [
+          {
+            "class": "brand workspace-brand",
+            "width": 116.5625,
+            "right": 128.5625,
+            "text": "SPStockPilot"
+          },
+          {
+            "class": "topbar-organization",
+            "width": 24.6875,
+            "right": 161.25,
+            "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+          },
+          {
+            "class": "topbar-session",
+            "width": 208.75,
+            "right": 378,
+            "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+          }
+        ],
+        "overflow": false
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "reflow at 550px",
+      "status": "PASS",
+      "details": {
+        "innerWidth": 550,
+        "clientWidth": 550,
+        "scrollWidth": 550,
+        "visualViewportWidth": 550,
+        "visualScale": 1,
+        "headerWidth": 550,
+        "headerChildren": [
+          {
+            "class": "brand workspace-brand",
+            "width": 116.5625,
+            "right": 128.5625,
+            "text": "SPStockPilot"
+          },
+          {
+            "class": "topbar-organization",
+            "width": 104,
+            "right": 240.5625,
+            "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+          },
+          {
+            "class": "topbar-session",
+            "width": 208.75,
+            "right": 538,
+            "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+          }
+        ],
+        "overflow": false
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "sign out returns real account login",
+      "status": "PASS",
+      "details": {
+        "logout": true,
+        "accountLoginVisible": true,
+        "sessionStatusAfterLogout": 401
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "long-SKU adjustment drawer fits 390px",
+      "status": "FAIL",
+      "details": {
+        "viewportWidth": 390,
+        "dialogWidth": 390,
+        "dialogRight": 390,
+        "controls": [
+          {
+            "label": "Search products",
+            "tag": "INPUT",
+            "left": 21,
+            "right": 503.78125,
+            "width": 482.78125
+          },
+          {
+            "label": "adjust-product",
+            "tag": "SELECT",
+            "left": 21,
+            "right": 503.78125,
+            "width": 482.78125
+          },
+          {
+            "label": "adjust-type",
+            "tag": "SELECT",
+            "left": 21,
+            "right": 503.78125,
+            "width": 482.78125
+          },
+          {
+            "label": "adjust-quantity",
+            "tag": "INPUT",
+            "left": 21,
+            "right": 503.78125,
+            "width": 482.78125
+          },
+          {
+            "label": "adjust-reason",
+            "tag": "TEXTAREA",
+            "left": 21,
+            "right": 503.78125,
+            "width": 482.78125
+          }
+        ],
+        "containers": [
+          {
+            "class": "drawer-body",
+            "client": 389,
+            "scroll": 503
+          },
+          {
+            "class": "form-stack",
+            "client": 349,
+            "scroll": 483
+          }
+        ]
+      }
+    }
+  ],
+  "screens": [
+    {
+      "device": "desktop",
+      "name": "inventory-empty",
+      "file": "images/desktop-inventory-empty.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "at": "2026-10-19T04:43:00.685Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "draft-keyboard-dialog",
+      "file": "images/desktop-draft-keyboard-dialog.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?new=1",
+      "at": "2026-10-19T04:43:06.401Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "receipt-ready",
+      "file": "images/desktop-receipt-ready.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/receipts",
+      "at": "2026-10-19T04:43:11.229Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "receipt-applied",
+      "file": "images/desktop-receipt-applied.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/receipts",
+      "at": "2026-10-19T04:43:14.505Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "draft-edit",
+      "file": "images/desktop-draft-edit.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97&edit=1",
+      "at": "2026-10-19T04:45:20.563Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "draft-persisted",
+      "file": "images/desktop-draft-persisted.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97",
+      "at": "2026-10-19T04:45:24.806Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "order-confirmed",
+      "file": "images/desktop-order-confirmed.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97",
+      "at": "2026-10-19T04:45:26.564Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "staff-access-boundary",
+      "file": "images/desktop-staff-access-boundary.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations",
+      "at": "2026-10-19T04:45:32.222Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "order-fulfilled",
+      "file": "images/desktop-order-fulfilled.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97",
+      "at": "2026-10-19T04:45:36.164Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "inventory-empty",
+      "file": "images/mobile-inventory-empty.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "at": "2026-10-19T04:48:28.329Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "draft-keyboard-dialog",
+      "file": "images/mobile-draft-keyboard-dialog.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?new=1",
+      "at": "2026-10-19T04:45:58.174Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "receipt-ready",
+      "file": "images/mobile-receipt-ready.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/receipts",
+      "at": "2026-10-19T04:46:02.533Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "receipt-applied",
+      "file": "images/mobile-receipt-applied.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/receipts",
+      "at": "2026-10-19T04:46:04.427Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "draft-edit",
+      "file": "images/mobile-draft-edit.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?search=SO-1792385161587-48745480&status=DRAFT&source=qa-history&order=63ffeda2-58b4-4e36-8e1a-fd60b4113451&edit=1",
+      "at": "2026-10-19T04:46:13.176Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "draft-persisted",
+      "file": "images/mobile-draft-persisted.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?search=SO-1792385161587-48745480&status=DRAFT&source=qa-history&order=63ffeda2-58b4-4e36-8e1a-fd60b4113451",
+      "at": "2026-10-19T04:46:16.787Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "order-confirmed",
+      "file": "images/mobile-order-confirmed.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?search=SO-1792385161587-48745480&status=DRAFT&source=qa-history&order=63ffeda2-58b4-4e36-8e1a-fd60b4113451",
+      "at": "2026-10-19T04:46:18.944Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "staff-access-boundary",
+      "file": "images/mobile-staff-access-boundary.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations",
+      "at": "2026-10-19T04:46:24.170Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "order-fulfilled",
+      "file": "images/mobile-order-fulfilled.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?order=63ffeda2-58b4-4e36-8e1a-fd60b4113451",
+      "at": "2026-10-19T04:46:27.800Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "owner-audit",
+      "file": "images/desktop-owner-audit.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/audit?entityId=60bf4678-218c-4870-b08a-9a84cfc0db97",
+      "at": "2026-10-19T04:47:35.160Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "audit-detail",
+      "file": "images/desktop-audit-detail.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/audit?entityId=60bf4678-218c-4870-b08a-9a84cfc0db97&entityType=SalesOrder&eventId=655207b2-f69c-49e9-8985-5f4b84eb4a51",
+      "at": "2026-10-19T04:47:37.367Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "import-invalid",
+      "file": "images/desktop-import-invalid.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+      "at": "2026-10-19T04:47:41.430Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "import-preview-valid",
+      "file": "images/desktop-import-preview-valid.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+      "at": "2026-10-19T04:47:43.221Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "import-completed",
+      "file": "images/desktop-import-completed.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+      "at": "2026-10-19T04:47:45.501Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": [
+        {
+          "id": "aria-allowed-role",
+          "impact": "minor",
+          "help": "ARIA role should be appropriate for the element",
+          "nodes": [
+            {
+              "target": ["article[role=\"status\"]"],
+              "summary": "Fix any of the following:\n  ARIA role status is not allowed for given element"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "device": "desktop",
+      "name": "integration-detail-before",
+      "file": "images/desktop-integration-detail-before.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761",
+      "at": "2026-10-19T04:47:49.917Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "integration-retry-result",
+      "file": "images/desktop-integration-retry-result.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761",
+      "at": "2026-10-19T05:02:30.813Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "simulated-read-error",
+      "file": "images/desktop-simulated-read-error.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "at": "2026-10-19T04:48:03.249Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "read-recovered",
+      "file": "images/desktop-read-recovered.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "at": "2026-10-19T04:48:05.704Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "owner-audit",
+      "file": "images/mobile-owner-audit.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/audit?entityId=63ffeda2-58b4-4e36-8e1a-fd60b4113451",
+      "at": "2026-10-19T04:48:31.086Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "audit-detail",
+      "file": "images/mobile-audit-detail.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/audit?entityId=63ffeda2-58b4-4e36-8e1a-fd60b4113451&entityType=SalesOrder&eventId=f808e45b-db8d-4f5d-9e49-6ca6378b130e",
+      "at": "2026-10-19T04:48:32.568Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "import-invalid",
+      "file": "images/mobile-import-invalid.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+      "at": "2026-10-19T04:48:37.386Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "import-preview-valid",
+      "file": "images/mobile-import-preview-valid.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+      "at": "2026-10-19T04:48:38.600Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "import-completed",
+      "file": "images/mobile-import-completed.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+      "at": "2026-10-19T04:48:40.221Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": [
+        {
+          "id": "aria-allowed-role",
+          "impact": "minor",
+          "help": "ARIA role should be appropriate for the element",
+          "nodes": [
+            {
+              "target": ["article[role=\"status\"]"],
+              "summary": "Fix any of the following:\n  ARIA role status is not allowed for given element"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "device": "mobile",
+      "name": "integration-detail-before",
+      "file": "images/mobile-integration-detail-before.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761",
+      "at": "2026-10-19T04:48:44.686Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "simulated-read-error",
+      "file": "images/mobile-simulated-read-error.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "at": "2026-10-19T04:48:53.755Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "read-recovered",
+      "file": "images/mobile-read-recovered.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "at": "2026-10-19T04:48:55.969Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "orders-reflow-320",
+      "file": "images/mobile-orders-reflow-320.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "at": "2026-10-19T04:51:28.348Z",
+      "viewport": {
+        "width": 353,
+        "height": 932,
+        "scrollWidth": 353
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "orders-reflow-550",
+      "file": "images/mobile-orders-reflow-550.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "at": "2026-10-19T04:51:31.160Z",
+      "viewport": {
+        "width": 550,
+        "height": 844,
+        "scrollWidth": 550
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "owner-navigation",
+      "file": "images/desktop-owner-navigation.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app",
+      "at": "2026-10-19T04:51:09.529Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "orders-reflow-320",
+      "file": "images/desktop-orders-reflow-320.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "at": "2026-10-19T04:51:11.508Z",
+      "viewport": {
+        "width": 320,
+        "height": 844,
+        "scrollWidth": 353
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "orders-reflow-390",
+      "file": "images/desktop-orders-reflow-390.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "at": "2026-10-19T04:51:12.991Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "orders-reflow-550",
+      "file": "images/desktop-orders-reflow-550.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "at": "2026-10-19T04:51:14.703Z",
+      "viewport": {
+        "width": 550,
+        "height": 844,
+        "scrollWidth": 550
+      },
+      "violations": []
+    },
+    {
+      "device": "desktop",
+      "name": "signed-out",
+      "file": "images/desktop-signed-out.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/login",
+      "at": "2026-10-19T04:51:20.475Z",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "orders-reflow-390",
+      "file": "images/mobile-orders-reflow-390.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "at": "2026-10-19T04:51:29.720Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "signed-out",
+      "file": "images/mobile-signed-out.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/login",
+      "at": "2026-10-19T04:51:36.192Z",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390
+      },
+      "violations": []
+    },
+    {
+      "device": "mobile",
+      "name": "adjustment-long-sku",
+      "file": "images/mobile-adjustment-long-sku.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "at": "2026-10-19T05:02:34.473Z",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": []
+    }
+  ],
+  "fixtures": [
+    {
+      "device": "desktop",
+      "receipt": "fe9fb699-a887-4321-b1a2-6849dc0c9669",
+      "number": "QA-DESKTOP-1792384976589"
+    },
+    {
+      "device": "desktop",
+      "order": "60bf4678-218c-4870-b08a-9a84cfc0db97",
+      "number": "SO-1792384991942-a1217472"
+    },
+    {
+      "device": "mobile",
+      "receipt": "5de0de36-caed-49f9-bd3d-0fe9ce98ebdd",
+      "number": "QA-MOBILE-1792385145179"
+    },
+    {
+      "device": "mobile",
+      "order": "63ffeda2-58b4-4e36-8e1a-fd60b4113451",
+      "number": "SO-1792385161587-48745480"
+    },
+    {
+      "device": "desktop",
+      "importRun": "d503357d-34db-4bdf-99e5-725bec7f256b",
+      "importedSku": "QA-IMP-DESKTOP-1792385251901"
+    },
+    {
+      "device": "desktop",
+      "delivery": "a301eaa2-4837-51ae-86b9-1cd1a3fb6761",
+      "retryStatus": "SUCCEEDED",
+      "storefrontOrder": "c44e89fc-f5d0-4a4d-8f9f-5012f00f4383"
+    },
+    {
+      "device": "mobile",
+      "importRun": "ab92ca3c-c5ce-4f55-a4ab-8c5fa61c8260",
+      "importedSku": "QA-IMP-MOBILE-1792385305115"
+    }
+  ],
+  "consoleErrors": [],
+  "browser": "156.0.8078.4",
+  "harnessNotes": [
+    "First edit probe reloaded at HTTP completion before the client URL update settled; resumed the same Draft with an explicit drawer-close and URL-state wait. No duplicate receipt/order was created."
+  ],
+  "deviceAborted": [],
+  "finished": "2026-10-19T05:02:34.484Z",
+  "status": "FINDINGS",
+  "harnessDiagnostics": [
+    {
+      "device": "desktop",
+      "name": "Owner audit actors, detail and Escape",
+      "status": "FAIL",
+      "error": "expect(locator).toBeVisible() failed\n\nLocator: getByText('ORDER_FULFILLED', { exact: true })\nExpected: visible\nError: strict mode violation: getByText('ORDER_FULFILLED', { exact: true }) resolved to 2 elements:\n    1) <strong>ORDER_FULFILLED</strong> aka getByRole('table', { name: 'Data table' }).getByText('ORDER_FULFILLED')\n    2) <strong>ORDER_FULFILLED</strong> aka getByLabel('ORDER_FULFILLED', { exact: true }).getByText('ORDER_FULFILLED')\n\nCall log:\n  - Expect \"toBeVisible\" getByText('ORDER_FULFILLED', { exact: true }) with timeout 5000ms\n  - waiting for getByText('ORDER_FULFILLED', { exact: true })\n",
+      "classification": "HARNESS_SELECTOR",
+      "reason": "Selector matched hidden responsive copies; use visible controls."
+    },
+    {
+      "device": "mobile",
+      "name": "empty search and clear recovery",
+      "status": "FAIL",
+      "error": "expect(locator).toBeVisible() failed\n\nLocator:  getByText('HP-1001', { exact: true }).first()\nExpected: visible\nReceived: hidden\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeVisible\" getByText('HP-1001', { exact: true }).first() with timeout 5000ms\n  - waiting for getByText('HP-1001', { exact: true }).first()\n    10 × locator resolved to <a class=\"mono\" href=\"/app/inventory?product=ac5f60b3-bffa-52e8-a38b-a90ed8d596f9\">HP-1001</a>\n       - unexpected value \"hidden\"\n",
+      "classification": "HARNESS_SELECTOR",
+      "reason": "Selector matched hidden responsive copies; use visible controls."
+    },
+    {
+      "device": "mobile",
+      "name": "Owner audit actors, detail and Escape",
+      "status": "FAIL",
+      "error": "expect(locator).toBeVisible() failed\n\nLocator: getByText('ORDER_FULFILLED', { exact: true })\nExpected: visible\nError: strict mode violation: getByText('ORDER_FULFILLED', { exact: true }) resolved to 2 elements:\n    1) <strong>ORDER_FULFILLED</strong> aka locator('tbody').getByText('ORDER_FULFILLED')\n    2) <strong>ORDER_FULFILLED</strong> aka getByRole('article', { name: 'ORDER_FULFILLED' }).getByText('ORDER_FULFILLED')\n\nCall log:\n  - Expect \"toBeVisible\" getByText('ORDER_FULFILLED', { exact: true }) with timeout 5000ms\n  - waiting for getByText('ORDER_FULFILLED', { exact: true })\n",
+      "classification": "HARNESS_SELECTOR",
+      "reason": "Selector matched hidden responsive copies; use visible controls."
+    },
+    {
+      "device": "desktop",
+      "name": "sign out returns real account login",
+      "status": "FAIL",
+      "error": "expect(locator).toBeVisible() failed\n\nLocator: getByLabel('Email', { exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByLabel('Email', { exact: true }) with timeout 5000ms\n  - waiting for getByLabel('Email', { exact: true })\n",
+      "classification": "HARNESS_LABEL",
+      "reason": "Account login label is Work email, not Email. Logout had already reached /login."
+    },
+    {
+      "device": "mobile",
+      "name": "sign out returns real account login",
+      "status": "FAIL",
+      "error": "expect(locator).toBeVisible() failed\n\nLocator: getByLabel('Email', { exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByLabel('Email', { exact: true }) with timeout 5000ms\n  - waiting for getByLabel('Email', { exact: true })\n",
+      "classification": "HARNESS_LABEL",
+      "reason": "Account login label is Work email, not Email. Logout had already reached /login."
+    },
+    {
+      "classification": "HARNESS_REFLOW",
+      "reason": "Mobile innerWidth expands when the document overflows. Final probes compare scrollWidth to documentElement.clientWidth and requested viewport."
+    },
+    {
+      "classification": "UI_SETTLE_WAIT",
+      "reason": "Success screenshot refreshed after explicitly waiting for Succeeded; immediate post-response capture had caught pre-refetch Failed details alongside the success toast. Stored API result was already Succeeded."
+    }
+  ],
+  "layoutProbes": [
+    {
+      "device": "desktop",
+      "requestedWidth": 320,
+      "innerWidth": 320,
+      "clientWidth": 320,
+      "scrollWidth": 353,
+      "visualViewportWidth": 320,
+      "visualScale": 1,
+      "headerWidth": 320,
+      "headerChildren": [
+        {
+          "class": "brand workspace-brand",
+          "width": 116.5625,
+          "right": 128.5625,
+          "text": "SPStockPilot"
+        },
+        {
+          "class": "topbar-organization",
+          "width": 0,
+          "right": 136.5625,
+          "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+        },
+        {
+          "class": "topbar-session",
+          "width": 208.75,
+          "right": 353.3125,
+          "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+        }
+      ],
+      "overflow": true
+    },
+    {
+      "device": "desktop",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "visualViewportWidth": 390,
+      "visualScale": 1,
+      "headerWidth": 390,
+      "headerChildren": [
+        {
+          "class": "brand workspace-brand",
+          "width": 116.5625,
+          "right": 128.5625,
+          "text": "SPStockPilot"
+        },
+        {
+          "class": "topbar-organization",
+          "width": 24.6875,
+          "right": 161.25,
+          "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+        },
+        {
+          "class": "topbar-session",
+          "width": 208.75,
+          "right": 378,
+          "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "device": "desktop",
+      "requestedWidth": 550,
+      "innerWidth": 550,
+      "clientWidth": 550,
+      "scrollWidth": 550,
+      "visualViewportWidth": 550,
+      "visualScale": 1,
+      "headerWidth": 550,
+      "headerChildren": [
+        {
+          "class": "brand workspace-brand",
+          "width": 116.5625,
+          "right": 128.5625,
+          "text": "SPStockPilot"
+        },
+        {
+          "class": "topbar-organization",
+          "width": 104,
+          "right": 240.5625,
+          "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+        },
+        {
+          "class": "topbar-session",
+          "width": 208.75,
+          "right": 538,
+          "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "device": "mobile",
+      "requestedWidth": 320,
+      "innerWidth": 353,
+      "clientWidth": 320,
+      "scrollWidth": 353,
+      "visualViewportWidth": 320,
+      "visualScale": 1,
+      "headerWidth": 320,
+      "headerChildren": [
+        {
+          "class": "brand workspace-brand",
+          "width": 116.5625,
+          "right": 128.5625,
+          "text": "SPStockPilot"
+        },
+        {
+          "class": "topbar-organization",
+          "width": 0,
+          "right": 136.5625,
+          "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+        },
+        {
+          "class": "topbar-session",
+          "width": 208.75,
+          "right": 353.3125,
+          "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+        }
+      ],
+      "overflow": true
+    },
+    {
+      "device": "mobile",
+      "requestedWidth": 390,
+      "innerWidth": 390,
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "visualViewportWidth": 390,
+      "visualScale": 1,
+      "headerWidth": 390,
+      "headerChildren": [
+        {
+          "class": "brand workspace-brand",
+          "width": 116.5625,
+          "right": 128.5625,
+          "text": "SPStockPilot"
+        },
+        {
+          "class": "topbar-organization",
+          "width": 24.6875,
+          "right": 161.25,
+          "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+        },
+        {
+          "class": "topbar-session",
+          "width": 208.75,
+          "right": 378,
+          "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+        }
+      ],
+      "overflow": false
+    },
+    {
+      "device": "mobile",
+      "requestedWidth": 550,
+      "innerWidth": 550,
+      "clientWidth": 550,
+      "scrollWidth": 550,
+      "visualViewportWidth": 550,
+      "visualScale": 1,
+      "headerWidth": 550,
+      "headerChildren": [
+        {
+          "class": "brand workspace-brand",
+          "width": 116.5625,
+          "right": 128.5625,
+          "text": "SPStockPilot"
+        },
+        {
+          "class": "topbar-organization",
+          "width": 104,
+          "right": 240.5625,
+          "text": "WorkspaceHarbor & Pine WholesaleUSD · Main Warehouse"
+        },
+        {
+          "class": "topbar-session",
+          "width": 208.75,
+          "right": 538,
+          "text": "Demo workspaceCurrent roleOwnerManagerStaffOOOlivia OwnerOwn"
+        }
+      ],
+      "overflow": false
+    }
+  ],
+  "typography": [
+    {
+      "device": "desktop",
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "headingFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "rootSansToken": "",
+      "bodySansToken": "",
+      "sourceVariable": "\"sourceSans\",\"sourceSans Fallback\"",
+      "fontFaceLoaded": false
+    },
+    {
+      "device": "mobile",
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "headingFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "rootSansToken": "",
+      "bodySansToken": "",
+      "sourceVariable": "\"sourceSans\",\"sourceSans Fallback\"",
+      "fontFaceLoaded": false
+    }
+  ],
+  "ownerNavigation": [
+    {
+      "device": "desktop",
+      "role": "OWNER",
+      "settingsLinksVisible": 0,
+      "moreLinksVisible": 0,
+      "visibleNavigation": [
+        "Overview",
+        "Orders",
+        "Inventory",
+        "Products",
+        "Partners",
+        "Receipts",
+        "Imports",
+        "Integrations",
+        "Audit"
+      ]
+    },
+    {
+      "device": "mobile",
+      "role": "OWNER",
+      "settingsLinksVisible": 0,
+      "moreLinksVisible": 1,
+      "visibleNavigation": ["Overview", "Orders", "Inventory", "More"]
+    }
+  ],
+  "integrationResultLinkProbe": {
+    "storedOrder": "c44e89fc-f5d0-4a4d-8f9f-5012f00f4383",
+    "uiStatus": "Succeeded",
+    "links": [],
+    "retryVisible": false
+  },
+  "adjustmentLayoutProbe": {
+    "viewportWidth": 390,
+    "dialogWidth": 390,
+    "dialogRight": 390,
+    "controls": [
+      {
+        "label": "Search products",
+        "tag": "INPUT",
+        "left": 21,
+        "right": 503.78125,
+        "width": 482.78125
+      },
+      {
+        "label": "adjust-product",
+        "tag": "SELECT",
+        "left": 21,
+        "right": 503.78125,
+        "width": 482.78125
+      },
+      {
+        "label": "adjust-type",
+        "tag": "SELECT",
+        "left": 21,
+        "right": 503.78125,
+        "width": 482.78125
+      },
+      {
+        "label": "adjust-quantity",
+        "tag": "INPUT",
+        "left": 21,
+        "right": 503.78125,
+        "width": 482.78125
+      },
+      {
+        "label": "adjust-reason",
+        "tag": "TEXTAREA",
+        "left": 21,
+        "right": 503.78125,
+        "width": 482.78125
+      }
+    ],
+    "containers": [
+      {
+        "class": "drawer-body",
+        "client": 389,
+        "scroll": 503
+      },
+      {
+        "class": "form-stack",
+        "client": 349,
+        "scroll": 483
+      }
+    ],
+    "overflow": true
+  }
+}

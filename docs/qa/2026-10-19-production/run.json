@@ -1,0 +1,1629 @@
+{
+  "started": "2026-10-19T04:39:35.603Z",
+  "timezone": "Asia/Saigon",
+  "origin": "https://stock-pilot-web-five.vercel.app",
+  "expectedRevision": "4b97984b3edd387ad29d9be5b64e3f695e602556",
+  "checks": [
+    {
+      "name": "exact deployed revisions",
+      "device": "preflight",
+      "status": "PASS",
+      "details": {
+        "version": {
+          "revision": "4b97984b3edd387ad29d9be5b64e3f695e602556",
+          "service": "stockpilot-web"
+        },
+        "health": {
+          "checks": {
+            "database": "ok",
+            "queue": "not_configured"
+          },
+          "rateLimit": {
+            "buckets": 0,
+            "rejected": {
+              "public": 0,
+              "auth": 0,
+              "user": 0
+            },
+            "limits": {
+              "publicWritesPerMinute": 60,
+              "authWritesPerMinute": 60,
+              "userWritesPerMinute": 240
+            }
+          },
+          "revision": "4b97984b3edd387ad29d9be5b64e3f695e602556",
+          "status": "ready"
+        }
+      }
+    },
+    {
+      "name": "public landing",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-landing.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Inventory and B2B order operations"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 15,
+        "initialJsEncodedBytes": 170194,
+        "observedResourceCount": 22,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "public login",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-login.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/login",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Access your workspace"],
+        "idleAnimations": 0,
+        "landmarks": 2,
+        "interactive": 8,
+        "initialJsEncodedBytes": 171564,
+        "observedResourceCount": 14,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "public signup",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-signup.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/signup",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Create your account"],
+        "idleAnimations": 0,
+        "landmarks": 2,
+        "interactive": 7,
+        "initialJsEncodedBytes": 170194,
+        "observedResourceCount": 13,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "public invitation-invalid",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-invitation-invalid.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/invitations/accept",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Accept your invitation"],
+        "idleAnimations": 0,
+        "landmarks": 2,
+        "interactive": 2,
+        "initialJsEncodedBytes": 170587,
+        "observedResourceCount": 13,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "demo Manager login",
+      "device": "desktop",
+      "status": "PASS"
+    },
+    {
+      "name": "workspace overview",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-overview.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Operations overview"],
+        "idleAnimations": 0,
+        "landmarks": 10,
+        "interactive": 40,
+        "initialJsEncodedBytes": 251290,
+        "observedResourceCount": 43,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace orders",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-orders.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Sales orders"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 22,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 28,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace inventory",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-inventory.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Inventory"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 32,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 37,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace products",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-products.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/products",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Products"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 23,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 26,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace partners",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-partners.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/partners",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Partners"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 21,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 26,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace receipts",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-receipts.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/receipts",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Goods receipts"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 16,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 28,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace imports",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-imports.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Product imports"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 16,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 25,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace integrations",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-integrations.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/integrations",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Integrations"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 15,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 26,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace audit",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-audit.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/audit",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Audit trail"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 23,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 26,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace more",
+      "device": "desktop",
+      "status": "FAIL",
+      "error": "Serious/critical axe violations\n+ actual - expected\n\n+ [\n+   {\n+     help: 'Elements must meet minimum color contrast ratio thresholds',\n+     id: 'color-contrast',\n+     impact: 'serious',\n+     nodes: [\n+       {\n+         summary: 'Fix any of the following:\\n' +\n+           '  Element has insufficient color contrast of 2.31 (foreground color: #9eacb9, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1',\n+         target: [\n+           'section > .demo-role-switcher.demo-role-compact > .demo-role-label'\n+         ]\n+       }\n+     ]\n+   }\n+ ]\n- []\n"
+    },
+    {
+      "name": "workspace settings-manager",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-settings-manager.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Organization settings"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 12,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 26,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "Owner settings renders",
+      "device": "desktop",
+      "status": "PASS",
+      "details": {
+        "file": "images/desktop-settings-owner.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scrollWidth": 1440,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Organization settings"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 22,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 30,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "public landing",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-landing.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Inventory and B2B order operations"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 13,
+        "initialJsEncodedBytes": 170194,
+        "observedResourceCount": 22,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "public login",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-login.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/login",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Access your workspace"],
+        "idleAnimations": 0,
+        "landmarks": 2,
+        "interactive": 7,
+        "initialJsEncodedBytes": 171564,
+        "observedResourceCount": 14,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "public signup",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-signup.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/signup",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Create your account"],
+        "idleAnimations": 0,
+        "landmarks": 2,
+        "interactive": 7,
+        "initialJsEncodedBytes": 170194,
+        "observedResourceCount": 13,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "public invitation-invalid",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-invitation-invalid.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/invitations/accept",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Accept your invitation"],
+        "idleAnimations": 0,
+        "landmarks": 2,
+        "interactive": 2,
+        "initialJsEncodedBytes": 170587,
+        "observedResourceCount": 13,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "demo Manager login",
+      "device": "mobile",
+      "status": "PASS"
+    },
+    {
+      "name": "workspace overview",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-overview.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Operations overview"],
+        "idleAnimations": 0,
+        "landmarks": 10,
+        "interactive": 28,
+        "initialJsEncodedBytes": 251290,
+        "observedResourceCount": 36,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace orders",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-orders.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Sales orders"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 17,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 23,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace inventory",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-inventory.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Inventory"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 27,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 27,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace products",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-products.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/products",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Products"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 18,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 22,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace partners",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-partners.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/partners",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Partners"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 16,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 22,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace receipts",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-receipts.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/receipts",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Goods receipts"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 11,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 24,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace imports",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-imports.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Product imports"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 11,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 21,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace integrations",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-integrations.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/integrations",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Integrations"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 10,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 22,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace audit",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-audit.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/audit",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Audit trail"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 18,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 22,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "workspace more",
+      "device": "mobile",
+      "status": "FAIL",
+      "error": "Serious/critical axe violations\n+ actual - expected\n\n+ [\n+   {\n+     help: 'Elements must meet minimum color contrast ratio thresholds',\n+     id: 'color-contrast',\n+     impact: 'serious',\n+     nodes: [\n+       {\n+         summary: 'Fix any of the following:\\n' +\n+           '  Element has insufficient color contrast of 2.31 (foreground color: #9eacb9, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1',\n+         target: [\n+           'section > .demo-role-switcher.demo-role-compact > .demo-role-label'\n+         ]\n+       }\n+     ]\n+   }\n+ ]\n- []\n"
+    },
+    {
+      "name": "workspace settings-manager",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-settings-manager.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Organization settings"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 7,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 21,
+        "axeViolations": 0
+      }
+    },
+    {
+      "name": "Owner settings renders",
+      "device": "mobile",
+      "status": "PASS",
+      "details": {
+        "file": "images/mobile-settings-owner.jpg",
+        "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollWidth": 390,
+        "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "h1": ["Organization settings"],
+        "idleAnimations": 0,
+        "landmarks": 5,
+        "interactive": 17,
+        "initialJsEncodedBytes": 251434,
+        "observedResourceCount": 25,
+        "axeViolations": 0
+      }
+    }
+  ],
+  "screens": [
+    {
+      "name": "landing",
+      "device": "desktop",
+      "file": "images/desktop-landing.jpg",
+      "at": "2026-10-19T04:39:40.064Z",
+      "url": "https://stock-pilot-web-five.vercel.app/",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Inventory and B2B order operations"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 15,
+      "initialJsEncodedBytes": 170194,
+      "observedResourceCount": 22,
+      "a11y": {
+        "violations": [],
+        "passes": 41,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "login",
+      "device": "desktop",
+      "file": "images/desktop-login.jpg",
+      "at": "2026-10-19T04:39:42.272Z",
+      "url": "https://stock-pilot-web-five.vercel.app/login",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Access your workspace"],
+      "idleAnimations": 0,
+      "landmarks": 2,
+      "interactive": 8,
+      "initialJsEncodedBytes": 171564,
+      "observedResourceCount": 14,
+      "a11y": {
+        "violations": [],
+        "passes": 36,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "signup",
+      "device": "desktop",
+      "file": "images/desktop-signup.jpg",
+      "at": "2026-10-19T04:39:43.992Z",
+      "url": "https://stock-pilot-web-five.vercel.app/signup",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Create your account"],
+      "idleAnimations": 0,
+      "landmarks": 2,
+      "interactive": 7,
+      "initialJsEncodedBytes": 170194,
+      "observedResourceCount": 13,
+      "a11y": {
+        "violations": [],
+        "passes": 36,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "invitation-invalid",
+      "device": "desktop",
+      "file": "images/desktop-invitation-invalid.jpg",
+      "at": "2026-10-19T04:39:45.870Z",
+      "url": "https://stock-pilot-web-five.vercel.app/invitations/accept",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Accept your invitation"],
+      "idleAnimations": 0,
+      "landmarks": 2,
+      "interactive": 2,
+      "initialJsEncodedBytes": 170587,
+      "observedResourceCount": 13,
+      "a11y": {
+        "violations": [],
+        "passes": 28,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "overview",
+      "device": "desktop",
+      "file": "images/desktop-overview.jpg",
+      "at": "2026-10-19T04:39:53.770Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Operations overview"],
+      "idleAnimations": 0,
+      "landmarks": 10,
+      "interactive": 40,
+      "initialJsEncodedBytes": 251290,
+      "observedResourceCount": 43,
+      "a11y": {
+        "violations": [],
+        "passes": 45,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 7
+          }
+        ]
+      }
+    },
+    {
+      "name": "orders",
+      "device": "desktop",
+      "file": "images/desktop-orders.jpg",
+      "at": "2026-10-19T04:39:57.829Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Sales orders"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 22,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 28,
+      "a11y": {
+        "violations": [],
+        "passes": 42,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "inventory",
+      "device": "desktop",
+      "file": "images/desktop-inventory.jpg",
+      "at": "2026-10-19T04:40:01.911Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Inventory"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 32,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 37,
+      "a11y": {
+        "violations": [],
+        "passes": 41,
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "products",
+      "device": "desktop",
+      "file": "images/desktop-products.jpg",
+      "at": "2026-10-19T04:40:06.305Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/products",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Products"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 23,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 26,
+      "a11y": {
+        "violations": [],
+        "passes": 42,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "partners",
+      "device": "desktop",
+      "file": "images/desktop-partners.jpg",
+      "at": "2026-10-19T04:40:10.805Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/partners",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Partners"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 21,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 26,
+      "a11y": {
+        "violations": [],
+        "passes": 44,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "receipts",
+      "device": "desktop",
+      "file": "images/desktop-receipts.jpg",
+      "at": "2026-10-19T04:40:13.902Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/receipts",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Goods receipts"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 16,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 28,
+      "a11y": {
+        "violations": [],
+        "passes": 42,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "imports",
+      "device": "desktop",
+      "file": "images/desktop-imports.jpg",
+      "at": "2026-10-19T04:40:17.092Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Product imports"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 16,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 25,
+      "a11y": {
+        "violations": [],
+        "passes": 35,
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "integrations",
+      "device": "desktop",
+      "file": "images/desktop-integrations.jpg",
+      "at": "2026-10-19T04:40:20.888Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Integrations"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 15,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 26,
+      "a11y": {
+        "violations": [],
+        "passes": 42,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "audit",
+      "device": "desktop",
+      "file": "images/desktop-audit.jpg",
+      "at": "2026-10-19T04:40:25.252Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/audit",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Audit trail"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 23,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 26,
+      "a11y": {
+        "violations": [],
+        "passes": 41,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "more",
+      "device": "desktop",
+      "file": "images/desktop-more.jpg",
+      "at": "2026-10-19T04:40:29.186Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/more",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["More operations"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 20,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 27,
+      "a11y": {
+        "violations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "nodes": [
+              {
+                "target": [
+                  "section > .demo-role-switcher.demo-role-compact > .demo-role-label"
+                ],
+                "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.31 (foreground color: #9eacb9, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "passes": 34,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "settings-manager",
+      "device": "desktop",
+      "file": "images/desktop-settings-manager.jpg",
+      "at": "2026-10-19T04:40:33.142Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Organization settings"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 12,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 26,
+      "a11y": {
+        "violations": [],
+        "passes": 34,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "settings-owner",
+      "device": "desktop",
+      "file": "images/desktop-settings-owner.jpg",
+      "at": "2026-10-19T04:40:39.392Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scrollWidth": 1440,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Organization settings"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 22,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 30,
+      "a11y": {
+        "violations": [],
+        "passes": 38,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "landing",
+      "device": "mobile",
+      "file": "images/mobile-landing.jpg",
+      "at": "2026-10-19T04:40:42.784Z",
+      "url": "https://stock-pilot-web-five.vercel.app/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Inventory and B2B order operations"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 13,
+      "initialJsEncodedBytes": 170194,
+      "observedResourceCount": 22,
+      "a11y": {
+        "violations": [],
+        "passes": 42,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 12
+          }
+        ]
+      }
+    },
+    {
+      "name": "login",
+      "device": "mobile",
+      "file": "images/mobile-login.jpg",
+      "at": "2026-10-19T04:40:44.977Z",
+      "url": "https://stock-pilot-web-five.vercel.app/login",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Access your workspace"],
+      "idleAnimations": 0,
+      "landmarks": 2,
+      "interactive": 7,
+      "initialJsEncodedBytes": 171564,
+      "observedResourceCount": 14,
+      "a11y": {
+        "violations": [],
+        "passes": 36,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "signup",
+      "device": "mobile",
+      "file": "images/mobile-signup.jpg",
+      "at": "2026-10-19T04:40:46.590Z",
+      "url": "https://stock-pilot-web-five.vercel.app/signup",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Create your account"],
+      "idleAnimations": 0,
+      "landmarks": 2,
+      "interactive": 7,
+      "initialJsEncodedBytes": 170194,
+      "observedResourceCount": 13,
+      "a11y": {
+        "violations": [],
+        "passes": 36,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "invitation-invalid",
+      "device": "mobile",
+      "file": "images/mobile-invitation-invalid.jpg",
+      "at": "2026-10-19T04:40:48.654Z",
+      "url": "https://stock-pilot-web-five.vercel.app/invitations/accept",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Accept your invitation"],
+      "idleAnimations": 0,
+      "landmarks": 2,
+      "interactive": 2,
+      "initialJsEncodedBytes": 170587,
+      "observedResourceCount": 13,
+      "a11y": {
+        "violations": [],
+        "passes": 28,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "overview",
+      "device": "mobile",
+      "file": "images/mobile-overview.jpg",
+      "at": "2026-10-19T04:40:56.129Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Operations overview"],
+      "idleAnimations": 0,
+      "landmarks": 10,
+      "interactive": 28,
+      "initialJsEncodedBytes": 251290,
+      "observedResourceCount": 36,
+      "a11y": {
+        "violations": [],
+        "passes": 41,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 7
+          }
+        ]
+      }
+    },
+    {
+      "name": "orders",
+      "device": "mobile",
+      "file": "images/mobile-orders.jpg",
+      "at": "2026-10-19T04:40:59.050Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Sales orders"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 17,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 23,
+      "a11y": {
+        "violations": [],
+        "passes": 38,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "inventory",
+      "device": "mobile",
+      "file": "images/mobile-inventory.jpg",
+      "at": "2026-10-19T04:41:02.365Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Inventory"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 27,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 27,
+      "a11y": {
+        "violations": [],
+        "passes": 37,
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          },
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "products",
+      "device": "mobile",
+      "file": "images/mobile-products.jpg",
+      "at": "2026-10-19T04:41:06.237Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/products",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Products"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 18,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 22,
+      "a11y": {
+        "violations": [],
+        "passes": 38,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "partners",
+      "device": "mobile",
+      "file": "images/mobile-partners.jpg",
+      "at": "2026-10-19T04:41:09.419Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/partners",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Partners"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 16,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 22,
+      "a11y": {
+        "violations": [],
+        "passes": 40,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "receipts",
+      "device": "mobile",
+      "file": "images/mobile-receipts.jpg",
+      "at": "2026-10-19T04:41:12.864Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/receipts",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Goods receipts"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 11,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 24,
+      "a11y": {
+        "violations": [],
+        "passes": 38,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "imports",
+      "device": "mobile",
+      "file": "images/mobile-imports.jpg",
+      "at": "2026-10-19T04:41:15.836Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Product imports"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 11,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 21,
+      "a11y": {
+        "violations": [],
+        "passes": 35,
+        "incomplete": [
+          {
+            "id": "aria-prohibited-attr",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "integrations",
+      "device": "mobile",
+      "file": "images/mobile-integrations.jpg",
+      "at": "2026-10-19T04:41:19.704Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Integrations"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 10,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 22,
+      "a11y": {
+        "violations": [],
+        "passes": 38,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "audit",
+      "device": "mobile",
+      "file": "images/mobile-audit.jpg",
+      "at": "2026-10-19T04:41:23.570Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/audit",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Audit trail"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 18,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 22,
+      "a11y": {
+        "violations": [],
+        "passes": 37,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "more",
+      "device": "mobile",
+      "file": "images/mobile-more.jpg",
+      "at": "2026-10-19T04:41:27.284Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/more",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["More operations"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 15,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 27,
+      "a11y": {
+        "violations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "help": "Elements must meet minimum color contrast ratio thresholds",
+            "nodes": [
+              {
+                "target": [
+                  "section > .demo-role-switcher.demo-role-compact > .demo-role-label"
+                ],
+                "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.31 (foreground color: #9eacb9, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "passes": 34,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "settings-manager",
+      "device": "mobile",
+      "file": "images/mobile-settings-manager.jpg",
+      "at": "2026-10-19T04:41:30.284Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Organization settings"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 7,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 21,
+      "a11y": {
+        "violations": [],
+        "passes": 34,
+        "incomplete": []
+      }
+    },
+    {
+      "name": "settings-owner",
+      "device": "mobile",
+      "file": "images/mobile-settings-owner.jpg",
+      "at": "2026-10-19T04:41:35.497Z",
+      "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scrollWidth": 390,
+      "bodyFont": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "h1": ["Organization settings"],
+      "idleAnimations": 0,
+      "landmarks": 5,
+      "interactive": 17,
+      "initialJsEncodedBytes": 251434,
+      "observedResourceCount": 25,
+      "a11y": {
+        "violations": [],
+        "passes": 38,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "nodes": 2
+          }
+        ]
+      }
+    }
+  ],
+  "consoleErrors": [],
+  "httpErrors": [],
+  "production": {
+    "version": {
+      "revision": "4b97984b3edd387ad29d9be5b64e3f695e602556",
+      "service": "stockpilot-web"
+    },
+    "health": {
+      "checks": {
+        "database": "ok",
+        "queue": "not_configured"
+      },
+      "rateLimit": {
+        "buckets": 0,
+        "rejected": {
+          "public": 0,
+          "auth": 0,
+          "user": 0
+        },
+        "limits": {
+          "publicWritesPerMinute": 60,
+          "authWritesPerMinute": 60,
+          "userWritesPerMinute": 240
+        }
+      },
+      "revision": "4b97984b3edd387ad29d9be5b64e3f695e602556",
+      "status": "ready"
+    }
+  },
+  "browser": "156.0.8078.4",
+  "finished": "2026-10-19T04:41:35.620Z",
+  "status": "FINDINGS"
+}

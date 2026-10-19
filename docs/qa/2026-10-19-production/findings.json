@@ -1,0 +1,92 @@
+{
+  "revision": "4b97984b3edd387ad29d9be5b64e3f695e602556",
+  "productionDeploymentChanged": false,
+  "syntheticDemoDataChanged": true,
+  "findings": [
+    {
+      "id": "UX-01",
+      "priority": "P2",
+      "title": "Low-contrast role label on More",
+      "status": "OPEN",
+      "evidence": [
+        "images/desktop-more.jpg",
+        "images/mobile-more.jpg",
+        "images/edge-more-contrast.jpg",
+        "run.json"
+      ],
+      "observed": "The 12px Demo workspace label renders #9eacb9 on white, contrast 2.31:1. Axe reports serious color-contrast on desktop and mobile.",
+      "source": "apps/web/app/styles/workspace/shell.css:285",
+      "next": "Scope the light label color to the navy header; preserve a sufficient text contrast on the white More surface. Re-run both More views."
+    },
+    {
+      "id": "UX-02",
+      "priority": "P2",
+      "title": "Source Sans 3 is not the rendered font",
+      "status": "OPEN",
+      "evidence": [
+        "features.json",
+        "images/desktop-overview.jpg",
+        "images/mobile-overview.jpg"
+      ],
+      "observed": "Both heading and body use the system font stack. The --font-sans computed value is empty, while --font-source-sans exists on body.",
+      "source": "apps/web/app/styles/foundation.css:133; apps/web/app/layout.tsx:42",
+      "next": "Resolve the next/font variable and the semantic font token at the same scope. Verify the actual computed heading/body font on production, rather than only checking the font source file."
+    },
+    {
+      "id": "UX-03",
+      "priority": "P2",
+      "title": "Owner settings has no visible desktop navigation entry",
+      "status": "OPEN",
+      "evidence": [
+        "features.json",
+        "images/desktop-owner-navigation.jpg",
+        "images/desktop-settings-owner.jpg"
+      ],
+      "observed": "For an authenticated Owner at desktop size, visible navigation contains neither /app/settings nor /app/more. Settings works when its URL is entered directly; mobile reaches it through More.",
+      "source": "apps/web/components/app/workspace-navigation.tsx:211",
+      "next": "Expose a discoverable Owner settings entry in the desktop shell, without weakening server-side access checks."
+    },
+    {
+      "id": "UX-04",
+      "priority": "P2",
+      "title": "Responsive overflow in the narrow header and long-SKU adjustment form",
+      "status": "OPEN",
+      "evidence": [
+        "features.json",
+        "images/desktop-orders-reflow-320.jpg",
+        "images/mobile-orders-reflow-320.jpg",
+        "images/mobile-overview.jpg",
+        "images/mobile-adjustment-long-sku.jpg"
+      ],
+      "observed": "At requested/client width 320px, document scroll width is 353px in desktop and touch contexts. At 390px the Manager header truncates workspace identity to H... . The 390px adjustment dialog also lets valid long-SKU form controls extend to x=503.78, beyond its x=390 boundary; drawer-body clientWidth=389 and scrollWidth=503.",
+      "source": "apps/web/app/styles/workspace/responsive.css:29; apps/web/app/styles/workspace/responsive.css:64; apps/web/app/styles/workspace/primitives.css:745",
+      "next": "Rebalance the narrow header while preserving workspace identity, and constrain form grid/select intrinsic widths. Verify both 320px page reflow and valid long SKUs inside the 390px drawer. Compare scrollWidth against clientWidth, not mobile innerWidth alone."
+    },
+    {
+      "id": "UX-05",
+      "priority": "P3",
+      "title": "Order facts show internal IDs instead of business names",
+      "status": "OPEN",
+      "evidence": [
+        "images/desktop-draft-persisted.jpg",
+        "images/mobile-order-fulfilled.jpg"
+      ],
+      "observed": "Warehouse and Created by display UUID strings. They provide little operational meaning beside a customer/order record.",
+      "source": "apps/web/features/orders/components/order-detail-view.tsx:120",
+      "next": "Return the actual tenant-scoped warehouse name and creator display name. Keep IDs only in an optional technical/copy affordance; do not substitute the current viewer for the actual creator."
+    },
+    {
+      "id": "UX-06",
+      "priority": "P2",
+      "title": "Successful integration retry does not link to its created order",
+      "status": "OPEN",
+      "evidence": [
+        "features.json",
+        "images/desktop-integration-retry-result.jpg"
+      ],
+      "observed": "The live manual retry succeeds and its API response contains orderId, but the succeeded delivery drawer shows metadata/payload without an Open order action.",
+      "source": "apps/web/features/integrations/integrations-workspace.tsx:210",
+      "next": "Connect the succeeded delivery to the created order's canonical detail URL and preserve a return path to the delivery."
+    }
+  ]
+}

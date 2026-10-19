@@ -1,0 +1,1900 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>StockPilot production evidence · 19 Oct 2026</title
+  ><style>
+    body {
+      margin: 0;
+      background: #f3f6f8;
+      color: #162d41;
+      font:
+        15px/1.5 system-ui,
+        sans-serif;
+    }
+    header,
+    main {
+      max-width: 1450px;
+      margin: auto;
+      padding: 24px;
+    }
+    header {
+      padding-bottom: 8px;
+    }
+    h1 {
+      font-size: 28px;
+      margin: 8px 0;
+    }
+    p {
+      max-width: 1000px;
+    }
+    a {
+      color: #0c5b93;
+    }
+    .bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      background: #fff;
+      padding: 14px;
+      border: 1px solid #ccd5dd;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    input,
+    select {
+      font: inherit;
+      padding: 8px;
+      border: 1px solid #9cacba;
+      background: white;
+      color: inherit;
+    }
+    input {
+      flex: 1;
+      min-width: 160px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-top: 20px;
+    }
+    .shot {
+      margin: 0;
+      background: #fff;
+      border: 1px solid #ccd5dd;
+      overflow: hidden;
+    }
+    .shot[hidden] {
+      display: none;
+    }
+    .shot img {
+      display: block;
+      width: 100%;
+      height: 245px;
+      object-fit: contain;
+      object-position: top;
+      background: #e7edf2;
+    }
+    .shot a:focus-visible {
+      outline: 3px solid #1768a3;
+      display: block;
+    }
+    figcaption {
+      padding: 12px;
+    }
+    figcaption strong,
+    .meta,
+    code {
+      display: block;
+    }
+    .meta {
+      color: #4d6070;
+      font-size: 12px;
+    }
+    code {
+      font-size: 11px;
+      overflow-wrap: anywhere;
+      margin: 5px 0;
+    }
+    .issue,
+    .note {
+      display: inline-block;
+      padding: 2px 7px;
+      font-size: 12px;
+      background: #fff0d3;
+      border: 1px solid #c7952a;
+      margin: 4px 4px 0 0;
+    }
+    .note {
+      background: #e8f2fb;
+      border-color: #8aafca;
+    }
+    .summary {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      border-block: 1px solid #bccbd6;
+      padding: 12px 0;
+    }
+    .summary strong {
+      font-size: 23px;
+      display: block;
+    }
+    details {
+      background: #fff;
+      border: 1px solid #ccd5dd;
+      padding: 12px;
+      margin: 15px 0;
+    }
+    .findings {
+      padding-left: 22px;
+    }
+    .findings li {
+      margin-bottom: 10px;
+    }
+    footer {
+      padding: 20px 0;
+      color: #526574;
+    }
+    small {
+      color: #526574;
+    }
+  </style>
+  <header>
+    <small>PRODUCTION QA · ASIA/SAIGON · 19 OCTOBER 2026</small>
+    <h1>StockPilot — evidence, with open findings</h1>
+    <p>
+      Exact deployed revision
+      <code style="display: inline"
+        >4b97984b3edd387ad29d9be5b64e3f695e602556</code
+      >. Original screenshots show observed states, not a claim that every
+      feature or accessibility criterion passes.
+    </p>
+    <div class="summary">
+      <div><strong>82</strong>screenshots</div>
+      <div><strong>33/35</strong>route / axe checks</div>
+      <div><strong>26/29</strong>workflow / reflow checks</div>
+      <div><strong>PASS</strong>mobile command recovery</div>
+      <div><strong>6 open</strong>UI/UX findings</div>
+    </div>
+    <p>
+      <a href="README.md">Full report</a> ·
+      <a href="findings.json">Findings</a> ·
+      <a href="run.json">Route results</a> ·
+      <a href="features.json">Workflow results</a> ·
+      <a href="recovery.json">Recovery proof</a> ·
+      <a href="manifest.json">SHA-256 manifest</a>
+    </p>
+    <details>
+      <summary>What still needs work</summary>
+      <ol class="findings">
+        <li>
+          <strong>UX-01 · Low-contrast role label on More</strong><br />The 12px
+          Demo workspace label renders #9eacb9 on white, contrast 2.31:1. Axe
+          reports serious color-contrast on desktop and mobile.
+        </li>
+        <li>
+          <strong>UX-02 · Source Sans 3 is not the rendered font</strong
+          ><br />Both heading and body use the system font stack. The
+          --font-sans computed value is empty, while --font-source-sans exists
+          on body.
+        </li>
+        <li>
+          <strong
+            >UX-03 · Owner settings has no visible desktop navigation
+            entry</strong
+          ><br />For an authenticated Owner at desktop size, visible navigation
+          contains neither /app/settings nor /app/more. Settings works when its
+          URL is entered directly; mobile reaches it through More.
+        </li>
+        <li>
+          <strong
+            >UX-04 · Responsive overflow in the narrow header and long-SKU
+            adjustment form</strong
+          ><br />At requested/client width 320px, document scroll width is 353px
+          in desktop and touch contexts. At 390px the Manager header truncates
+          workspace identity to H... . The 390px adjustment dialog also lets
+          valid long-SKU form controls extend to x=503.78, beyond its x=390
+          boundary; drawer-body clientWidth=389 and scrollWidth=503.
+        </li>
+        <li>
+          <strong
+            >UX-05 · Order facts show internal IDs instead of business
+            names</strong
+          ><br />Warehouse and Created by display UUID strings. They provide
+          little operational meaning beside a customer/order record.
+        </li>
+        <li>
+          <strong
+            >UX-06 · Successful integration retry does not link to its created
+            order</strong
+          ><br />The live manual retry succeeds and its API response contains
+          orderId, but the succeeded delivery drawer shows metadata/payload
+          without an Open order action.
+        </li>
+      </ol>
+    </details>
+  </header>
+  <main>
+    <div class="bar">
+      <label
+        >Device
+        <select id="device" aria-label="Device">
+          <option value="all">All</option>
+          <option value="desktop">Desktop</option>
+          <option value="mobile">Mobile</option>
+        </select></label
+      ><label
+        >Findings
+        <select id="issues" aria-label="Findings">
+          <option value="all">All evidence</option>
+          <option value="yes">Linked to a finding</option>
+        </select></label
+      ><input
+        id="search"
+        type="search"
+        aria-label="Search evidence"
+        placeholder="Search screen, route or workflow"
+      /><output id="count" aria-live="polite"></output>
+    </div>
+    <div class="grid">
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="landing images/desktop-landing.jpg https://stock-pilot-web-five.vercel.app/"
+      >
+        <a href="images/desktop-landing.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-landing.jpg"
+            alt="desktop landing"
+        /></a>
+        <figcaption>
+          <strong>landing</strong
+          ><span class="meta">desktop · 19/10/2026, 11:39:40</span
+          ><code>/</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="login images/desktop-login.jpg https://stock-pilot-web-five.vercel.app/login"
+      >
+        <a href="images/desktop-login.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-login.jpg"
+            alt="desktop login"
+        /></a>
+        <figcaption>
+          <strong>login</strong
+          ><span class="meta">desktop · 19/10/2026, 11:39:42</span
+          ><code>/login</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="signup images/desktop-signup.jpg https://stock-pilot-web-five.vercel.app/signup"
+      >
+        <a href="images/desktop-signup.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-signup.jpg"
+            alt="desktop signup"
+        /></a>
+        <figcaption>
+          <strong>signup</strong
+          ><span class="meta">desktop · 19/10/2026, 11:39:43</span
+          ><code>/signup</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="invitation-invalid images/desktop-invitation-invalid.jpg https://stock-pilot-web-five.vercel.app/invitations/accept"
+      >
+        <a
+          href="images/desktop-invitation-invalid.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-invitation-invalid.jpg"
+            alt="desktop invitation-invalid"
+        /></a>
+        <figcaption>
+          <strong>invitation-invalid</strong
+          ><span class="meta">desktop · 19/10/2026, 11:39:45</span
+          ><code>/invitations/accept</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="yes"
+        data-search="overview images/desktop-overview.jpg https://stock-pilot-web-five.vercel.app/app"
+      >
+        <a href="images/desktop-overview.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-overview.jpg"
+            alt="desktop overview"
+        /></a>
+        <figcaption>
+          <strong>overview</strong
+          ><span class="meta">desktop · 19/10/2026, 11:39:53</span
+          ><code>/app</code><span class="issue">UX-02</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="orders images/desktop-orders.jpg https://stock-pilot-web-five.vercel.app/app/orders"
+      >
+        <a href="images/desktop-orders.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-orders.jpg"
+            alt="desktop orders"
+        /></a>
+        <figcaption>
+          <strong>orders</strong
+          ><span class="meta">desktop · 19/10/2026, 11:39:57</span
+          ><code>/app/orders</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="inventory images/desktop-inventory.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a href="images/desktop-inventory.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-inventory.jpg"
+            alt="desktop inventory"
+        /></a>
+        <figcaption>
+          <strong>inventory</strong
+          ><span class="meta">desktop · 19/10/2026, 11:40:01</span
+          ><code>/app/inventory</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="products images/desktop-products.jpg https://stock-pilot-web-five.vercel.app/app/products"
+      >
+        <a href="images/desktop-products.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-products.jpg"
+            alt="desktop products"
+        /></a>
+        <figcaption>
+          <strong>products</strong
+          ><span class="meta">desktop · 19/10/2026, 11:40:06</span
+          ><code>/app/products</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="partners images/desktop-partners.jpg https://stock-pilot-web-five.vercel.app/app/partners"
+      >
+        <a href="images/desktop-partners.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-partners.jpg"
+            alt="desktop partners"
+        /></a>
+        <figcaption>
+          <strong>partners</strong
+          ><span class="meta">desktop · 19/10/2026, 11:40:10</span
+          ><code>/app/partners</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="receipts images/desktop-receipts.jpg https://stock-pilot-web-five.vercel.app/app/receipts"
+      >
+        <a href="images/desktop-receipts.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-receipts.jpg"
+            alt="desktop receipts"
+        /></a>
+        <figcaption>
+          <strong>receipts</strong
+          ><span class="meta">desktop · 19/10/2026, 11:40:13</span
+          ><code>/app/receipts</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="imports images/desktop-imports.jpg https://stock-pilot-web-five.vercel.app/app/imports"
+      >
+        <a href="images/desktop-imports.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-imports.jpg"
+            alt="desktop imports"
+        /></a>
+        <figcaption>
+          <strong>imports</strong
+          ><span class="meta">desktop · 19/10/2026, 11:40:17</span
+          ><code>/app/imports</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="integrations images/desktop-integrations.jpg https://stock-pilot-web-five.vercel.app/app/integrations"
+      >
+        <a href="images/desktop-integrations.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-integrations.jpg"
+            alt="desktop integrations"
+        /></a>
+        <figcaption>
+          <strong>integrations</strong
+          ><span class="meta">desktop · 19/10/2026, 11:40:20</span
+          ><code>/app/integrations</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="audit images/desktop-audit.jpg https://stock-pilot-web-five.vercel.app/app/audit"
+      >
+        <a href="images/desktop-audit.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-audit.jpg"
+            alt="desktop audit"
+        /></a>
+        <figcaption>
+          <strong>audit</strong
+          ><span class="meta">desktop · 19/10/2026, 11:40:25</span
+          ><code>/app/audit</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="yes"
+        data-search="more images/desktop-more.jpg https://stock-pilot-web-five.vercel.app/app/more"
+      >
+        <a href="images/desktop-more.jpg" target="_blank" rel="noopener"
+          ><img loading="lazy" src="images/desktop-more.jpg" alt="desktop more"
+        /></a>
+        <figcaption>
+          <strong>more</strong
+          ><span class="meta">desktop · 19/10/2026, 11:40:29</span
+          ><code>/app/more</code><span class="issue">UX-01</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="settings-manager images/desktop-settings-manager.jpg https://stock-pilot-web-five.vercel.app/app/settings"
+      >
+        <a
+          href="images/desktop-settings-manager.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-settings-manager.jpg"
+            alt="desktop settings-manager"
+        /></a>
+        <figcaption>
+          <strong>settings-manager</strong
+          ><span class="meta">desktop · 19/10/2026, 11:40:33</span
+          ><code>/app/settings</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="yes"
+        data-search="settings-owner images/desktop-settings-owner.jpg https://stock-pilot-web-five.vercel.app/app/settings"
+      >
+        <a
+          href="images/desktop-settings-owner.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-settings-owner.jpg"
+            alt="desktop settings-owner"
+        /></a>
+        <figcaption>
+          <strong>settings-owner</strong
+          ><span class="meta">desktop · 19/10/2026, 11:40:39</span
+          ><code>/app/settings</code><span class="issue">UX-03</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="landing images/mobile-landing.jpg https://stock-pilot-web-five.vercel.app/"
+      >
+        <a href="images/mobile-landing.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-landing.jpg"
+            alt="mobile landing"
+        /></a>
+        <figcaption>
+          <strong>landing</strong
+          ><span class="meta">mobile · 19/10/2026, 11:40:42</span><code>/</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="login images/mobile-login.jpg https://stock-pilot-web-five.vercel.app/login"
+      >
+        <a href="images/mobile-login.jpg" target="_blank" rel="noopener"
+          ><img loading="lazy" src="images/mobile-login.jpg" alt="mobile login"
+        /></a>
+        <figcaption>
+          <strong>login</strong
+          ><span class="meta">mobile · 19/10/2026, 11:40:44</span
+          ><code>/login</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="signup images/mobile-signup.jpg https://stock-pilot-web-five.vercel.app/signup"
+      >
+        <a href="images/mobile-signup.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-signup.jpg"
+            alt="mobile signup"
+        /></a>
+        <figcaption>
+          <strong>signup</strong
+          ><span class="meta">mobile · 19/10/2026, 11:40:46</span
+          ><code>/signup</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="invitation-invalid images/mobile-invitation-invalid.jpg https://stock-pilot-web-five.vercel.app/invitations/accept"
+      >
+        <a
+          href="images/mobile-invitation-invalid.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-invitation-invalid.jpg"
+            alt="mobile invitation-invalid"
+        /></a>
+        <figcaption>
+          <strong>invitation-invalid</strong
+          ><span class="meta">mobile · 19/10/2026, 11:40:48</span
+          ><code>/invitations/accept</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="yes"
+        data-search="overview images/mobile-overview.jpg https://stock-pilot-web-five.vercel.app/app"
+      >
+        <a href="images/mobile-overview.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-overview.jpg"
+            alt="mobile overview"
+        /></a>
+        <figcaption>
+          <strong>overview</strong
+          ><span class="meta">mobile · 19/10/2026, 11:40:56</span
+          ><code>/app</code><span class="issue">UX-02 · UX-04</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="orders images/mobile-orders.jpg https://stock-pilot-web-five.vercel.app/app/orders"
+      >
+        <a href="images/mobile-orders.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-orders.jpg"
+            alt="mobile orders"
+        /></a>
+        <figcaption>
+          <strong>orders</strong
+          ><span class="meta">mobile · 19/10/2026, 11:40:59</span
+          ><code>/app/orders</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="inventory images/mobile-inventory.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a href="images/mobile-inventory.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-inventory.jpg"
+            alt="mobile inventory"
+        /></a>
+        <figcaption>
+          <strong>inventory</strong
+          ><span class="meta">mobile · 19/10/2026, 11:41:02</span
+          ><code>/app/inventory</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="products images/mobile-products.jpg https://stock-pilot-web-five.vercel.app/app/products"
+      >
+        <a href="images/mobile-products.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-products.jpg"
+            alt="mobile products"
+        /></a>
+        <figcaption>
+          <strong>products</strong
+          ><span class="meta">mobile · 19/10/2026, 11:41:06</span
+          ><code>/app/products</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="partners images/mobile-partners.jpg https://stock-pilot-web-five.vercel.app/app/partners"
+      >
+        <a href="images/mobile-partners.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-partners.jpg"
+            alt="mobile partners"
+        /></a>
+        <figcaption>
+          <strong>partners</strong
+          ><span class="meta">mobile · 19/10/2026, 11:41:09</span
+          ><code>/app/partners</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="receipts images/mobile-receipts.jpg https://stock-pilot-web-five.vercel.app/app/receipts"
+      >
+        <a href="images/mobile-receipts.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-receipts.jpg"
+            alt="mobile receipts"
+        /></a>
+        <figcaption>
+          <strong>receipts</strong
+          ><span class="meta">mobile · 19/10/2026, 11:41:12</span
+          ><code>/app/receipts</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="imports images/mobile-imports.jpg https://stock-pilot-web-five.vercel.app/app/imports"
+      >
+        <a href="images/mobile-imports.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-imports.jpg"
+            alt="mobile imports"
+        /></a>
+        <figcaption>
+          <strong>imports</strong
+          ><span class="meta">mobile · 19/10/2026, 11:41:15</span
+          ><code>/app/imports</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="integrations images/mobile-integrations.jpg https://stock-pilot-web-five.vercel.app/app/integrations"
+      >
+        <a href="images/mobile-integrations.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-integrations.jpg"
+            alt="mobile integrations"
+        /></a>
+        <figcaption>
+          <strong>integrations</strong
+          ><span class="meta">mobile · 19/10/2026, 11:41:19</span
+          ><code>/app/integrations</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="audit images/mobile-audit.jpg https://stock-pilot-web-five.vercel.app/app/audit"
+      >
+        <a href="images/mobile-audit.jpg" target="_blank" rel="noopener"
+          ><img loading="lazy" src="images/mobile-audit.jpg" alt="mobile audit"
+        /></a>
+        <figcaption>
+          <strong>audit</strong
+          ><span class="meta">mobile · 19/10/2026, 11:41:23</span
+          ><code>/app/audit</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="yes"
+        data-search="more images/mobile-more.jpg https://stock-pilot-web-five.vercel.app/app/more"
+      >
+        <a href="images/mobile-more.jpg" target="_blank" rel="noopener"
+          ><img loading="lazy" src="images/mobile-more.jpg" alt="mobile more"
+        /></a>
+        <figcaption>
+          <strong>more</strong
+          ><span class="meta">mobile · 19/10/2026, 11:41:27</span
+          ><code>/app/more</code><span class="issue">UX-01</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="settings-manager images/mobile-settings-manager.jpg https://stock-pilot-web-five.vercel.app/app/settings"
+      >
+        <a
+          href="images/mobile-settings-manager.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-settings-manager.jpg"
+            alt="mobile settings-manager"
+        /></a>
+        <figcaption>
+          <strong>settings-manager</strong
+          ><span class="meta">mobile · 19/10/2026, 11:41:30</span
+          ><code>/app/settings</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="settings-owner images/mobile-settings-owner.jpg https://stock-pilot-web-five.vercel.app/app/settings"
+      >
+        <a
+          href="images/mobile-settings-owner.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-settings-owner.jpg"
+            alt="mobile settings-owner"
+        /></a>
+        <figcaption>
+          <strong>settings-owner</strong
+          ><span class="meta">mobile · 19/10/2026, 11:41:35</span
+          ><code>/app/settings</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="inventory-empty images/desktop-inventory-empty.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a
+          href="images/desktop-inventory-empty.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-inventory-empty.jpg"
+            alt="desktop inventory-empty"
+        /></a>
+        <figcaption>
+          <strong>inventory-empty</strong
+          ><span class="meta">desktop · 19/10/2026, 11:43:00</span
+          ><code>/app/inventory</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="draft-keyboard-dialog images/desktop-draft-keyboard-dialog.jpg https://stock-pilot-web-five.vercel.app/app/orders?new=1"
+      >
+        <a
+          href="images/desktop-draft-keyboard-dialog.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-draft-keyboard-dialog.jpg"
+            alt="desktop draft-keyboard-dialog"
+        /></a>
+        <figcaption>
+          <strong>draft-keyboard-dialog</strong
+          ><span class="meta">desktop · 19/10/2026, 11:43:06</span
+          ><code>/app/orders?new=1</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="receipt-ready images/desktop-receipt-ready.jpg https://stock-pilot-web-five.vercel.app/app/receipts"
+      >
+        <a
+          href="images/desktop-receipt-ready.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-receipt-ready.jpg"
+            alt="desktop receipt-ready"
+        /></a>
+        <figcaption>
+          <strong>receipt-ready</strong
+          ><span class="meta">desktop · 19/10/2026, 11:43:11</span
+          ><code>/app/receipts</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="receipt-applied images/desktop-receipt-applied.jpg https://stock-pilot-web-five.vercel.app/app/receipts"
+      >
+        <a
+          href="images/desktop-receipt-applied.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-receipt-applied.jpg"
+            alt="desktop receipt-applied"
+        /></a>
+        <figcaption>
+          <strong>receipt-applied</strong
+          ><span class="meta">desktop · 19/10/2026, 11:43:14</span
+          ><code>/app/receipts</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="draft-edit images/desktop-draft-edit.jpg https://stock-pilot-web-five.vercel.app/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97&amp;edit=1"
+      >
+        <a href="images/desktop-draft-edit.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-draft-edit.jpg"
+            alt="desktop draft-edit"
+        /></a>
+        <figcaption>
+          <strong>draft-edit</strong
+          ><span class="meta">desktop · 19/10/2026, 11:45:20</span
+          ><code
+            >/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97&amp;edit=1</code
+          >
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="yes"
+        data-search="draft-persisted images/desktop-draft-persisted.jpg https://stock-pilot-web-five.vercel.app/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97"
+      >
+        <a
+          href="images/desktop-draft-persisted.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-draft-persisted.jpg"
+            alt="desktop draft-persisted"
+        /></a>
+        <figcaption>
+          <strong>draft-persisted</strong
+          ><span class="meta">desktop · 19/10/2026, 11:45:24</span
+          ><code>/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97</code
+          ><span class="issue">UX-05</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="order-confirmed images/desktop-order-confirmed.jpg https://stock-pilot-web-five.vercel.app/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97"
+      >
+        <a
+          href="images/desktop-order-confirmed.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-order-confirmed.jpg"
+            alt="desktop order-confirmed"
+        /></a>
+        <figcaption>
+          <strong>order-confirmed</strong
+          ><span class="meta">desktop · 19/10/2026, 11:45:26</span
+          ><code>/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="staff-access-boundary images/desktop-staff-access-boundary.jpg https://stock-pilot-web-five.vercel.app/app/integrations"
+      >
+        <a
+          href="images/desktop-staff-access-boundary.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-staff-access-boundary.jpg"
+            alt="desktop staff-access-boundary"
+        /></a>
+        <figcaption>
+          <strong>staff-access-boundary</strong
+          ><span class="meta">desktop · 19/10/2026, 11:45:32</span
+          ><code>/app/integrations</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="order-fulfilled images/desktop-order-fulfilled.jpg https://stock-pilot-web-five.vercel.app/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97"
+      >
+        <a
+          href="images/desktop-order-fulfilled.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-order-fulfilled.jpg"
+            alt="desktop order-fulfilled"
+        /></a>
+        <figcaption>
+          <strong>order-fulfilled</strong
+          ><span class="meta">desktop · 19/10/2026, 11:45:36</span
+          ><code>/app/orders?order=60bf4678-218c-4870-b08a-9a84cfc0db97</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="inventory-empty images/mobile-inventory-empty.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a
+          href="images/mobile-inventory-empty.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-inventory-empty.jpg"
+            alt="mobile inventory-empty"
+        /></a>
+        <figcaption>
+          <strong>inventory-empty</strong
+          ><span class="meta">mobile · 19/10/2026, 11:48:28</span
+          ><code>/app/inventory</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="draft-keyboard-dialog images/mobile-draft-keyboard-dialog.jpg https://stock-pilot-web-five.vercel.app/app/orders?new=1"
+      >
+        <a
+          href="images/mobile-draft-keyboard-dialog.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-draft-keyboard-dialog.jpg"
+            alt="mobile draft-keyboard-dialog"
+        /></a>
+        <figcaption>
+          <strong>draft-keyboard-dialog</strong
+          ><span class="meta">mobile · 19/10/2026, 11:45:58</span
+          ><code>/app/orders?new=1</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="receipt-ready images/mobile-receipt-ready.jpg https://stock-pilot-web-five.vercel.app/app/receipts"
+      >
+        <a href="images/mobile-receipt-ready.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-receipt-ready.jpg"
+            alt="mobile receipt-ready"
+        /></a>
+        <figcaption>
+          <strong>receipt-ready</strong
+          ><span class="meta">mobile · 19/10/2026, 11:46:02</span
+          ><code>/app/receipts</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="receipt-applied images/mobile-receipt-applied.jpg https://stock-pilot-web-five.vercel.app/app/receipts"
+      >
+        <a
+          href="images/mobile-receipt-applied.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-receipt-applied.jpg"
+            alt="mobile receipt-applied"
+        /></a>
+        <figcaption>
+          <strong>receipt-applied</strong
+          ><span class="meta">mobile · 19/10/2026, 11:46:04</span
+          ><code>/app/receipts</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="draft-edit images/mobile-draft-edit.jpg https://stock-pilot-web-five.vercel.app/app/orders?search=SO-1792385161587-48745480&amp;status=DRAFT&amp;source=qa-history&amp;order=63ffeda2-58b4-4e36-8e1a-fd60b4113451&amp;edit=1"
+      >
+        <a href="images/mobile-draft-edit.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-draft-edit.jpg"
+            alt="mobile draft-edit"
+        /></a>
+        <figcaption>
+          <strong>draft-edit</strong
+          ><span class="meta">mobile · 19/10/2026, 11:46:13</span
+          ><code
+            >/app/orders?search=SO-1792385161587-48745480&amp;status=DRAFT&amp;source=qa-history&amp;order=63ffeda2-58b4-4e36-8e1a-fd60b4113451&amp;edit=1</code
+          >
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="draft-persisted images/mobile-draft-persisted.jpg https://stock-pilot-web-five.vercel.app/app/orders?search=SO-1792385161587-48745480&amp;status=DRAFT&amp;source=qa-history&amp;order=63ffeda2-58b4-4e36-8e1a-fd60b4113451"
+      >
+        <a
+          href="images/mobile-draft-persisted.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-draft-persisted.jpg"
+            alt="mobile draft-persisted"
+        /></a>
+        <figcaption>
+          <strong>draft-persisted</strong
+          ><span class="meta">mobile · 19/10/2026, 11:46:16</span
+          ><code
+            >/app/orders?search=SO-1792385161587-48745480&amp;status=DRAFT&amp;source=qa-history&amp;order=63ffeda2-58b4-4e36-8e1a-fd60b4113451</code
+          >
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="order-confirmed images/mobile-order-confirmed.jpg https://stock-pilot-web-five.vercel.app/app/orders?search=SO-1792385161587-48745480&amp;status=DRAFT&amp;source=qa-history&amp;order=63ffeda2-58b4-4e36-8e1a-fd60b4113451"
+      >
+        <a
+          href="images/mobile-order-confirmed.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-order-confirmed.jpg"
+            alt="mobile order-confirmed"
+        /></a>
+        <figcaption>
+          <strong>order-confirmed</strong
+          ><span class="meta">mobile · 19/10/2026, 11:46:18</span
+          ><code
+            >/app/orders?search=SO-1792385161587-48745480&amp;status=DRAFT&amp;source=qa-history&amp;order=63ffeda2-58b4-4e36-8e1a-fd60b4113451</code
+          >
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="staff-access-boundary images/mobile-staff-access-boundary.jpg https://stock-pilot-web-five.vercel.app/app/integrations"
+      >
+        <a
+          href="images/mobile-staff-access-boundary.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-staff-access-boundary.jpg"
+            alt="mobile staff-access-boundary"
+        /></a>
+        <figcaption>
+          <strong>staff-access-boundary</strong
+          ><span class="meta">mobile · 19/10/2026, 11:46:24</span
+          ><code>/app/integrations</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="yes"
+        data-search="order-fulfilled images/mobile-order-fulfilled.jpg https://stock-pilot-web-five.vercel.app/app/orders?order=63ffeda2-58b4-4e36-8e1a-fd60b4113451"
+      >
+        <a
+          href="images/mobile-order-fulfilled.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-order-fulfilled.jpg"
+            alt="mobile order-fulfilled"
+        /></a>
+        <figcaption>
+          <strong>order-fulfilled</strong
+          ><span class="meta">mobile · 19/10/2026, 11:46:27</span
+          ><code>/app/orders?order=63ffeda2-58b4-4e36-8e1a-fd60b4113451</code
+          ><span class="issue">UX-05</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="owner-audit images/desktop-owner-audit.jpg https://stock-pilot-web-five.vercel.app/app/audit?entityId=60bf4678-218c-4870-b08a-9a84cfc0db97"
+      >
+        <a href="images/desktop-owner-audit.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-owner-audit.jpg"
+            alt="desktop owner-audit"
+        /></a>
+        <figcaption>
+          <strong>owner-audit</strong
+          ><span class="meta">desktop · 19/10/2026, 11:47:35</span
+          ><code>/app/audit?entityId=60bf4678-218c-4870-b08a-9a84cfc0db97</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="audit-detail images/desktop-audit-detail.jpg https://stock-pilot-web-five.vercel.app/app/audit?entityId=60bf4678-218c-4870-b08a-9a84cfc0db97&amp;entityType=SalesOrder&amp;eventId=655207b2-f69c-49e9-8985-5f4b84eb4a51"
+      >
+        <a href="images/desktop-audit-detail.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-audit-detail.jpg"
+            alt="desktop audit-detail"
+        /></a>
+        <figcaption>
+          <strong>audit-detail</strong
+          ><span class="meta">desktop · 19/10/2026, 11:47:37</span
+          ><code
+            >/app/audit?entityId=60bf4678-218c-4870-b08a-9a84cfc0db97&amp;entityType=SalesOrder&amp;eventId=655207b2-f69c-49e9-8985-5f4b84eb4a51</code
+          >
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="import-invalid images/desktop-import-invalid.jpg https://stock-pilot-web-five.vercel.app/app/imports"
+      >
+        <a
+          href="images/desktop-import-invalid.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-import-invalid.jpg"
+            alt="desktop import-invalid"
+        /></a>
+        <figcaption>
+          <strong>import-invalid</strong
+          ><span class="meta">desktop · 19/10/2026, 11:47:41</span
+          ><code>/app/imports</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="import-preview-valid images/desktop-import-preview-valid.jpg https://stock-pilot-web-five.vercel.app/app/imports"
+      >
+        <a
+          href="images/desktop-import-preview-valid.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-import-preview-valid.jpg"
+            alt="desktop import-preview-valid"
+        /></a>
+        <figcaption>
+          <strong>import-preview-valid</strong
+          ><span class="meta">desktop · 19/10/2026, 11:47:43</span
+          ><code>/app/imports</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="import-completed images/desktop-import-completed.jpg https://stock-pilot-web-five.vercel.app/app/imports"
+      >
+        <a
+          href="images/desktop-import-completed.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-import-completed.jpg"
+            alt="desktop import-completed"
+        /></a>
+        <figcaption>
+          <strong>import-completed</strong
+          ><span class="meta">desktop · 19/10/2026, 11:47:45</span
+          ><code>/app/imports</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="integration-detail-before images/desktop-integration-detail-before.jpg https://stock-pilot-web-five.vercel.app/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761"
+      >
+        <a
+          href="images/desktop-integration-detail-before.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-integration-detail-before.jpg"
+            alt="desktop integration-detail-before"
+        /></a>
+        <figcaption>
+          <strong>integration-detail-before</strong
+          ><span class="meta">desktop · 19/10/2026, 11:47:49</span
+          ><code
+            >/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761</code
+          >
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="yes"
+        data-search="integration-retry-result images/desktop-integration-retry-result.jpg https://stock-pilot-web-five.vercel.app/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761"
+      >
+        <a
+          href="images/desktop-integration-retry-result.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-integration-retry-result.jpg"
+            alt="desktop integration-retry-result"
+        /></a>
+        <figcaption>
+          <strong>integration-retry-result</strong
+          ><span class="meta">desktop · 19/10/2026, 12:02:30</span
+          ><code
+            >/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761</code
+          ><span class="issue">UX-06</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="simulated-read-error images/desktop-simulated-read-error.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a
+          href="images/desktop-simulated-read-error.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-simulated-read-error.jpg"
+            alt="desktop simulated-read-error"
+        /></a>
+        <figcaption>
+          <strong>simulated-read-error</strong
+          ><span class="meta">desktop · 19/10/2026, 11:48:03</span
+          ><code>/app/inventory</code
+          ><span class="note">Controlled browser fault</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="read-recovered images/desktop-read-recovered.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a
+          href="images/desktop-read-recovered.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-read-recovered.jpg"
+            alt="desktop read-recovered"
+        /></a>
+        <figcaption>
+          <strong>read-recovered</strong
+          ><span class="meta">desktop · 19/10/2026, 11:48:05</span
+          ><code>/app/inventory</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="owner-audit images/mobile-owner-audit.jpg https://stock-pilot-web-five.vercel.app/app/audit?entityId=63ffeda2-58b4-4e36-8e1a-fd60b4113451"
+      >
+        <a href="images/mobile-owner-audit.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-owner-audit.jpg"
+            alt="mobile owner-audit"
+        /></a>
+        <figcaption>
+          <strong>owner-audit</strong
+          ><span class="meta">mobile · 19/10/2026, 11:48:31</span
+          ><code>/app/audit?entityId=63ffeda2-58b4-4e36-8e1a-fd60b4113451</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="audit-detail images/mobile-audit-detail.jpg https://stock-pilot-web-five.vercel.app/app/audit?entityId=63ffeda2-58b4-4e36-8e1a-fd60b4113451&amp;entityType=SalesOrder&amp;eventId=f808e45b-db8d-4f5d-9e49-6ca6378b130e"
+      >
+        <a href="images/mobile-audit-detail.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-audit-detail.jpg"
+            alt="mobile audit-detail"
+        /></a>
+        <figcaption>
+          <strong>audit-detail</strong
+          ><span class="meta">mobile · 19/10/2026, 11:48:32</span
+          ><code
+            >/app/audit?entityId=63ffeda2-58b4-4e36-8e1a-fd60b4113451&amp;entityType=SalesOrder&amp;eventId=f808e45b-db8d-4f5d-9e49-6ca6378b130e</code
+          >
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="import-invalid images/mobile-import-invalid.jpg https://stock-pilot-web-five.vercel.app/app/imports"
+      >
+        <a
+          href="images/mobile-import-invalid.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-import-invalid.jpg"
+            alt="mobile import-invalid"
+        /></a>
+        <figcaption>
+          <strong>import-invalid</strong
+          ><span class="meta">mobile · 19/10/2026, 11:48:37</span
+          ><code>/app/imports</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="import-preview-valid images/mobile-import-preview-valid.jpg https://stock-pilot-web-five.vercel.app/app/imports"
+      >
+        <a
+          href="images/mobile-import-preview-valid.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-import-preview-valid.jpg"
+            alt="mobile import-preview-valid"
+        /></a>
+        <figcaption>
+          <strong>import-preview-valid</strong
+          ><span class="meta">mobile · 19/10/2026, 11:48:38</span
+          ><code>/app/imports</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="import-completed images/mobile-import-completed.jpg https://stock-pilot-web-five.vercel.app/app/imports"
+      >
+        <a
+          href="images/mobile-import-completed.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-import-completed.jpg"
+            alt="mobile import-completed"
+        /></a>
+        <figcaption>
+          <strong>import-completed</strong
+          ><span class="meta">mobile · 19/10/2026, 11:48:40</span
+          ><code>/app/imports</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="integration-detail-before images/mobile-integration-detail-before.jpg https://stock-pilot-web-five.vercel.app/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761"
+      >
+        <a
+          href="images/mobile-integration-detail-before.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-integration-detail-before.jpg"
+            alt="mobile integration-detail-before"
+        /></a>
+        <figcaption>
+          <strong>integration-detail-before</strong
+          ><span class="meta">mobile · 19/10/2026, 11:48:44</span
+          ><code
+            >/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761</code
+          >
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="simulated-read-error images/mobile-simulated-read-error.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a
+          href="images/mobile-simulated-read-error.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-simulated-read-error.jpg"
+            alt="mobile simulated-read-error"
+        /></a>
+        <figcaption>
+          <strong>simulated-read-error</strong
+          ><span class="meta">mobile · 19/10/2026, 11:48:53</span
+          ><code>/app/inventory</code
+          ><span class="note">Controlled browser fault</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="read-recovered images/mobile-read-recovered.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a
+          href="images/mobile-read-recovered.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-read-recovered.jpg"
+            alt="mobile read-recovered"
+        /></a>
+        <figcaption>
+          <strong>read-recovered</strong
+          ><span class="meta">mobile · 19/10/2026, 11:48:55</span
+          ><code>/app/inventory</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="yes"
+        data-search="orders-reflow-320 images/mobile-orders-reflow-320.jpg https://stock-pilot-web-five.vercel.app/app/orders"
+      >
+        <a
+          href="images/mobile-orders-reflow-320.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-orders-reflow-320.jpg"
+            alt="mobile orders-reflow-320"
+        /></a>
+        <figcaption>
+          <strong>orders-reflow-320</strong
+          ><span class="meta">mobile · 19/10/2026, 11:51:28</span
+          ><code>/app/orders</code><span class="issue">UX-04</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="orders-reflow-550 images/mobile-orders-reflow-550.jpg https://stock-pilot-web-five.vercel.app/app/orders"
+      >
+        <a
+          href="images/mobile-orders-reflow-550.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-orders-reflow-550.jpg"
+            alt="mobile orders-reflow-550"
+        /></a>
+        <figcaption>
+          <strong>orders-reflow-550</strong
+          ><span class="meta">mobile · 19/10/2026, 11:51:31</span
+          ><code>/app/orders</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="yes"
+        data-search="owner-navigation images/desktop-owner-navigation.jpg https://stock-pilot-web-five.vercel.app/app"
+      >
+        <a
+          href="images/desktop-owner-navigation.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-owner-navigation.jpg"
+            alt="desktop owner-navigation"
+        /></a>
+        <figcaption>
+          <strong>owner-navigation</strong
+          ><span class="meta">desktop · 19/10/2026, 11:51:09</span
+          ><code>/app</code><span class="issue">UX-03</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="yes"
+        data-search="orders-reflow-320 images/desktop-orders-reflow-320.jpg https://stock-pilot-web-five.vercel.app/app/orders"
+      >
+        <a
+          href="images/desktop-orders-reflow-320.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-orders-reflow-320.jpg"
+            alt="desktop orders-reflow-320"
+        /></a>
+        <figcaption>
+          <strong>orders-reflow-320</strong
+          ><span class="meta">desktop · 19/10/2026, 11:51:11</span
+          ><code>/app/orders</code><span class="issue">UX-04</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="orders-reflow-390 images/desktop-orders-reflow-390.jpg https://stock-pilot-web-five.vercel.app/app/orders"
+      >
+        <a
+          href="images/desktop-orders-reflow-390.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-orders-reflow-390.jpg"
+            alt="desktop orders-reflow-390"
+        /></a>
+        <figcaption>
+          <strong>orders-reflow-390</strong
+          ><span class="meta">desktop · 19/10/2026, 11:51:12</span
+          ><code>/app/orders</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="orders-reflow-550 images/desktop-orders-reflow-550.jpg https://stock-pilot-web-five.vercel.app/app/orders"
+      >
+        <a
+          href="images/desktop-orders-reflow-550.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-orders-reflow-550.jpg"
+            alt="desktop orders-reflow-550"
+        /></a>
+        <figcaption>
+          <strong>orders-reflow-550</strong
+          ><span class="meta">desktop · 19/10/2026, 11:51:14</span
+          ><code>/app/orders</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="no"
+        data-search="signed-out images/desktop-signed-out.jpg https://stock-pilot-web-five.vercel.app/login"
+      >
+        <a href="images/desktop-signed-out.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/desktop-signed-out.jpg"
+            alt="desktop signed-out"
+        /></a>
+        <figcaption>
+          <strong>signed-out</strong
+          ><span class="meta">desktop · 19/10/2026, 11:51:20</span
+          ><code>/login</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="orders-reflow-390 images/mobile-orders-reflow-390.jpg https://stock-pilot-web-five.vercel.app/app/orders"
+      >
+        <a
+          href="images/mobile-orders-reflow-390.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-orders-reflow-390.jpg"
+            alt="mobile orders-reflow-390"
+        /></a>
+        <figcaption>
+          <strong>orders-reflow-390</strong
+          ><span class="meta">mobile · 19/10/2026, 11:51:29</span
+          ><code>/app/orders</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="signed-out images/mobile-signed-out.jpg https://stock-pilot-web-five.vercel.app/login"
+      >
+        <a href="images/mobile-signed-out.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-signed-out.jpg"
+            alt="mobile signed-out"
+        /></a>
+        <figcaption>
+          <strong>signed-out</strong
+          ><span class="meta">mobile · 19/10/2026, 11:51:36</span
+          ><code>/login</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="yes"
+        data-search="adjustment-long-sku images/mobile-adjustment-long-sku.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a
+          href="images/mobile-adjustment-long-sku.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-adjustment-long-sku.jpg"
+            alt="mobile adjustment-long-sku"
+        /></a>
+        <figcaption>
+          <strong>adjustment-long-sku</strong
+          ><span class="meta">mobile · 19/10/2026, 12:02:34</span
+          ><code>/app/inventory</code><span class="issue">UX-04</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="command-outcome-unknown images/mobile-command-outcome-unknown.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a
+          href="images/mobile-command-outcome-unknown.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-command-outcome-unknown.jpg"
+            alt="mobile command-outcome-unknown"
+        /></a>
+        <figcaption>
+          <strong>command-outcome-unknown</strong
+          ><span class="meta">mobile · 19/10/2026, 11:52:17</span
+          ><code>/app/inventory</code
+          ><span class="note">Controlled browser fault</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="command-restored-after-reload images/mobile-command-restored-after-reload.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a
+          href="images/mobile-command-restored-after-reload.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-command-restored-after-reload.jpg"
+            alt="mobile command-restored-after-reload"
+        /></a>
+        <figcaption>
+          <strong>command-restored-after-reload</strong
+          ><span class="meta">mobile · 19/10/2026, 11:52:19</span
+          ><code>/app/inventory</code
+          ><span class="note">Controlled browser fault</span>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="command-recovered-once images/mobile-command-recovered-once.jpg https://stock-pilot-web-five.vercel.app/app/inventory"
+      >
+        <a
+          href="images/mobile-command-recovered-once.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-command-recovered-once.jpg"
+            alt="mobile command-recovered-once"
+        /></a>
+        <figcaption>
+          <strong>command-recovered-once</strong
+          ><span class="meta">mobile · 19/10/2026, 11:52:20</span
+          ><code>/app/inventory</code>
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="mobile"
+        data-issues="no"
+        data-search="command-recovery-stock-trace images/mobile-command-recovery-stock-trace.jpg https://stock-pilot-web-five.vercel.app/app/inventory?product=5d33d102-f896-46ea-9863-1bb326dca29c"
+      >
+        <a
+          href="images/mobile-command-recovery-stock-trace.jpg"
+          target="_blank"
+          rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/mobile-command-recovery-stock-trace.jpg"
+            alt="mobile command-recovery-stock-trace"
+        /></a>
+        <figcaption>
+          <strong>command-recovery-stock-trace</strong
+          ><span class="meta">mobile · 19/10/2026, 11:54:14</span
+          ><code
+            >/app/inventory?product=5d33d102-f896-46ea-9863-1bb326dca29c</code
+          >
+        </figcaption>
+      </figure>
+      <figure
+        class="shot"
+        data-device="desktop"
+        data-issues="yes"
+        data-search="Edge More contrast cross-check images/edge-more-contrast.jpg https://stock-pilot-web-five.vercel.app/app/more"
+      >
+        <a href="images/edge-more-contrast.jpg" target="_blank" rel="noopener"
+          ><img
+            loading="lazy"
+            src="images/edge-more-contrast.jpg"
+            alt="desktop Edge More contrast cross-check"
+        /></a>
+        <figcaption>
+          <strong>Edge More contrast cross-check</strong
+          ><span class="meta">desktop · 19/10/2026, 11:43:48</span
+          ><code>/app/more</code><span class="issue">UX-01</span>
+        </figcaption>
+      </figure>
+    </div>
+    <footer>
+      Desktop 1440×900 · mobile 390×844 · 320/550px probes. Click an image for
+      its untouched original. Browser fault injections are labeled. Synthetic QA
+      is separate from real-user validation.
+    </footer>
+  </main>
+  <script>
+    const dev = document.querySelector('#device'),
+      issues = document.querySelector('#issues'),
+      search = document.querySelector('#search'),
+      shots = [...document.querySelectorAll('.shot')],
+      out = document.querySelector('#count');
+    function filter() {
+      let n = 0;
+      for (const s of shots) {
+        s.hidden = !(
+          (dev.value === 'all' || s.dataset.device === dev.value) &&
+          (issues.value === 'all' || s.dataset.issues === 'yes') &&
+          s.dataset.search.toLowerCase().includes(search.value.toLowerCase())
+        );
+        if (!s.hidden) n++;
+      }
+      out.textContent = n + ' images';
+    }
+    for (const e of [dev, issues, search]) e.addEventListener('input', filter);
+    filter();
+  </script>
+</html>

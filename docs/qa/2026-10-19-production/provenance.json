@@ -1,0 +1,77 @@
+{
+  "verifiedAt": "2026-10-19T05:07:27.997Z",
+  "displayTimezone": "Asia/Saigon",
+  "observations": [
+    {
+      "url": "https://stock-pilot-web-five.vercel.app/version",
+      "status": 200,
+      "payload": {
+        "revision": "4b97984b3edd387ad29d9be5b64e3f695e602556",
+        "service": "stockpilot-web"
+      }
+    },
+    {
+      "url": "https://stock-pilot-web-five.vercel.app/api/v1/health/ready",
+      "status": 200,
+      "payload": {
+        "checks": {
+          "database": "ok",
+          "queue": "not_configured"
+        },
+        "rateLimit": {
+          "buckets": 0,
+          "rejected": {
+            "public": 0,
+            "auth": 0,
+            "user": 0
+          },
+          "limits": {
+            "publicWritesPerMinute": 60,
+            "authWritesPerMinute": 60,
+            "userWritesPerMinute": 240
+          }
+        },
+        "revision": "4b97984b3edd387ad29d9be5b64e3f695e602556",
+        "status": "ready"
+      }
+    },
+    {
+      "url": "https://stockpilot-api-y1aw.onrender.com/v1/health/ready",
+      "status": 200,
+      "payload": {
+        "checks": {
+          "database": "ok",
+          "queue": "not_configured"
+        },
+        "rateLimit": {
+          "buckets": 0,
+          "rejected": {
+            "public": 0,
+            "auth": 0,
+            "user": 0
+          },
+          "limits": {
+            "publicWritesPerMinute": 60,
+            "authWritesPerMinute": 60,
+            "userWritesPerMinute": 240
+          }
+        },
+        "revision": "4b97984b3edd387ad29d9be5b64e3f695e602556",
+        "status": "ready"
+      }
+    }
+  ],
+  "finalStock": {
+    "sku": "HP-1001",
+    "onHand": 20,
+    "reserved": 4,
+    "available": 16
+  },
+  "recoveryStock": {
+    "sku": "QA-IMP-MOBILE-1792385305115",
+    "onHand": 0,
+    "reserved": 0,
+    "available": 0
+  },
+  "productionSourceChanged": false
+}
