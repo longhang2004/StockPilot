@@ -103,6 +103,11 @@ use the production origin.
   direct URL to the separate `stockpilot_queue` database.
 - Confirm `stockpilot_app` has `rolbypassrls=false`, is not a member of
   `neon_superuser`, and that tenant tables have both RLS and forced RLS.
+- Readiness rejects a connection authenticated as a superuser, a role with
+  `BYPASSRLS`, `CREATEROLE` or `CREATEDB`, or a member of such a role. It returns
+  HTTP 503 with `checks.database=unsafe_role`. Configure the actual app URL;
+  `SET ROLE` does not make an owner credential suitable for runtime. Liveness
+  stays independent so platform probes do not wake Neon.
 
 ## Environment matrix
 

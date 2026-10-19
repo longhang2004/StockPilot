@@ -2,7 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
-import { setTestEnvironment } from './support/environment.js';
+import { adminDatabaseUrl, setTestEnvironment } from './support/environment.js';
 import { createTestApplication } from './support/test-app.js';
 
 describe('health endpoints', () => {
@@ -10,7 +10,7 @@ describe('health endpoints', () => {
 
   // The app bootstraps the full module graph, so the required configuration
   // surface must be present (same minimal set as the other integration
-  // suites; the health endpoints themselves do not touch the database).
+  // suites; readiness checks the connected database role).
   beforeAll(() => {
     setTestEnvironment();
   });
@@ -63,6 +63,33 @@ describe('health endpoints', () => {
       else process.env.RENDER_GIT_COMMIT = previousRevision;
     }
   });
+
+  it.each([false, true])(
+    'rejects an owner connection even with SET ROLE=%s',
+    async (setRole) => {
+      const previous = process.env.DATABASE_URL;
+      const ownerUrl = new URL(adminDatabaseUrl());
+      if (setRole)
+        ownerUrl.searchParams.set('options', '-c role=stockpilot_app');
+      process.env.DATABASE_URL = ownerUrl.toString();
+      try {
+        ({ app } = await createTestApplication());
+        const readiness = await request(app.getHttpServer()).get(
+          '/v1/health/ready',
+        );
+        expect(readiness.status).toBe(503);
+        expect(readiness.body).toMatchObject({
+          checks: { database: 'unsafe_role', queue: 'not_configured' },
+          status: 'degraded',
+        });
+        const live = await request(app.getHttpServer()).get('/v1/health/live');
+        expect(live.status).toBe(200);
+      } finally {
+        if (previous === undefined) delete process.env.DATABASE_URL;
+        else process.env.DATABASE_URL = previous;
+      }
+    },
+  );
 
   it('returns 503 when the queue is required but not configured', async () => {
     const previous = process.env.QUEUE_REQUIRED;

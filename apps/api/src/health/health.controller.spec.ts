@@ -56,10 +56,10 @@ describe('HealthController', () => {
     });
   });
 
-  it('reports database readiness and explicit queue configuration', async () => {
+  it('requires a safe runtime role before reporting readiness', async () => {
     const { HealthController } = await import('./health.controller.js');
     const prisma = {
-      $queryRaw: vi.fn().mockResolvedValue([{ '?column?': 1 }]),
+      $queryRaw: vi.fn().mockResolvedValue([{ runtime_role_safe: true }]),
     };
     const moduleRef = await Test.createTestingModule({
       controllers: [HealthController],
@@ -96,6 +96,17 @@ describe('HealthController', () => {
       status: 'ready',
     });
     expect(response.status).not.toHaveBeenCalled();
+
+    for (const rows of [[{ runtime_role_safe: false }], []]) {
+      prisma.$queryRaw.mockResolvedValueOnce(rows);
+      await expect(
+        moduleRef.get(HealthController).ready(response),
+      ).resolves.toMatchObject({
+        checks: { database: 'unsafe_role', queue: 'not_configured' },
+        status: 'degraded',
+      });
+      expect(response.status).toHaveBeenLastCalledWith(503);
+    }
   });
 
   it('returns degraded readiness when the required queue is not configured', async () => {
@@ -107,7 +118,7 @@ describe('HealthController', () => {
           provide: (await import('../database/prisma.service.js'))
             .PrismaService,
           useValue: {
-            $queryRaw: vi.fn().mockResolvedValue([{ '?column?': 1 }]),
+            $queryRaw: vi.fn().mockResolvedValue([{ runtime_role_safe: true }]),
           },
         },
         {
