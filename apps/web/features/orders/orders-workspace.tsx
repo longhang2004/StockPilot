@@ -323,6 +323,9 @@ export function OrdersWorkspace({ role }: { role: Role }) {
       ) : (
         <OrderDetailView
           detail={selectedOrder}
+          {...(location.params.get('returnTo')
+            ? { returnTo: location.params.get('returnTo')! }
+            : {})}
           canManage={canManage}
           canEditDraft={selectedOrder.status === 'DRAFT'}
           onBack={() => location.update({ order: null, edit: null }, 'replace')}

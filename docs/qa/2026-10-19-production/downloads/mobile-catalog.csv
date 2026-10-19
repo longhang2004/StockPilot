@@ -1,0 +1,12 @@
+sku,name,sale_price,reorder_point,description,is_active
+HP-1001,Packing Tape 48mm,12.50,8,Reliable carton sealing tape for daily dispatches.,true
+HP-1002,Kraft Carton Large,18.00,12,Double-wall cartons sized for wholesale case packing.,true
+HP-1003,Thermal Labels 4x6,24.00,10,Thermal labels for parcel and pallet shipments.,true
+HP-1004,Nitrile Gloves L,32.50,6,Powder-free nitrile gloves for warehouse handling.,true
+HP-1005,Stretch Wrap 500mm,15.75,5,Clear stretch wrap for pallet stability.,true
+HP-1006,Warehouse Marker Set,9.90,4,Permanent marker set for bin and carton labelling.,true
+HP-1007,Pallet Corner Guards,21.00,5,Protective guards for pallet corners in transit.,true
+HP-1008,Inventory Tags,7.25,3,Bright inventory tags for fast cycle counts.,true
+HP-1009,Legacy Poly Mailer,5.00,0,Retired mailer kept for historical order snapshots.,false
+QA-IMP-DESKTOP-1792385251901,QA import desktop,1.00,0,Synthetic production verification,true
+QA-IMP-MOBILE-1792385305115,QA import mobile,1.00,0,Synthetic production verification,true

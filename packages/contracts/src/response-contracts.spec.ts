@@ -132,6 +132,7 @@ describe('shared response contracts', () => {
       cancelledAt: null,
       confirmedAt: '2026-08-04T03:45:00.000Z',
       createdAt: '2026-08-04T03:30:00.000Z',
+      createdByName: 'Morgan Manager',
       createdByUserId: 'c0ffee00-0000-4000-8000-000000000001',
       customerCompanyName: 'Northstar Office Supply',
       customerContactName: 'Avery Chen',
@@ -171,8 +172,11 @@ describe('shared response contracts', () => {
       ],
       updatedAt: '2026-08-04T03:45:00.000Z',
       warehouseId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+      warehouseName: 'Main Warehouse',
     });
     expect(detail.lines[0]?.skuSnapshot).toBe('HP-1001');
+    expect(detail.createdByName).toBe('Morgan Manager');
+    expect(detail.warehouseName).toBe('Main Warehouse');
     expect(detail.transitions[0]?.toStatus).toBe('DRAFT');
   });
 
@@ -243,6 +247,7 @@ describe('shared response contracts', () => {
             lastError: 'Queue worker unavailable',
             payload: { eventType: 'order.created' },
             processedAt: null,
+            salesOrderId: null,
             status: 'FAILED',
           },
         ],

@@ -1,0 +1,11 @@
+19d6e5b81988ccaaa6be6cf20d28d5e68602ca98c5d433be2262c15133d02cf2  docs/qa/2026-10-19-ui-fixes-local/README.md
+87feb278aa260eef34e93d2c46055cb7cb3ea339505949b337c1019bac7ed929  docs/qa/2026-10-19-ui-fixes-local/results.json
+d5da9e003f9c0bc033b7b83296ce16e0d805f0dc2e85b7a438f49285ea25e875  docs/qa/2026-10-19-ui-fixes-local/screenshots/UX01-more-mobile.png
+b85d1cb6d45f1983ee3ca386407d4b96081a55c0a2c150b16f2c3ce5cb7609b5  docs/qa/2026-10-19-ui-fixes-local/screenshots/UX02-overview-desktop.png
+31414ce8c81a72f73029fa36707bdcd6a18b559117af8d844601a9b4561c607e  docs/qa/2026-10-19-ui-fixes-local/screenshots/UX02-overview-mobile.png
+38d120583e8c45137ad4260c5796720818ba22bd60dd1db079acc6b4ecc41d5a  docs/qa/2026-10-19-ui-fixes-local/screenshots/UX04-long-sku-drawer-mobile.png
+27a9dcde122e29c38c41807636aaa3456281b011b5313e0d0c587e0c7a571f2b  docs/qa/2026-10-19-ui-fixes-local/screenshots/UX04-narrow-orders-mobile.png
+2621eb4964057f01462c67ed2abc1786973c44d961886b9e649fbf7dc5e7a42c  docs/qa/2026-10-19-ui-fixes-local/screenshots/UX05-order-facts-desktop.png
+bd8800a7ecc1e1f9e29680e82733c594fb035aa571eef214c69f3ee2942dfd23  docs/qa/2026-10-19-ui-fixes-local/screenshots/UX05-order-facts-mobile.png
+1d28adef47e6d8e37d617db84bb19e483bc12bc54930d7350d738e763f51e123  docs/qa/2026-10-19-ui-fixes-local/screenshots/UX06-order-return-desktop.png
+a2818a537b1b1c86f15d99b536914ec17e4f992a8a9088d708c4412d1e887893  docs/qa/2026-10-19-ui-fixes-local/screenshots/UX06-order-return-mobile.png

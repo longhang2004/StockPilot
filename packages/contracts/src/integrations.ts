@@ -15,7 +15,8 @@ export type IntegrationDeliveryStatus = z.infer<
 /**
  * Integration delivery record returned by GET /v1/integration-deliveries.
  * The API serializes raw rows; this contract documents the fields the
- * integrations workspace consumes.
+ * integrations workspace consumes. `salesOrderId` links a SUCCEEDED
+ * delivery to the sales order it created (UX-06).
  */
 export const IntegrationDeliveryRecordSchema = z.object({
   id: UuidSchema,
@@ -25,6 +26,7 @@ export const IntegrationDeliveryRecordSchema = z.object({
   attempts: z.number().int(),
   lastError: z.string().nullable(),
   payload: z.unknown(),
+  salesOrderId: UuidSchema.nullable(),
   createdAt: DateTimeSchema,
   processedAt: DateTimeSchema.nullable(),
 });

@@ -5,13 +5,57 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useRouter } from 'next/navigation';
 
 import { clearCsrfToken } from '../../lib/api-client';
-import { DemoRoleSwitcher, WorkspaceSignOut } from './workspace-navigation';
+import {
+  DemoRoleSwitcher,
+  WorkspaceSidebar,
+  WorkspaceSignOut,
+} from './workspace-navigation';
 
 vi.mock('next/navigation', () => ({ useRouter: vi.fn() }));
+
+vi.mock('next/link', () => ({
+  default: ({
+    href,
+    children,
+    ...rest
+  }: ComponentProps<'a'> & { href: string }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
+describe('WorkspaceSidebar', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('exposes a discoverable Owner settings entry with active state', () => {
+    render(<WorkspaceSidebar role="OWNER" section="settings" />);
+    const link = screen.getByRole('link', { name: 'Settings' });
+    expect(link).toHaveAttribute('href', '/app/settings');
+    expect(link).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('keeps Settings out of Manager and Staff navigation', () => {
+    const { rerender, unmount } = render(
+      <WorkspaceSidebar role="MANAGER" section="orders" />,
+    );
+    expect(
+      screen.queryByRole('link', { name: 'Settings' }),
+    ).not.toBeInTheDocument();
+    rerender(<WorkspaceSidebar role="STAFF" section="orders" />);
+    expect(
+      screen.queryByRole('link', { name: 'Settings' }),
+    ).not.toBeInTheDocument();
+    unmount();
+  });
+});
 
 describe('DemoRoleSwitcher', () => {
   beforeEach(() => {

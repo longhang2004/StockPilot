@@ -27,7 +27,7 @@
   }
 
   .workspace-topbar {
-    gap: 0.5rem;
+    column-gap: 0.5rem;
     min-height: 3.5rem;
     padding-inline: 0.75rem;
   }
@@ -354,5 +354,32 @@
 
   .drawer-panel {
     width: 100%;
+  }
+}
+
+/* Narrow reflow: at and below 480px the single-row topbar minimum (~400px)
+   stops fitting, so session controls drop to a second line while the brand
+   and organization name keep their width (UX-04). */
+@media (max-width: 480px) {
+  .workspace-topbar {
+    flex-wrap: wrap;
+    padding-block: 0.45rem;
+    row-gap: 0.3rem;
+  }
+
+  .topbar-organization {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .topbar-organization strong {
+    max-width: none;
+    min-width: 0;
+  }
+
+  .topbar-session {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+    margin-left: 0;
   }
 }

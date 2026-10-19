@@ -2,6 +2,7 @@
 
 import { type Role } from '@stockpilot/contracts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import {
@@ -27,7 +28,7 @@ import { ExpiredCommandResolution } from '../shared/expired-command-resolution';
 import { useWorkspaceLocation } from '../shared/use-workspace-location';
 
 export function IntegrationsWorkspace({ role }: { role: Role }) {
-  const { params, update } = useWorkspaceLocation();
+  const { params, update, href } = useWorkspaceLocation();
   const selectedId = params.get('delivery');
   const [page, setPage] = useState(Number(params.get('page') || 1));
   const [search, setSearch] = useState(params.get('search') || '');
@@ -209,6 +210,17 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
         ) : selected ? (
           <div className="detail-stack">
             <StatusBadge value={selected.status} />
+            {selected.salesOrderId ? (
+              <p className="muted-note">
+                This delivery created a sales order in this workspace.{' '}
+                <Link
+                  className="text-link"
+                  href={`/app/orders?order=${encodeURIComponent(selected.salesOrderId)}&returnTo=${encodeURIComponent(href())}`}
+                >
+                  Open order
+                </Link>
+              </p>
+            ) : null}
             <dl className="detail-metadata">
               <div>
                 <dt>Event</dt>
