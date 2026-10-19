@@ -13,7 +13,11 @@ export function fetchDelivery(id: string): Promise<IntegrationDeliveryRecord> {
 export function retryDelivery(
   id: string,
   idempotencyKey: string,
-): Promise<{ status: IntegrationDeliveryStatus; error?: string }> {
+): Promise<{
+  status: IntegrationDeliveryStatus;
+  error?: string;
+  orderId?: string | null;
+}> {
   return apiRequest(`/integration-deliveries/${id}/retry`, {
     idempotencyKey,
     method: 'POST',

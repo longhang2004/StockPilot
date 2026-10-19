@@ -89,6 +89,11 @@ export const SalesOrderSchema = z.object({
 export type SalesOrder = z.infer<typeof SalesOrderSchema>;
 
 export const SalesOrderDetailSchema = SalesOrderSchema.extend({
+  // Resolved business names for the internal ID references above (UX-05).
+  // IDs stay the source of truth; names are display-only and nullable when
+  // the referenced row cannot be resolved.
+  warehouseName: z.string().nullable(),
+  createdByName: z.string().nullable(),
   lines: z.array(SalesOrderLineSchema),
   transitions: z.array(OrderTransitionSchema),
 });

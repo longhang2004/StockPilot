@@ -80,7 +80,10 @@ export function WorkspaceShell({
         <div className="workspace">
           <WorkspaceHeader session={workspaceSession} />
           <div className="workspace-layout">
-            <WorkspaceSidebar section={section} />
+            <WorkspaceSidebar
+              role={workspaceSession.membership.role}
+              section={section}
+            />
             <main className="workspace-main">
               {organization.isDemo ? (
                 <div className="demo-banner">

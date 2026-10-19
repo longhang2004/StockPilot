@@ -38,8 +38,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={sourceSans.variable}>{children}</body>
+    <html className={sourceSans.variable} lang="en">
+      <body>{children}</body>
     </html>
   );
 }

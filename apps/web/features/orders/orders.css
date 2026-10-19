@@ -112,6 +112,15 @@
   overflow-wrap: anywhere;
 }
 
+/* Business name first, internal ID as the small technical affordance. */
+.order-fact-id {
+  color: var(--muted);
+  display: block;
+  font-size: var(--text-2xs);
+  margin-top: 0.15rem;
+  overflow-wrap: anywhere;
+}
+
 .order-object-note {
   border-top: 1px solid var(--line-subtle);
   margin-top: 0.8rem;

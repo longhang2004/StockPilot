@@ -119,11 +119,19 @@ export function OrderDetailView({
           </div>
           <div>
             <dt>Warehouse</dt>
-            <dd className="mono">{detail.warehouseId}</dd>
+            <dd>
+              {detail.warehouseName ?? 'Unknown warehouse'}
+              <small className="order-fact-id mono">{detail.warehouseId}</small>
+            </dd>
           </div>
           <div>
             <dt>Created by</dt>
-            <dd className="mono">{detail.createdByUserId}</dd>
+            <dd>
+              {detail.createdByName ?? 'Unknown user'}
+              <small className="order-fact-id mono">
+                {detail.createdByUserId}
+              </small>
+            </dd>
           </div>
           <div>
             <dt>Order total</dt>

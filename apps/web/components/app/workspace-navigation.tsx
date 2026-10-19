@@ -9,6 +9,7 @@ import {
   Package,
   PlugsConnected,
   Receipt,
+  SlidersHorizontal,
   UsersThree,
 } from '@phosphor-icons/react';
 import type { Role } from '@stockpilot/contracts';
@@ -76,12 +77,26 @@ const navigation: Array<{
     icon: PlugsConnected,
   },
   { label: WORKSPACE_SECTION_LABELS.audit, section: 'audit', icon: GearSix },
+  {
+    label: WORKSPACE_SECTION_LABELS.settings,
+    section: 'settings',
+    icon: SlidersHorizontal,
+  },
 ];
 
 const navigationGroups = [
   { label: 'Operations', sections: ['overview', 'orders', 'inventory'] },
   { label: 'Records', sections: ['products', 'partners', 'receipts'] },
   { label: 'Review', sections: ['imports', 'integrations', 'audit'] },
+] as const;
+
+/**
+ * Owner-only administration entry (UX-03). Rendering stays client-side and
+ * merely discovers the route; /app/settings access is still enforced by the
+ * server-side role checks, so this adds no privilege.
+ */
+const ownerNavigationGroups = [
+  { label: 'Administration', sections: ['settings'] },
 ] as const;
 
 const roleLabels: Record<Role, string> = {
@@ -208,11 +223,21 @@ function WorkspaceSwitcher({
   );
 }
 
-export function WorkspaceSidebar({ section }: { section: WorkspaceSection }) {
+export function WorkspaceSidebar({
+  section,
+  role,
+}: {
+  section: WorkspaceSection;
+  role?: Role;
+}) {
+  const groups =
+    role === 'OWNER'
+      ? [...navigationGroups, ...ownerNavigationGroups]
+      : [...navigationGroups];
   return (
     <aside className="workspace-sidebar">
       <nav aria-label="Workspace navigation">
-        {navigationGroups.map((group) => (
+        {groups.map((group) => (
           <div className="workspace-nav-group" key={group.label}>
             <span className="workspace-nav-group-label">{group.label}</span>
             {group.sections.map((groupSection) => {

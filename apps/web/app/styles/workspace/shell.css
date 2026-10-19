@@ -282,10 +282,16 @@
   padding: 0;
 }
 
+/* Base compact label must stay legible on light surfaces (UX-01); the
+   slate tint is scoped to the navy topbar only. */
 .demo-role-compact .demo-role-label {
-  color: var(--color-slate-300);
+  color: var(--color-muted-foreground);
   font-size: var(--text-2xs);
   white-space: nowrap;
+}
+
+.workspace-topbar .demo-role-compact .demo-role-label {
+  color: var(--color-slate-300);
 }
 
 .workspace-topbar .demo-role-compact select {
@@ -599,6 +605,11 @@
   margin: 0;
   padding: 0.65rem;
   white-space: pre-wrap;
+}
+
+/* In-drawer cross links (e.g. Open order for a succeeded delivery). */
+.detail-stack .text-link {
+  font-size: var(--text-2xs);
 }
 
 .payload-preview {

@@ -397,6 +397,7 @@
   color: var(--ink);
   font-size: var(--text-xs);
   height: 2rem;
+  min-width: 0;
   padding: 0.2rem 0.5rem;
 }
 
@@ -746,6 +747,13 @@
 .form-grid {
   display: grid;
   gap: 0.75rem;
+  min-width: 0;
+}
+
+/* Single bounded column: keeps long option text (SKU pickers) from
+   inflating the intrinsic width of drawer forms (UX-04). */
+.form-stack {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .form-grid {
@@ -762,6 +770,8 @@
 .catalog-search-controls {
   display: grid;
   gap: 0.35rem;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
 }
 
 .line-field-label {
@@ -771,6 +781,8 @@
 .form-field {
   display: grid;
   gap: 0.25rem;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
 }
 
 .form-field label {
@@ -789,8 +801,10 @@
   color: var(--ink);
   font-size: var(--text-xs);
   min-height: 2.5rem;
+  min-width: 0;
   padding: 0.45rem 0.65rem;
   transition: border-color var(--motion-fast) ease;
+  width: 100%;
 }
 
 .form-field input:focus,
@@ -867,6 +881,7 @@
 .line-editor-cell {
   display: grid;
   gap: 0.2rem;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
 }
 

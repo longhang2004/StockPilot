@@ -26,6 +26,7 @@ const delivery = {
   attempts: 1,
   lastError: 'Unknown SKU',
   payload: { sku: 'MISSING' },
+  salesOrderId: null,
   createdAt: '2026-10-17T00:00:00Z',
   processedAt: null,
 };
@@ -130,5 +131,48 @@ describe('integration retry feedback', () => {
     expect(screen.getByText('Integration access required')).toBeVisible();
     expect(listFetch).not.toHaveBeenCalled();
     expect(fetchDelivery).not.toHaveBeenCalled();
+  });
+
+  it('links a succeeded delivery to its created order', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/app/integrations?delivery=delivery-a',
+    );
+    vi.mocked(fetchDelivery).mockResolvedValue({
+      ...delivery,
+      salesOrderId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+      status: 'SUCCEEDED',
+      lastError: null,
+    });
+    render(
+      <QueryProvider>
+        <IntegrationsWorkspace role="MANAGER" />
+      </QueryProvider>,
+    );
+    const dialog = await screen.findByRole('dialog');
+    const link = await within(dialog).findByRole('link', {
+      name: 'Open order',
+    });
+    expect(link).toHaveAttribute(
+      'href',
+      '/app/orders?order=f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    );
+    // No order link when the delivery never created one.
+    vi.mocked(fetchDelivery).mockReset();
+    vi.mocked(fetchDelivery).mockResolvedValue(delivery);
+    cleanup();
+    render(
+      <QueryProvider>
+        <IntegrationsWorkspace role="MANAGER" />
+      </QueryProvider>,
+    );
+    const failedDialog = await screen.findByRole('dialog');
+    await waitFor(() =>
+      expect(within(failedDialog).getByText('Retry delivery')).toBeVisible(),
+    );
+    expect(
+      within(failedDialog).queryByRole('link', { name: 'Open order' }),
+    ).toBeNull();
   });
 });

@@ -130,9 +130,11 @@
   --motion-normal: 160ms;
   --motion-slow: 200ms;
 
+  /* next/font binds --font-source-sans on <html> so this :root alias
+     resolves to the real face (UX-02); keep a named fallback. */
   --font-sans:
-    var(--font-source-sans), 'Source Sans 3', ui-sans-serif, system-ui,
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    var(--font-source-sans, 'Source Sans 3'), 'Source Sans 3', ui-sans-serif,
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
 
   --text-2xs: 12px;
