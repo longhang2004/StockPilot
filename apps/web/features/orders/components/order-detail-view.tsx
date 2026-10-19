@@ -16,6 +16,7 @@ export function OrderDetailView({
   onBack,
   onEdit,
   pending,
+  returnTo,
   role,
 }: {
   detail: OrderDetail;
@@ -25,17 +26,28 @@ export function OrderDetailView({
   onBack: () => void;
   onEdit: () => void;
   pending: boolean;
+  returnTo?: string;
   role: Role;
 }) {
+  const deliveryReturnPath = safeDeliveryReturnPath(returnTo);
   return (
     <article className="order-object-page">
-      <button
-        className="button button-quiet order-object-back"
-        onClick={onBack}
-        type="button"
-      >
-        <ArrowLeft size={16} aria-hidden="true" /> Back to orders
-      </button>
+      {deliveryReturnPath ? (
+        <Link
+          className="button button-quiet order-object-back"
+          href={deliveryReturnPath}
+        >
+          <ArrowLeft size={16} aria-hidden="true" /> Back to delivery
+        </Link>
+      ) : (
+        <button
+          className="button button-quiet order-object-back"
+          onClick={onBack}
+          type="button"
+        >
+          <ArrowLeft size={16} aria-hidden="true" /> Back to orders
+        </button>
+      )}
       <header className="order-object-header">
         <div className="order-object-title-block">
           <h1>{detail.orderNumber}</h1>
@@ -264,4 +276,14 @@ export function OrderDetailView({
       </section>
     </article>
   );
+}
+
+function safeDeliveryReturnPath(value?: string): string | undefined {
+  if (!value?.startsWith('/app/integrations?')) return undefined;
+  const target = new URL(value, 'https://stockpilot.invalid');
+  return target.origin === 'https://stockpilot.invalid' &&
+    target.pathname === '/app/integrations' &&
+    target.searchParams.has('delivery')
+    ? `${target.pathname}${target.search}`
+    : undefined;
 }

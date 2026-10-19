@@ -75,4 +75,46 @@ describe('OrderDetailView order facts', () => {
     expect(screen.getByText('Unknown warehouse')).toBeVisible();
     expect(screen.getByText('Unknown user')).toBeVisible();
   });
+
+  it('returns to the integration delivery when opened from a delivery', () => {
+    render(
+      <OrderDetailView
+        canEditDraft={false}
+        canManage={false}
+        detail={detail}
+        onAction={() => undefined}
+        onBack={() => undefined}
+        onEdit={() => undefined}
+        pending={false}
+        returnTo="/app/integrations?delivery=abc&search=storefront"
+        role="OWNER"
+      />,
+    );
+    expect(
+      screen.getByRole('link', { name: 'Back to delivery' }),
+    ).toHaveAttribute(
+      'href',
+      '/app/integrations?delivery=abc&search=storefront',
+    );
+  });
+
+  it('ignores external and malformed delivery return targets', () => {
+    render(
+      <OrderDetailView
+        canEditDraft={false}
+        canManage={false}
+        detail={detail}
+        onAction={() => undefined}
+        onBack={() => undefined}
+        onEdit={() => undefined}
+        pending={false}
+        returnTo="//evil.example/app/integrations?delivery=abc"
+        role="OWNER"
+      />,
+    );
+    expect(screen.queryByRole('link', { name: 'Back to delivery' })).toBeNull();
+    expect(
+      screen.getByRole('button', { name: 'Back to orders' }),
+    ).toBeVisible();
+  });
 });

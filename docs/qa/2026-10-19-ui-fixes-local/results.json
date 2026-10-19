@@ -1,0 +1,30 @@
+{
+  "runType": "local-production-image-regression",
+  "sourceRevision": "u4-review-1dd3f1671308",
+  "sourcePatchSha256": "1dd3f1671308e6f99d38141fd5f83a3cb518ddefc38978c79ba0a8131a234ba3",
+  "productionE2e": {
+    "passed": 49,
+    "skipped": 1,
+    "failed": 0,
+    "skipReason": "UX-03 desktop-only Owner sidebar case omitted from mobile project"
+  },
+  "apiOrderIntegration": {
+    "passed": 7,
+    "failed": 0,
+    "database": "disposable PostgreSQL 18, loopback port 55434",
+    "migrationsApplied": 11
+  },
+  "lint": "passed",
+  "formatCheck": "passed",
+  "screenshots": [
+    "UX01-more-mobile.png",
+    "UX02-overview-desktop.png",
+    "UX02-overview-mobile.png",
+    "UX04-narrow-orders-mobile.png",
+    "UX04-long-sku-drawer-mobile.png",
+    "UX05-order-facts-desktop.png",
+    "UX05-order-facts-mobile.png",
+    "UX06-order-return-desktop.png",
+    "UX06-order-return-mobile.png"
+  ]
+}

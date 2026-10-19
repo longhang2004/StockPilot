@@ -156,7 +156,7 @@ describe('integration retry feedback', () => {
     });
     expect(link).toHaveAttribute(
       'href',
-      '/app/orders?order=f47ac10b-58cc-4372-a567-0e02b2c3d479',
+      '/app/orders?order=f47ac10b-58cc-4372-a567-0e02b2c3d479&returnTo=%2Fapp%2Fintegrations%3Fdelivery%3Ddelivery-a',
     );
     // No order link when the delivery never created one.
     vi.mocked(fetchDelivery).mockReset();

@@ -17,6 +17,7 @@ import {
 
 describe('sales orders API', () => {
   const demoSlug = `orders-test-${randomUUID()}`;
+  const foreignSlug = `orders-foreign-${randomUUID()}`;
   let app: INestApplication;
   let admin: Awaited<ReturnType<typeof createAdminClient>>;
   let manager: Awaited<ReturnType<typeof createTestAgent>>;
@@ -26,6 +27,7 @@ describe('sales orders API', () => {
   let productId: string;
   let customerId: string;
   let supplierId: string;
+  let foreignOrderId: string;
   const applicationName = `orders-${randomUUID()}`;
 
   async function createOrder(
@@ -51,6 +53,34 @@ describe('sales orders API', () => {
     admin = await createAdminClient(adminDatabaseUrl());
     const { seedDemoIdentity } = await import('../prisma/seed.js');
     await seedDemoIdentity(admin, { seedFixture: false, slug: demoSlug });
+    await seedDemoIdentity(admin, { seedFixture: false, slug: foreignSlug });
+    const foreignOrganization = await admin.organization.findUniqueOrThrow({
+      where: { slug: foreignSlug },
+    });
+    const foreignWarehouse = await admin.warehouse.findUniqueOrThrow({
+      where: { organizationId: foreignOrganization.id },
+    });
+    const foreignCustomer = await admin.customer.create({
+      data: {
+        companyName: 'Foreign Order Customer',
+        organizationId: foreignOrganization.id,
+      },
+    });
+    const foreignCreator = await admin.membership.findFirstOrThrow({
+      where: { organizationId: foreignOrganization.id, role: 'OWNER' },
+    });
+    const foreignOrder = await admin.salesOrder.create({
+      data: {
+        createdByUserId: foreignCreator.userId,
+        customerCompanyName: foreignCustomer.companyName,
+        customerId: foreignCustomer.id,
+        orderNumber: `FOREIGN-${randomUUID()}`,
+        organizationId: foreignOrganization.id,
+        subtotal: '0.00',
+        warehouseId: foreignWarehouse.id,
+      },
+    });
+    foreignOrderId = foreignOrder.id;
 
     ({ app } = await createTestApplication());
 
@@ -101,11 +131,38 @@ describe('sales orders API', () => {
     await app?.close();
     if (admin) {
       await admin.organization.deleteMany({ where: { slug: demoSlug } });
+      await admin.organization.deleteMany({ where: { slug: foreignSlug } });
       await admin.user.deleteMany({
-        where: { email: { endsWith: `@${demoSlug}.stockpilot.test` } },
+        where: {
+          OR: [
+            { email: { endsWith: `@${demoSlug}.stockpilot.test` } },
+            { email: { endsWith: `@${foreignSlug}.stockpilot.test` } },
+          ],
+        },
       });
       await admin.$disconnect();
     }
+  });
+
+  it('resolves the actual creator name and hides another tenant order', async () => {
+    const draft = await createOrder(manager, managerCsrf, 1);
+    const creator = await admin.user.findUniqueOrThrow({
+      select: { displayName: true },
+      where: { id: draft.body.createdByUserId as string },
+    });
+    const viewer = await admin.user.findUniqueOrThrow({
+      select: { displayName: true },
+      where: { email: `staff@${demoSlug}.stockpilot.test` },
+    });
+    const detail = await staff.get(`/v1/orders/${draft.body.id}`);
+    expect(detail.status).toBe(200);
+    expect(detail.body.createdByName).toBe(creator.displayName);
+    expect(detail.body.createdByName).not.toBe(viewer.displayName);
+    expect(detail.body.warehouseName).toBe('Main Warehouse');
+
+    const foreignDetail = await staff.get(`/v1/orders/${foreignOrderId}`);
+    expect(foreignDetail.status).toBe(404);
+    expect(foreignDetail.body.createdByName).toBeUndefined();
   });
 
   it('snapshots prices, separates confirm from fulfill, and records transitions', async () => {

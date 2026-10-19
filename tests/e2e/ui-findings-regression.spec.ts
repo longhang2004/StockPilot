@@ -34,6 +34,15 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 test.describe('production UI/UX finding regressions', () => {
+  test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status === 'passed') {
+      await testInfo.attach('verified-view', {
+        body: await page.screenshot({ fullPage: true }),
+        contentType: 'image/png',
+      });
+    }
+  });
+
   test('UX-02: Source Sans 3 is the computed font, not the fallback', async ({
     page,
   }) => {
@@ -42,6 +51,7 @@ test.describe('production UI/UX finding regressions', () => {
     await expect(
       page.getByRole('heading', { name: 'Operations overview' }),
     ).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
     const typography = await page.evaluate(() => {
       const body = getComputedStyle(document.body);
       const heading = document.querySelector('h1,h2');
@@ -51,8 +61,9 @@ test.describe('production UI/UX finding regressions', () => {
           document.documentElement,
         ).getPropertyValue('--font-source-sans'),
         faces: Array.from(document.fonts as unknown as Iterable<FontFace>).map(
-          (face) => face.family,
+          (face) => ({ family: face.family, status: face.status }),
         ),
+        fontLoaded: document.fonts.check('16px sourceSans'),
         body: body.fontFamily,
         headingToken: heading
           ? getComputedStyle(heading).getPropertyValue('--font-sans')
@@ -65,6 +76,14 @@ test.describe('production UI/UX finding regressions', () => {
     // <html>; the semantic token must not collapse to the system fallback.
     const diagnostics = JSON.stringify(typography);
     expect(typography.faces?.length, diagnostics).toBeGreaterThan(0);
+    expect(typography.fontLoaded, diagnostics).toBe(true);
+    expect(
+      typography.faces?.some(
+        (face) =>
+          face.family.includes('sourceSans') && face.status === 'loaded',
+      ),
+      diagnostics,
+    ).toBe(true);
     for (const family of [
       typography.body,
       typography.token,
@@ -75,7 +94,10 @@ test.describe('production UI/UX finding regressions', () => {
       expect(family ?? '', diagnostics).not.toContain('undefined');
     }
     expect(
-      typography.body.includes(typography.faces[0] ?? '\u0000'),
+      typography.body.includes(
+        typography.faces.find((face) => face.family.includes('sourceSans'))
+          ?.family ?? '\u0000',
+      ),
       diagnostics,
     ).toBe(true);
   });
@@ -310,9 +332,8 @@ test.describe('production UI/UX finding regressions', () => {
       (item) => item.externalDeliveryId === deliveryId,
     )?.id;
     expect(recordId).toBeTruthy();
-    await page.goto(
-      `/app/integrations?delivery=${encodeURIComponent(recordId!)}`,
-    );
+    const deliveryContext = `/app/integrations?delivery=${encodeURIComponent(recordId!)}&search=${encodeURIComponent(deliveryId)}&status=SUCCEEDED`;
+    await page.goto(deliveryContext);
     const drawer = page.getByRole('dialog');
     const retryButton = drawer.getByRole('button', { name: 'Retry delivery' });
     // Background queue workers may beat the manual retry in this shared
@@ -326,18 +347,27 @@ test.describe('production UI/UX finding regressions', () => {
     const openOrder = drawer.getByRole('link', { name: 'Open order' });
     await expect(openOrder).toBeVisible();
     const href = await openOrder.getAttribute('href');
-    expect(href).toMatch(/^\/app\/orders\?order=[\da-f][\da-f-]+$/i);
+    expect(href).toContain('returnTo=');
+    expect(decodeURIComponent(href ?? '')).toContain(
+      `/app/integrations?delivery=${recordId}&search=${deliveryId}&status=SUCCEEDED`,
+    );
     await openOrder.click();
     await expect(page).toHaveURL(new RegExp('app/orders\\?order='));
     const orderNumber = await page
       .getByRole('heading', { name: /^STORE-/ })
       .textContent();
     expect(orderNumber).toContain(`STORE-qa-${suffix}`);
+    await page.reload();
+    await expect(page.getByRole('heading', { name: /^STORE-/ })).toBeVisible();
+    await page.getByRole('link', { name: 'Back to delivery' }).click();
+    await expect(page).toHaveURL(deliveryContext);
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(
+      page.getByRole('dialog').getByRole('link', { name: 'Open order' }),
+    ).toBeVisible();
 
     // Deep link + reload: the succeeded delivery still carries its order.
-    await page.goto(
-      `/app/integrations?delivery=${encodeURIComponent(recordId!)}`,
-    );
+    await page.goto(deliveryContext);
     const reloadedLink = page
       .getByRole('dialog')
       .getByRole('link', { name: 'Open order' });
@@ -345,6 +375,8 @@ test.describe('production UI/UX finding regressions', () => {
     await expect(reloadedLink).toHaveAttribute('href', href!);
     await reloadedLink.click();
     await expect(page).toHaveURL(new RegExp('app/orders\\?order='));
+    await expect(page.getByRole('heading', { name: /^STORE-/ })).toBeVisible();
+    await page.reload();
     await expect(page.getByRole('heading', { name: /^STORE-/ })).toBeVisible();
   });
 });

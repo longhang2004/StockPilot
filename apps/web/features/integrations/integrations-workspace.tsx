@@ -28,7 +28,7 @@ import { ExpiredCommandResolution } from '../shared/expired-command-resolution';
 import { useWorkspaceLocation } from '../shared/use-workspace-location';
 
 export function IntegrationsWorkspace({ role }: { role: Role }) {
-  const { params, update } = useWorkspaceLocation();
+  const { params, update, href } = useWorkspaceLocation();
   const selectedId = params.get('delivery');
   const [page, setPage] = useState(Number(params.get('page') || 1));
   const [search, setSearch] = useState(params.get('search') || '');
@@ -215,7 +215,7 @@ export function IntegrationsWorkspace({ role }: { role: Role }) {
                 This delivery created a sales order in this workspace.{' '}
                 <Link
                   className="text-link"
-                  href={`/app/orders?order=${encodeURIComponent(selected.salesOrderId)}`}
+                  href={`/app/orders?order=${encodeURIComponent(selected.salesOrderId)}&returnTo=${encodeURIComponent(href())}`}
                 >
                   Open order
                 </Link>
