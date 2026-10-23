@@ -81,6 +81,12 @@ test.describe.serial('manager receipt and order confirmation', () => {
     // The redesigned flow opens the created order's object view; confirm it
     // from the object header actions.
     await page.getByRole('button', { name: /confirm order/i }).click();
+    await expect(
+      page.getByRole('table', { name: /Stock impact for/ }),
+    ).toBeVisible();
+    await page
+      .getByRole('button', { name: 'Confirm & reserve', exact: true })
+      .click();
     await expect(page.getByText(/order status updated/i)).toBeVisible();
   });
 
@@ -101,6 +107,9 @@ test.describe.serial('manager receipt and order confirmation', () => {
     const fulfill = page.getByRole('button', { name: /fulfill order/i });
     await expect(fulfill).toBeVisible();
     await fulfill.click();
+    await page
+      .getByRole('button', { name: 'Fulfill order', exact: true })
+      .click();
     await expect(page.getByText(/order status updated/i)).toBeVisible();
   });
 });

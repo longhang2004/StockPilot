@@ -59,6 +59,11 @@ describe('operations UI primitives', () => {
     });
     const actions = screen.getAllByRole('button');
     const lastAction = screen.getByRole('button', { name: 'Last action' });
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Focus test' })).toHaveFocus(),
+    );
+    fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
+    expect(lastAction).toHaveFocus();
     lastAction.focus();
     fireEvent.keyDown(dialog, { key: 'Tab' });
     expect(document.activeElement).not.toBe(lastAction);

@@ -58,8 +58,8 @@ function stepsForRole(
 export function DemoQuickGuide({ role }: { role: Role }) {
   const steps = stepsForRole(role);
   return (
-    <article className="guidance-card demo-guide" aria-label="Try StockPilot">
-      <p className="eyebrow">Try StockPilot</p>
+    <details className="guidance-card demo-guide">
+      <summary>Try StockPilot · A quick workflow guide</summary>
       <ol className="demo-guide-steps">
         {steps.map((step) => (
           <li key={step.label}>
@@ -73,6 +73,6 @@ export function DemoQuickGuide({ role }: { role: Role }) {
           </li>
         ))}
       </ol>
-    </article>
+    </details>
   );
 }

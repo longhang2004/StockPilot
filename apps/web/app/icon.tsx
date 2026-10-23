@@ -17,7 +17,7 @@ export default async function Icon(): Promise<Response> {
     <div
       style={{
         alignItems: 'center',
-        background: '#102A43',
+        background: '#225D43',
         borderRadius: 14,
         color: '#FFFFFF',
         display: 'flex',

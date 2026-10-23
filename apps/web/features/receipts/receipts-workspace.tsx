@@ -148,8 +148,9 @@ export function ReceiptsWorkspace({ role }: { role: Role }) {
           open={open}
           {...(productId ? { initialProductId: productId } : {})}
           onClose={() => setOpen(false)}
-          onSaved={() => {
+          onSaved={(savedReceiptId) => {
             setOpen(false);
+            update({ receipt: savedReceiptId }, 'push');
             void invalidatePageQueries(queryClient, RECEIPTS_RESOURCE);
             void invalidatePageQueries(queryClient, '/inventory/movements');
             void invalidatePageQueries(queryClient, '/inventory/balances');
@@ -195,6 +196,10 @@ function ReceiptObject({ receipt }: { receipt: ReceiptDetail }) {
         </div>
       </dl>
       <h2>Receipt lines</h2>
+      <p className="muted-note">
+        On-hand quantities below show the moment this receipt was recorded. Open
+        a SKU to see its current stock.
+      </p>
       <div className="table-scroll">
         <table>
           <thead>
@@ -203,6 +208,8 @@ function ReceiptObject({ receipt }: { receipt: ReceiptDetail }) {
               <th>Product</th>
               <th className="numeric">Quantity</th>
               <th className="numeric">Unit cost</th>
+              <th className="numeric">On hand before</th>
+              <th className="numeric">On hand after</th>
             </tr>
           </thead>
           <tbody>
@@ -220,6 +227,12 @@ function ReceiptObject({ receipt }: { receipt: ReceiptDetail }) {
                 <td className="numeric mono">{line.quantity}</td>
                 <td className="numeric mono">
                   {line.unitCost ? formatMoney(Number(line.unitCost)) : '—'}
+                </td>
+                <td className="numeric mono">
+                  {line.onHandBefore ?? 'Unavailable'}
+                </td>
+                <td className="numeric mono">
+                  {line.onHandAfter ?? 'Unavailable'}
                 </td>
               </tr>
             ))}

@@ -1,0 +1,164 @@
+{
+  "origin": "http://localhost:3000",
+  "createdAt": "2026-10-23T07:41:51.352Z",
+  "screenshots": [
+    {
+      "file": "01-landing-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "fullPage": false
+    },
+    {
+      "file": "02-landing-full.png",
+      "width": 1440,
+      "fullPage": true
+    },
+    {
+      "file": "03-overview-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "fullPage": false
+    },
+    {
+      "file": "04-orders-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "fullPage": false
+    },
+    {
+      "file": "05-order-detail-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "fullPage": false
+    },
+    {
+      "file": "06-stock-impact-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "fullPage": false
+    },
+    {
+      "file": "07-global-search-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "fullPage": false
+    },
+    {
+      "file": "08-stock-trace-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "fullPage": false
+    },
+    {
+      "file": "09-inventory-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "fullPage": false
+    },
+    {
+      "file": "10-receipts-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "fullPage": false
+    },
+    {
+      "file": "11-receipt-detail-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "fullPage": false
+    },
+    {
+      "file": "12-landing-mobile.png",
+      "width": 390,
+      "height": 844,
+      "fullPage": false
+    },
+    {
+      "file": "13-overview-mobile.png",
+      "width": 390,
+      "height": 844,
+      "fullPage": false
+    },
+    {
+      "file": "14-orders-mobile.png",
+      "width": 390,
+      "height": 844,
+      "fullPage": false
+    },
+    {
+      "file": "15-order-detail-mobile.png",
+      "width": 390,
+      "height": 844,
+      "fullPage": false
+    },
+    {
+      "file": "16-stock-impact-mobile.png",
+      "width": 390,
+      "height": 844,
+      "fullPage": false
+    },
+    {
+      "file": "17-stock-trace-mobile.png",
+      "width": 390,
+      "height": 844,
+      "fullPage": false
+    },
+    {
+      "file": "18-receipt-detail-mobile.png",
+      "width": 390,
+      "height": 844,
+      "fullPage": false
+    }
+  ],
+  "chapters": [
+    {
+      "time": 0.001,
+      "title": "Landing · Bản đồ logistics",
+      "detail": "Canvas kho và kiện hàng chuyển động bên dưới hero."
+    },
+    {
+      "time": 7.769,
+      "title": "Product tour",
+      "detail": "Xem các màn hình thật ngay trên landing."
+    },
+    {
+      "time": 14.314,
+      "title": "Tổng quan vận hành",
+      "detail": "Các chỉ số và công việc cần chú ý trong workspace."
+    },
+    {
+      "time": 20.177,
+      "title": "Đơn hàng",
+      "detail": "Tìm các đơn mẫu bằng bộ lọc có sẵn."
+    },
+    {
+      "time": 25.635,
+      "title": "Chi tiết đơn hàng",
+      "detail": "Sản phẩm, số lượng, giá và khả năng đáp ứng cùng một chỗ."
+    },
+    {
+      "time": 31.105,
+      "title": "Xem trước tác động tồn kho",
+      "detail": "Xem thay đổi on hand / reserved / available trước khi xác nhận."
+    },
+    {
+      "time": 38.384,
+      "title": "Tìm kiếm nhanh",
+      "detail": "Từ SKU đi thẳng đến truy vết tồn kho bằng Ctrl K."
+    },
+    {
+      "time": 43.925,
+      "title": "Truy vết tồn kho",
+      "detail": "Theo dõi số dư, đơn đang giữ hàng và các giao dịch nguồn."
+    },
+    {
+      "time": 52.563,
+      "title": "Phiếu nhập hàng",
+      "detail": "Mở chứng từ nhập và theo dõi số dư trước / sau từng dòng."
+    }
+  ],
+  "errors": [],
+  "businessWrites": [],
+  "desktopSeconds": 60.298,
+  "passed": true
+}

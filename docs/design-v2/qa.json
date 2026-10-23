@@ -1,0 +1,581 @@
+{
+  "viewportChecks": [
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "screen": "overview",
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "screen": "orders",
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "screen": "inventory",
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "concept": "atlas",
+      "width": 1024,
+      "screen": "overview",
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "concept": "atlas",
+      "width": 1024,
+      "screen": "orders",
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "concept": "atlas",
+      "width": 1024,
+      "screen": "inventory",
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "concept": "atlas",
+      "width": 768,
+      "screen": "overview",
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "concept": "atlas",
+      "width": 768,
+      "screen": "orders",
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "concept": "atlas",
+      "width": 768,
+      "screen": "inventory",
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "screen": "overview",
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "screen": "orders",
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "screen": "inventory",
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "concept": "atlas",
+      "width": 375,
+      "screen": "overview",
+      "client": 375,
+      "scroll": 375
+    },
+    {
+      "concept": "atlas",
+      "width": 375,
+      "screen": "orders",
+      "client": 375,
+      "scroll": 375
+    },
+    {
+      "concept": "atlas",
+      "width": 375,
+      "screen": "inventory",
+      "client": 375,
+      "scroll": 375
+    },
+    {
+      "concept": "atlas",
+      "width": 320,
+      "screen": "overview",
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "concept": "atlas",
+      "width": 320,
+      "screen": "orders",
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "concept": "atlas",
+      "width": 320,
+      "screen": "inventory",
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "screen": "overview",
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "screen": "orders",
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "screen": "inventory",
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "concept": "relay",
+      "width": 1024,
+      "screen": "overview",
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "concept": "relay",
+      "width": 1024,
+      "screen": "orders",
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "concept": "relay",
+      "width": 1024,
+      "screen": "inventory",
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "concept": "relay",
+      "width": 768,
+      "screen": "overview",
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "concept": "relay",
+      "width": 768,
+      "screen": "orders",
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "concept": "relay",
+      "width": 768,
+      "screen": "inventory",
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "screen": "overview",
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "screen": "orders",
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "screen": "inventory",
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "concept": "relay",
+      "width": 375,
+      "screen": "overview",
+      "client": 375,
+      "scroll": 375
+    },
+    {
+      "concept": "relay",
+      "width": 375,
+      "screen": "orders",
+      "client": 375,
+      "scroll": 375
+    },
+    {
+      "concept": "relay",
+      "width": 375,
+      "screen": "inventory",
+      "client": 375,
+      "scroll": 375
+    },
+    {
+      "concept": "relay",
+      "width": 320,
+      "screen": "overview",
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "concept": "relay",
+      "width": 320,
+      "screen": "orders",
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "concept": "relay",
+      "width": 320,
+      "screen": "inventory",
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "screen": "overview",
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "screen": "orders",
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "screen": "inventory",
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "concept": "folio",
+      "width": 1024,
+      "screen": "overview",
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "concept": "folio",
+      "width": 1024,
+      "screen": "orders",
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "concept": "folio",
+      "width": 1024,
+      "screen": "inventory",
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "concept": "folio",
+      "width": 768,
+      "screen": "overview",
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "concept": "folio",
+      "width": 768,
+      "screen": "orders",
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "concept": "folio",
+      "width": 768,
+      "screen": "inventory",
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "screen": "overview",
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "screen": "orders",
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "screen": "inventory",
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "concept": "folio",
+      "width": 375,
+      "screen": "overview",
+      "client": 375,
+      "scroll": 375
+    },
+    {
+      "concept": "folio",
+      "width": 375,
+      "screen": "orders",
+      "client": 375,
+      "scroll": 375
+    },
+    {
+      "concept": "folio",
+      "width": 375,
+      "screen": "inventory",
+      "client": 375,
+      "scroll": 375
+    },
+    {
+      "concept": "folio",
+      "width": 320,
+      "screen": "overview",
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "concept": "folio",
+      "width": 320,
+      "screen": "orders",
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "concept": "folio",
+      "width": 320,
+      "screen": "inventory",
+      "client": 320,
+      "scroll": 320
+    }
+  ],
+  "accessibility": [
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "screen": "overview",
+      "violations": []
+    },
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "screen": "orders",
+      "violations": []
+    },
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "screen": "inventory",
+      "violations": []
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "screen": "overview",
+      "violations": []
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "screen": "orders",
+      "violations": []
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "screen": "inventory",
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "screen": "overview",
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "screen": "orders",
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "screen": "inventory",
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "screen": "overview",
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "screen": "orders",
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "screen": "inventory",
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "screen": "overview",
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "screen": "orders",
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "screen": "inventory",
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "screen": "overview",
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "screen": "orders",
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "screen": "inventory",
+      "violations": []
+    }
+  ],
+  "interactions": [
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "passed": [
+        "status filter",
+        "search",
+        "empty state",
+        "confirm/reserve",
+        "fulfill/deduct",
+        "receipt/replenish",
+        "create draft",
+        "Escape closes dialog"
+      ]
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "passed": [
+        "status filter",
+        "search",
+        "empty state",
+        "confirm/reserve",
+        "fulfill/deduct",
+        "receipt/replenish",
+        "create draft",
+        "Escape closes dialog"
+      ]
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "passed": [
+        "status filter",
+        "search",
+        "empty state",
+        "confirm/reserve",
+        "fulfill/deduct",
+        "receipt/replenish",
+        "create draft",
+        "Escape closes dialog"
+      ]
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "passed": [
+        "status filter",
+        "search",
+        "empty state",
+        "confirm/reserve",
+        "fulfill/deduct",
+        "receipt/replenish",
+        "create draft",
+        "Escape closes dialog"
+      ]
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "passed": [
+        "status filter",
+        "search",
+        "empty state",
+        "confirm/reserve",
+        "fulfill/deduct",
+        "receipt/replenish",
+        "create draft",
+        "Escape closes dialog"
+      ]
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "passed": [
+        "status filter",
+        "search",
+        "empty state",
+        "confirm/reserve",
+        "fulfill/deduct",
+        "receipt/replenish",
+        "create draft",
+        "Escape closes dialog"
+      ]
+    }
+  ],
+  "gallery": "Concept switch and mobile viewport passed",
+  "runtimeErrors": [],
+  "httpErrors": []
+}

@@ -1,0 +1,15 @@
+{
+  "origin": "http://localhost:3000",
+  "passed": true,
+  "viewports": [
+    {
+      "section": "settings",
+      "width": 320,
+      "client": 320,
+      "scroll": 320
+    }
+  ],
+  "accessibility": [],
+  "motion": [],
+  "errors": []
+}

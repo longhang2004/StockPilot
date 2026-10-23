@@ -1,6 +1,10 @@
 import { render } from '@testing-library/react';
 import { createElement } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('../components/marketing/logistics-map', () => ({
+  LogisticsMap: () => null,
+}));
 
 import { metadata as homepageMetadata } from './page';
 import { metadata as workspaceMetadata } from './app/layout';
@@ -53,7 +57,7 @@ describe('public SEO contract', () => {
     expect(appManifest.name).toMatch(/StockPilot/);
     expect(appManifest.start_url).toBeTruthy();
     expect(appManifest.start_url).not.toMatch(/\/app/);
-    expect(appManifest.theme_color).toBe('#F3F6F8');
+    expect(appManifest.theme_color).toBe('#F6F7F5');
   });
 
   it('serializes safe WebSite and WebPage JSON-LD', async () => {

@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import {
   ConfirmDialog,
+  Drawer,
   EmptyState,
   ErrorState,
   PageHeader,
@@ -30,7 +31,11 @@ import { invalidatePageQueries, usePage } from '../../hooks/use-page-query';
 import { useToasts } from '../../hooks/use-toasts';
 import { useCommandMutation } from '../../hooks/use-command-mutation';
 import { useWorkspaceLocation } from '../shared/use-workspace-location';
-import { OrderDetailView } from './components/order-detail-view';
+import { OrderTransitionPreview } from './components/order-transition-preview';
+import {
+  OrderDetailActions,
+  OrderDetailView,
+} from './components/order-detail-view';
 import { OrderFormDrawer } from './components/order-form-drawer';
 import { type OrderDetail, type OrderRecord } from '../shared/types';
 import './orders.css';
@@ -71,7 +76,9 @@ export function OrdersWorkspace({ role }: { role: Role }) {
     : null;
   const createFormRequested = location.params.get('new') === '1';
   const [searchInput, setSearchInput] = useState(searchFromUrl);
-  const [confirmAction, setConfirmAction] = useState<'CANCELLED' | null>(null);
+  const [confirmAction, setConfirmAction] = useState<
+    'CANCELLED' | 'CONFIRMED' | 'FULFILLED' | null
+  >(null);
   const [pendingDraftRecovery, setPendingDraftRecovery] = useState(false);
   const { push, toasts } = useToasts();
   const queryClient = useQueryClient();
@@ -122,11 +129,13 @@ export function OrdersWorkspace({ role }: { role: Role }) {
         ['CONFIRMED', 'FULFILLED', 'CANCELLED'].includes(String(value.to)),
       ),
     command: (value, key) => transitionOrder(value.id, value.to, key),
-    onError: (error) =>
+    onError: (error) => {
+      setConfirmAction(null);
       push(
         error instanceof Error ? error.message : 'Order transition failed.',
         'error',
-      ),
+      );
+    },
     onSuccess: (updated, value) => {
       queryClient.setQueryData(orderKeys.detail(value.id), updated);
       void invalidatePageQueries(queryClient, ORDERS_RESOURCE);
@@ -162,30 +171,31 @@ export function OrdersWorkspace({ role }: { role: Role }) {
   }
 
   const selectedOrder = detail.data;
+  const recoveryNotice = transition.outcomeUnknown ? (
+    <div className="work-panel" role="alert">
+      <p>{transition.recoveryMessage}</p>
+      {transition.recoveryExpired ? (
+        <ExpiredCommandResolution
+          idempotencyKey={transition.idempotencyKey}
+          onResolve={transition.resolveExpired}
+        />
+      ) : (
+        <button
+          className="button button-secondary"
+          type="button"
+          disabled={transition.isPending}
+          onClick={() =>
+            transition.variables && transition.mutate(transition.variables)
+          }
+        >
+          Retry same status update
+        </button>
+      )}
+    </div>
+  ) : null;
   return (
     <section className="workspace-section-page orders-workspace">
-      {transition.outcomeUnknown ? (
-        <div className="work-panel" role="alert">
-          <p>{transition.recoveryMessage}</p>
-          {transition.recoveryExpired ? (
-            <ExpiredCommandResolution
-              idempotencyKey={transition.idempotencyKey}
-              onResolve={transition.resolveExpired}
-            />
-          ) : (
-            <button
-              className="button button-secondary"
-              disabled={transition.isPending}
-              onClick={() =>
-                transition.variables && transition.mutate(transition.variables)
-              }
-              type="button"
-            >
-              Retry same status update
-            </button>
-          )}
-        </div>
-      ) : null}
+      {!selectedId ? recoveryNotice : null}
       {pendingDraftRecovery ? (
         <div className="work-panel order-create-recovery" role="status">
           <p>
@@ -202,142 +212,166 @@ export function OrdersWorkspace({ role }: { role: Role }) {
           </button>
         </div>
       ) : null}
-      {!selectedId ? (
-        <>
-          <PageHeader
-            description="Prepare customer demand, review approvals, and follow fulfillment from one order register."
-            title="Sales orders"
+      <>
+        <PageHeader
+          description="Prepare customer demand, review approvals, and follow fulfillment from one order register."
+          title="Sales orders"
+          action={
+            <button
+              className="button button-primary"
+              onClick={() => location.update({ new: '1' }, 'push')}
+              type="button"
+            >
+              <Plus size={16} aria-hidden="true" />
+              {pendingDraftRecovery ? 'Resume pending Draft' : 'New draft'}
+            </button>
+          }
+        />
+        <SearchFilterBar
+          onSearch={setSearchInput}
+          placeholder="Search order number or customer"
+          search={searchInput}
+        >
+          <label className="orders-status-filter">
+            <span>Status</span>
+            <select
+              aria-label="Filter orders by status"
+              onChange={(event) =>
+                location.update(
+                  {
+                    status: event.target.value || null,
+                    page: null,
+                  },
+                  'replace',
+                )
+              }
+              value={status}
+            >
+              <option value="">All statuses</option>
+              <option value="DRAFT">Draft</option>
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="FULFILLED">Fulfilled</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </label>
+        </SearchFilterBar>
+        <p className="orders-result-count" aria-live="polite">
+          {list.isLoading
+            ? 'Loading orders…'
+            : list.isError
+              ? 'Order register unavailable'
+              : `${list.data?.total ?? 0} orders`}
+        </p>
+        {list.isLoading ? (
+          <Skeleton lines={5} />
+        ) : list.isError ? (
+          <ErrorState
+            description="Orders could not be loaded. Your filters remain in the address bar."
+            onRetry={() => void list.refetch()}
+          />
+        ) : list.data?.items.length ? (
+          <>
+            <ResponsiveDataTable
+              ariaLabel="Sales orders"
+              columns={orderColumns}
+              data={list.data.items}
+              getRowLabel={(record) => record.orderNumber}
+              onRowClick={openOrder}
+            />
+            <Pagination
+              onPageChange={(nextPage) =>
+                location.update({
+                  page: nextPage === 1 ? null : String(nextPage),
+                })
+              }
+              page={list.data.page}
+              totalPages={list.data.totalPages}
+            />
+          </>
+        ) : (
+          <EmptyState
+            description="Create a draft order when a customer is ready to buy."
+            title="No orders match this view"
             action={
               <button
                 className="button button-primary"
                 onClick={() => location.update({ new: '1' }, 'push')}
                 type="button"
               >
-                <Plus size={16} aria-hidden="true" />
-                {pendingDraftRecovery ? 'Resume pending Draft' : 'New draft'}
+                Create draft
               </button>
             }
           />
-          <SearchFilterBar
-            onSearch={setSearchInput}
-            placeholder="Search order number or customer"
-            search={searchInput}
-          >
-            <label className="orders-status-filter">
-              <span>Status</span>
-              <select
-                aria-label="Filter orders by status"
-                onChange={(event) =>
-                  location.update(
-                    {
-                      status: event.target.value || null,
-                      page: null,
-                    },
-                    'replace',
-                  )
-                }
-                value={status}
-              >
-                <option value="">All statuses</option>
-                <option value="DRAFT">Draft</option>
-                <option value="CONFIRMED">Confirmed</option>
-                <option value="FULFILLED">Fulfilled</option>
-                <option value="CANCELLED">Cancelled</option>
-              </select>
-            </label>
-          </SearchFilterBar>
-          <p className="orders-result-count" aria-live="polite">
-            {list.isLoading
-              ? 'Loading orders…'
-              : list.isError
-                ? 'Order register unavailable'
-                : `${list.data?.total ?? 0} orders`}
-          </p>
-          {list.isLoading ? (
-            <Skeleton lines={5} />
-          ) : list.isError ? (
+        )}
+      </>
+      <Drawer
+        key={selectedId ?? 'order-detail'}
+        open={Boolean(selectedId) && !formOpen && !confirmAction}
+        title={selectedOrder?.orderNumber ?? 'Order detail'}
+        description={selectedOrder?.customerCompanyName}
+        size="wide"
+        onClose={() => location.update({ order: null, edit: null }, 'replace')}
+        footer={
+          selectedOrder ? (
+            <OrderDetailActions
+              detail={selectedOrder}
+              canManage={canManage}
+              canEditDraft={selectedOrder.status === 'DRAFT'}
+              onEdit={() => location.update({ edit: '1' }, 'push')}
+              onAction={setConfirmAction}
+              pending={transition.locked}
+            />
+          ) : undefined
+        }
+      >
+        {recoveryNotice}
+        {detail.isLoading ? (
+          <div className="order-object-page">
+            <button
+              className="button button-secondary"
+              onClick={() => location.update({ order: null }, 'replace')}
+              type="button"
+            >
+              Back to orders
+            </button>
+            <Skeleton lines={7} />
+          </div>
+        ) : detail.isError || !selectedOrder ? (
+          <div className="order-object-page">
+            <button
+              className="button button-secondary"
+              onClick={() => location.update({ order: null }, 'replace')}
+              type="button"
+            >
+              Back to orders
+            </button>
             <ErrorState
-              description="Orders could not be loaded. Your filters remain in the address bar."
-              onRetry={() => void list.refetch()}
+              description="This order could not be loaded or is no longer available in this workspace."
+              onRetry={() => void detail.refetch()}
             />
-          ) : list.data?.items.length ? (
-            <>
-              <ResponsiveDataTable
-                ariaLabel="Sales orders"
-                columns={orderColumns}
-                data={list.data.items}
-                getRowLabel={(record) => record.orderNumber}
-                onRowClick={openOrder}
-              />
-              <Pagination
-                onPageChange={(nextPage) =>
-                  location.update({
-                    page: nextPage === 1 ? null : String(nextPage),
-                  })
-                }
-                page={list.data.page}
-                totalPages={list.data.totalPages}
-              />
-            </>
-          ) : (
-            <EmptyState
-              description="Create a draft order when a customer is ready to buy."
-              title="No orders match this view"
-              action={
-                <button
-                  className="button button-primary"
-                  onClick={() => location.update({ new: '1' }, 'push')}
-                  type="button"
-                >
-                  Create draft
-                </button>
-              }
-            />
-          )}
-        </>
-      ) : detail.isLoading ? (
-        <div className="order-object-page">
-          <button
-            className="button button-secondary"
-            onClick={() => location.update({ order: null }, 'replace')}
-            type="button"
-          >
-            Back to orders
-          </button>
-          <Skeleton lines={7} />
-        </div>
-      ) : detail.isError || !selectedOrder ? (
-        <div className="order-object-page">
-          <button
-            className="button button-secondary"
-            onClick={() => location.update({ order: null }, 'replace')}
-            type="button"
-          >
-            Back to orders
-          </button>
-          <ErrorState
-            description="This order could not be loaded or is no longer available in this workspace."
-            onRetry={() => void detail.refetch()}
+          </div>
+        ) : (
+          <OrderDetailView
+            checkStock
+            hideActions
+            detail={selectedOrder}
+            {...(location.params.get('returnTo')
+              ? { returnTo: location.params.get('returnTo')! }
+              : {})}
+            canManage={canManage}
+            canEditDraft={selectedOrder.status === 'DRAFT'}
+            onBack={() =>
+              location.update({ order: null, edit: null }, 'replace')
+            }
+            onEdit={() => location.update({ edit: '1' }, 'push')}
+            onAction={(to) => {
+              setConfirmAction(to);
+            }}
+            pending={transition.locked}
+            role={role}
           />
-        </div>
-      ) : (
-        <OrderDetailView
-          detail={selectedOrder}
-          {...(location.params.get('returnTo')
-            ? { returnTo: location.params.get('returnTo')! }
-            : {})}
-          canManage={canManage}
-          canEditDraft={selectedOrder.status === 'DRAFT'}
-          onBack={() => location.update({ order: null, edit: null }, 'replace')}
-          onEdit={() => location.update({ edit: '1' }, 'push')}
-          onAction={(to) => {
-            if (to === 'CANCELLED') setConfirmAction(to);
-            else transition.mutate({ id: selectedOrder.id, to });
-          }}
-          pending={transition.locked}
-          role={role}
-        />
-      )}
+        )}
+      </Drawer>
       <ToastRegion toasts={toasts} />
       <OrderFormDrawer
         open={formOpen}
@@ -357,6 +391,18 @@ export function OrdersWorkspace({ role }: { role: Role }) {
         }
         push={push}
       />
+      {selectedOrder &&
+      (confirmAction === 'CONFIRMED' || confirmAction === 'FULFILLED') ? (
+        <OrderTransitionPreview
+          detail={selectedOrder}
+          target={confirmAction}
+          pending={transition.locked}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={() =>
+            transition.mutate({ id: selectedOrder.id, to: confirmAction })
+          }
+        />
+      ) : null}
       <ConfirmDialog
         confirmLabel="Cancel order"
         destructive

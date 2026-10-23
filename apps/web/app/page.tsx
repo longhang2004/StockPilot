@@ -1,6 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-
+import {
+  ArrowRight,
+  Cube,
+  Stack,
+  ClipboardText,
+  UsersThree,
+} from '@phosphor-icons/react/dist/ssr';
+import { LogisticsMap } from '../components/marketing/logistics-map';
+import { ProductTour } from '../components/marketing/product-tour';
 import {
   homepageTitle,
   siteDescription,
@@ -37,11 +45,7 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-image-preview': 'large',
-    },
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
   },
 };
 
@@ -85,7 +89,7 @@ const jsonLd = {
 
 export default function HomePage() {
   return (
-    <>
+    <div className="landing-page">
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
@@ -93,186 +97,161 @@ export default function HomePage() {
         <nav className="site-nav" aria-label="Primary navigation">
           <Link className="brand" href="/">
             <span className="brand-mark" aria-hidden="true">
-              SP
+              <Stack size={20} />
             </span>
-            <span>StockPilot</span>
+            StockPilot
           </Link>
           <div className="site-nav-links">
-            <a href="#inventory-worklist">Inventory worklist</a>
-            <a href="#workflow">Process</a>
+            <a href="#product-tour">Product</a>
+            <a href="#workflow">How it works</a>
           </div>
-          <Link
-            className="button button-primary site-nav-cta"
-            href="/login?role=manager"
-          >
-            Open the demo
+          <Link className="button button-primary" href="/login?role=manager">
+            Explore demo <ArrowRight size={16} aria-hidden="true" />
           </Link>
         </nav>
       </header>
-
-      <main id="main-content" className="marketing-page">
-        <section className="public-hero" aria-labelledby="hero-title">
-          <div className="public-hero-copy">
-            <h1 id="hero-title">Inventory and B2B order operations</h1>
-            <p className="hero-summary">
-              Review stock, prepare customer orders, receive supplier goods and
-              trace changes in one workspace.
+      <main id="main-content">
+        <section className="landing-hero" aria-labelledby="hero-title">
+          <LogisticsMap />
+          <div className="hero-content">
+            <p className="landing-audience">
+              Inventory &amp; orders for small wholesale teams
+            </p>
+            <h1 id="hero-title">
+              Know your stock.
+              <br />
+              <span>Keep orders moving.</span>
+            </h1>
+            <p className="landing-intro">
+              A clear workspace for receiving stock, reviewing B2B orders
+              <br className="desktop-break" /> and keeping every handoff in
+              view.
             </p>
             <div className="hero-actions">
               <Link
                 className="button button-primary"
                 href="/login?role=manager"
               >
-                Start with the Manager demo
+                Explore the workspace{' '}
+                <ArrowRight size={17} aria-hidden="true" />
               </Link>
               <Link className="button button-secondary" href="/signup">
                 Create a workspace
               </Link>
             </div>
             <p className="hero-note">
-              The demo uses seeded data and needs no signup.
+              Live demo · Seeded data · No account needed
             </p>
           </div>
-
-          <section className="demo-entry" aria-labelledby="demo-entry-title">
-            <div className="demo-entry-heading">
-              <div>
-                <h2 id="demo-entry-title">Open a role-based demo</h2>
-              </div>
-            </div>
-            <ul className="demo-role-list">
-              {demoRoles.map((item) => (
-                <li key={item.role}>
-                  <span className="demo-role-copy">
-                    <strong>{item.label}</strong>
-                    <small>{item.description}</small>
-                  </span>
-                  <Link
-                    className="role-entry-link"
-                    href={`/login?role=${item.role}`}
-                  >
-                    Enter {item.label} demo
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
         </section>
-
-        <section
-          id="inventory-worklist"
-          className="product-evidence"
-          aria-labelledby="worklist-title"
-        >
-          <div className="product-evidence-heading">
-            <div>
-              <h2 id="worklist-title">Inventory worklist</h2>
-              <p>
-                Available quantity and reorder point shown together for review.
-              </p>
-            </div>
-            <span>Illustrative data</span>
-          </div>
-          <div
-            tabIndex={0}
-            role="region"
-            aria-label="Illustrative inventory example table"
-            className="product-evidence-table-wrap"
-          >
-            <table className="product-evidence-table">
-              <caption className="sr-only">
-                Illustrative inventory worklist rows
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Product</th>
-                  <th scope="col">SKU</th>
-                  <th scope="col">On hand</th>
-                  <th scope="col">Reserved</th>
-                  <th scope="col">Available</th>
-                  <th scope="col">Reorder point</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">Arabica coffee, 1 kg</th>
-                  <td>COF-1042</td>
-                  <td>184</td>
-                  <td>32</td>
-                  <td>152</td>
-                  <td>80</td>
-                </tr>
-                <tr>
-                  <th scope="row">Cold brew bottles, 12 × 250 ml</th>
-                  <td>DRK-2280</td>
-                  <td>46</td>
-                  <td>38</td>
-                  <td>8</td>
-                  <td>24</td>
-                </tr>
-                <tr>
-                  <th scope="row">Paper cups, 500 count</th>
-                  <td>PKG-3016</td>
-                  <td>0</td>
-                  <td>0</td>
-                  <td>0</td>
-                  <td>40</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <ProductTour />
+        <section className="landing-benefits" aria-label="What stays connected">
+          {[
+            {
+              Icon: Cube,
+              title: 'Stock you can explain.',
+              copy: 'On hand, reserved and available. See the orders behind every commitment.',
+            },
+            {
+              Icon: ClipboardText,
+              title: 'A clear next step.',
+              copy: 'Draft, confirm, fulfill. Keep each order’s state and next action together.',
+            },
+            {
+              Icon: UsersThree,
+              title: 'One team workspace.',
+              copy: 'Customers, suppliers and stock records connected to the work they support.',
+            },
+          ].map(({ Icon, title, copy }) => (
+            <article key={title}>
+              <Icon size={25} aria-hidden="true" />
+              <h2>{title}</h2>
+              <p>{copy}</p>
+            </article>
+          ))}
         </section>
-
         <section
           id="workflow"
-          className="workflow-section"
+          className="landing-workflow"
           aria-labelledby="workflow-title"
         >
-          <div className="section-intro">
-            <h2 id="workflow-title">From receipt to fulfillment</h2>
+          <div className="workflow-intro">
+            <p className="landing-audience">How the work flows</p>
+            <h2 id="workflow-title">
+              From the first receipt
+              <br />
+              to the final handoff.
+            </h2>
             <p>
-              Receipts add stock, order confirmation reserves it, and
-              fulfillment records the shipment and resulting stock movement.
+              Keep inventory and customer orders connected, without switching
+              between separate tools.
+            </p>
+            <a className="text-link" href="/login?role=manager">
+              Try it with sample data{' '}
+              <ArrowRight size={16} aria-hidden="true" />
+            </a>
+          </div>
+          <div className="workflow-steps">
+            <details open>
+              <summary>
+                <span>01</span>Receive what arrived.
+              </summary>
+              <p>
+                Record a supplier receipt. On-hand stock increases while
+                existing reservations stay allocated.
+              </p>
+            </details>
+            <details>
+              <summary>
+                <span>02</span>Reserve with the full picture.
+              </summary>
+              <p>
+                Review the customer’s draft and item quantities. Confirm the
+                order to reserve available stock.
+              </p>
+            </details>
+            <details>
+              <summary>
+                <span>03</span>Complete the handoff.
+              </summary>
+              <p>
+                Fulfill the confirmed order. On-hand and reserved quantities
+                decrease together, keeping availability clear.
+              </p>
+            </details>
+          </div>
+        </section>
+        <section className="landing-demo" aria-labelledby="demo-title">
+          <div>
+            <p className="landing-audience">Find your perspective</p>
+            <h2 id="demo-title">One workspace. Your role.</h2>
+            <p>
+              Explore the real application with seeded data. Demo data resets
+              every six hours.
             </p>
           </div>
-          <ol className="workflow-list">
-            <li>
-              <strong>Receive</strong>
-              <span>Post supplier quantities</span>
-            </li>
-            <li>
-              <strong>Confirm</strong>
-              <span>Reserve available stock</span>
-            </li>
-            <li>
-              <strong>Fulfill</strong>
-              <span>Record dispatched goods</span>
-            </li>
-            <li>
-              <strong>Review</strong>
-              <span>Inspect movement and audit history</span>
-            </li>
-          </ol>
-        </section>
-
-        <section className="public-proof" aria-label="Reliability details">
-          <h2>Operational controls</h2>
           <ul>
-            <li>Tenant and role-aware access</li>
-            <li>Append-only stock history</li>
-            <li>Duplicate-safe commands</li>
-            <li>Oversell protection</li>
+            {demoRoles.map((item) => (
+              <li key={item.role}>
+                <strong>{item.label}</strong>
+                <p>{item.description}</p>
+                <Link className="text-link" href={`/login?role=${item.role}`}>
+                  Enter {item.label} demo{' '}
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
           </ul>
-          <a
-            className="text-link"
-            href="https://github.com/longhang2004/StockPilot"
-            target="_blank"
-            rel="noreferrer"
-          >
-            View the source and technical documentation
-          </a>
         </section>
-
+        <section className="landing-closing">
+          <div>
+            <h2>A clearer view of every order.</h2>
+            <p>Start with your team’s inventory and customer orders.</p>
+          </div>
+          <Link className="button button-primary" href="/signup">
+            Create a workspace <ArrowRight size={17} aria-hidden="true" />
+          </Link>
+        </section>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -280,38 +259,25 @@ export default function HomePage() {
           }}
         />
       </main>
-
       <footer className="marketing-footer">
         <Link className="brand" href="/">
           <span className="brand-mark" aria-hidden="true">
-            SP
+            <Stack size={20} />
           </span>
-          <span>StockPilot</span>
+          StockPilot
         </Link>
+        <p>Inventory and B2B orders, in one workspace.</p>
         <nav aria-label="Reference links">
           <a
             href="https://github.com/longhang2004/StockPilot"
             target="_blank"
             rel="noreferrer"
           >
-            GitHub
+            View source
           </a>
-          <a
-            href="https://github.com/longhang2004/StockPilot/blob/main/docs/walkthrough.md"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Walkthrough
-          </a>
-          <a
-            href="https://github.com/longhang2004/StockPilot/blob/main/docs/architecture.md"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Architecture
-          </a>
+          <Link href="/login">Sign in</Link>
         </nav>
       </footer>
-    </>
+    </div>
   );
 }

@@ -13,6 +13,7 @@ import { useState } from 'react';
 
 import {
   EmptyState,
+  Drawer,
   ErrorState,
   PageHeader,
   Pagination,
@@ -86,15 +87,24 @@ export function InventoryWorkspace({ role }: { role: Role }) {
         }
       />
       {productId ? (
-        <ProductTraceView
-          error={trace.isError}
-          loading={trace.isLoading}
+        <Drawer
+          key={productId}
+          open
+          title="Stock trace"
+          description={trace.data?.product.sku}
+          size="wide"
           onClose={() => update({ product: null }, 'push')}
-          onMovementPage={setMovementsPage}
-          onReservationPage={setReservationsPage}
-          refetch={() => void trace.refetch()}
-          value={trace.data}
-        />
+        >
+          <ProductTraceView
+            error={trace.isError}
+            loading={trace.isLoading}
+            onClose={() => update({ product: null }, 'push')}
+            onMovementPage={setMovementsPage}
+            onReservationPage={setReservationsPage}
+            refetch={() => void trace.refetch()}
+            value={trace.data}
+          />
+        </Drawer>
       ) : null}
       {summary.isLoading ? (
         <Skeleton lines={3} />

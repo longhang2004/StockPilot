@@ -3,7 +3,7 @@
 import type { CustomerInputSchema, Role } from '@stockpilot/contracts';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from '@phosphor-icons/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { z } from 'zod';
 
 import {
@@ -23,11 +23,18 @@ import { savePartner } from './api';
 import { useToasts } from '../../hooks/use-toasts';
 import { PartnerDrawer } from './components/partner-drawer';
 import { type PartnerRecord } from '../shared/types';
+import { useWorkspaceLocation } from '../shared/use-workspace-location';
 
 export function PartnersWorkspace({ role }: { role: Role }) {
+  const location = useWorkspaceLocation();
+  const searchFromUrl = location.params.get('search') ?? '';
   const [kind, setKind] = useState<'customers' | 'suppliers'>('customers');
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchFromUrl);
+  useEffect(() => {
+    setSearch(searchFromUrl);
+    setPage(1);
+  }, [searchFromUrl]);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<PartnerRecord | null>(null);
   const { push, toasts } = useToasts();
@@ -62,7 +69,7 @@ export function PartnersWorkspace({ role }: { role: Role }) {
   return (
     <section className="workspace-section-page">
       <PageHeader
-        description="Keep customer and supplier records active, searchable, and tenant-scoped."
+        description="Manage the customers and suppliers behind your daily operations."
         title="Partners"
         action={
           canWrite ? (

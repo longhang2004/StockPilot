@@ -160,6 +160,8 @@ export const ReceiptDetailSchema = ReceiptSummarySchema.extend({
       quantity: z.number().int().positive(),
       unitCost: MoneyStringSchema.nullable(),
       product: ReceiptProductBriefSchema,
+      onHandBefore: z.number().int().nullable().optional(),
+      onHandAfter: z.number().int().nullable().optional(),
     }),
   ),
 });

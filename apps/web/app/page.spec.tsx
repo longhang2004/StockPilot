@@ -1,50 +1,40 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('../components/marketing/logistics-map', () => ({
+  LogisticsMap: () => null,
+}));
 
 describe('StockPilot public page', () => {
-  it('explains the product and offers the manager demo first', async () => {
+  it('offers working demo/signup routes and an accessible product tour', async () => {
     const { default: HomePage } = await import('./page');
-
     render(<HomePage />);
-
     expect(
       screen.getByRole('heading', {
         level: 1,
-        name: /inventory and b2b order operations/i,
+        name: /Know your stock.*Keep orders moving/i,
       }),
-    ).toBeInTheDocument();
-    const managerLinks = screen.getAllByRole('link', {
-      name: /enter manager demo/i,
-    });
-    expect(managerLinks).toHaveLength(1);
-    expect(managerLinks[0]).toHaveAttribute('href', '/login?role=manager');
-    expect(
-      screen.getByRole('heading', { name: 'Inventory worklist' }),
     ).toBeVisible();
-    expect(screen.getByText('Illustrative data')).toBeVisible();
     expect(
-      screen.getByRole('table', {
-        name: 'Illustrative inventory worklist rows',
-      }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/seeded data/i)).toBeVisible();
+      screen.getByRole('link', { name: /Enter Manager demo/i }),
+    ).toHaveAttribute('href', '/login?role=manager');
     expect(
-      screen
-        .getAllByRole('heading', { level: 2 })
-        .map((heading) => heading.textContent?.trim()),
-    ).toEqual([
-      'Open a role-based demo',
-      'Inventory worklist',
-      'From receipt to fulfillment',
-      'Operational controls',
-    ]);
+      screen.getAllByRole('link', { name: /Create a workspace/i })[0],
+    ).toHaveAttribute('href', '/signup');
     expect(
-      screen.getByRole('link', { name: /skip to content/i }),
+      screen.getByRole('link', { name: /Skip to content/i }),
     ).toHaveAttribute('href', '#main-content');
+    expect(screen.getByText(/Live demo · Seeded data/i)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Inventory' }));
+    expect(screen.getByRole('button', { name: 'Inventory' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
     expect(
-      screen.getByRole('link', {
-        name: /view the source and technical documentation/i,
-      }),
-    ).toHaveAttribute('href', 'https://github.com/longhang2004/StockPilot');
+      screen.getByRole('img', { name: /StockPilot Inventory/ }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('link', { name: /Explore Inventory in the demo/i }),
+    ).toHaveAttribute('href', '/login?role=manager');
   });
 });

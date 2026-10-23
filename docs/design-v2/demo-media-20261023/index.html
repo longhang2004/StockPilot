@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StockPilot Atlas · Demo thực tế</title>
+    <style>
+      :root {
+        font-family:
+          Inter,
+          Segoe UI,
+          Arial,
+          sans-serif;
+        color: #203329;
+        background: #f1f3ef;
+        font-synthesis: none;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      a {
+        color: inherit;
+      }
+      button,
+      a,
+      video {
+        outline-offset: 5px;
+      }
+      main {
+        max-width: 1240px;
+        margin: auto;
+        padding: 56px 32px 72px;
+      }
+      .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #53705e;
+      }
+      h1 {
+        font-size: clamp(32px, 5vw, 52px);
+        letter-spacing: -0.045em;
+        line-height: 1.1;
+        margin: 14px 0 18px;
+        font-weight: 650;
+      }
+      p {
+        color: #5e7064;
+        line-height: 1.65;
+        margin: 0;
+      }
+      .intro {
+        max-width: 750px;
+      }
+      .meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 24px;
+      }
+      .meta span {
+        border: 1px solid #d3ddd2;
+        border-radius: 30px;
+        padding: 7px 12px;
+        font-size: 12px;
+      }
+      .video-card {
+        background: #fff;
+        border: 1px solid #d6ded4;
+        border-radius: 20px;
+        padding: 16px;
+        margin-top: 32px;
+        box-shadow: 0 18px 60px #2848330a;
+      }
+      video {
+        width: 100%;
+        display: block;
+        background: #e8eee6;
+        border-radius: 9px;
+        max-height: 77vh;
+      }
+      video::cue {
+        font-family:
+          Segoe UI,
+          Arial,
+          sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        background: #173623ee;
+        color: #fff;
+      }
+      .video-meta {
+        display: flex;
+        gap: 16px;
+        align-items: start;
+        justify-content: space-between;
+        padding: 20px 8px 5px;
+      }
+      h2 {
+        font-size: 25px;
+        letter-spacing: -0.025em;
+        line-height: 1.25;
+        margin: 0 0 9px;
+      }
+      h3 {
+        font-size: 15px;
+        margin: 0 0 7px;
+      }
+      .video-meta p {
+        font-size: 14px;
+      }
+      .download {
+        white-space: nowrap;
+        background: #225d43;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .chapters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin: 18px 8px 8px;
+      }
+      .chapters button {
+        background: #f2f5f0;
+        border: 1px solid #dce4d8;
+        color: #415a48;
+        border-radius: 7px;
+        padding: 9px 12px;
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+      }
+      .chapters button[aria-pressed='true'] {
+        background: #225d43;
+        color: #fff;
+        border-color: #225d43;
+      }
+      .chapter-time {
+        font-variant-numeric: tabular-nums;
+        opacity: 0.65;
+        margin-right: 7px;
+      }
+      .section-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin: 56px 0 22px;
+        gap: 20px;
+      }
+      .section-head p {
+        font-size: 13px;
+      }
+      .desktop-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+      .screen {
+        margin: 0;
+        min-width: 0;
+      }
+      .screen a {
+        display: block;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #d7dfd4;
+        background: #fff;
+        box-shadow: 0 6px 22px #28483308;
+      }
+      .screen img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      .screen figcaption {
+        padding: 13px 3px 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #4a6250;
+      }
+      .mobile-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+      }
+      .phone a {
+        border-radius: 22px;
+        border: 6px solid #253c2e;
+        box-shadow: 0 12px 24px #1e362a12;
+      }
+      .phone img {
+        aspect-ratio: 390/844;
+      }
+      .footnote {
+        border-top: 1px solid #d7dfd2;
+        padding-top: 24px;
+        margin-top: 48px;
+        font-size: 13px;
+      }
+      .fullscreen {
+        font-size: 13px;
+        color: #476f54;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      #mobile-board {
+        background: #f1f3ef;
+        padding: 24px;
+        border-radius: 16px;
+      }
+      #mobile-board .mobile-grid {
+        gap: 20px;
+      }
+      #mobile-board h2 {
+        margin: 0 0 8px;
+      }
+      #mobile-board > p {
+        font-size: 13px;
+        margin: 0 0 24px;
+      }
+      #mobile-board .phone figcaption {
+        font-size: 12px;
+      }
+      .screen a:hover {
+        box-shadow: 0 10px 30px #28483318;
+      }
+      .screen a:focus-visible {
+        outline: 3px solid #225d43;
+      }
+      @media (max-width: 780px) {
+        main {
+          padding: 32px 18px 48px;
+        }
+        .desktop-grid {
+          grid-template-columns: 1fr;
+        }
+        .mobile-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 18px;
+        }
+        .section-head,
+        .video-meta {
+          align-items: start;
+          flex-direction: column;
+        }
+        .video-card {
+          padding: 10px;
+        }
+        .chapters {
+          max-height: 150px;
+          overflow: auto;
+        }
+        #mobile-board {
+          padding: 14px;
+        }
+        .section-head {
+          margin-top: 40px;
+        }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        html {
+          scroll-behavior: smooth;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="intro">
+        <div class="eyebrow">StockPilot / Atlas v2 / 23.10.2026</div>
+        <h1>Xem Atlas trong vận hành.</h1>
+        <p>
+          Bộ ảnh và clip được ghi trực tiếp từ ứng dụng đã implement, kết nối
+          API và database local. Chọn một mốc trong clip hoặc bấm vào ảnh để xem
+          kích thước gốc.
+        </p>
+        <div class="meta">
+          <span>Desktop · 1440 × 1000</span><span>Mobile · 390 × 844</span
+          ><span>18 ảnh thực tế</span>
+        </div>
+      </header>
+      <section class="video-card" aria-labelledby="video-title">
+        <video
+          id="demo"
+          controls
+          preload="metadata"
+          poster="01-landing-desktop.png"
+          playsinline
+        >
+          <source src="stockpilot-atlas-desktop.webm" type="video/webm" />
+          <track
+            src="chapters-vi.vtt"
+            kind="captions"
+            srclang="vi"
+            label="Tiếng Việt"
+            default
+          />
+          Trình duyệt của bạn chưa phát được clip này. Hãy tải clip bằng liên
+          kết bên dưới.
+        </video>
+        <div class="video-meta">
+          <div>
+            <h2 id="video-title">Một vòng StockPilot</h2>
+            <p>
+              Landing → tổng quan → đơn hàng → tồn kho → phiếu nhập. Clip không
+              có âm thanh.
+            </p>
+          </div>
+          <a class="download" href="stockpilot-atlas-desktop.webm" download
+            >Tải clip WebM ↓</a
+          >
+        </div>
+        <nav
+          id="chapters"
+          class="chapters"
+          aria-label="Các mốc trong clip"
+        ></nav>
+      </section>
+      <div class="section-head">
+        <h2>Desktop</h2>
+        <p>Ảnh chụp từ bản chạy thật · bấm ảnh để phóng to</p>
+      </div>
+      <section class="desktop-grid" aria-label="Ảnh desktop">
+        <figure class="screen">
+          <a href="01-landing-desktop.png" target="_blank"
+            ><img
+              src="01-landing-desktop.png"
+              alt="Landing Atlas với canvas logistics chìm dưới hero"
+              loading="lazy"
+          /></a>
+          <figcaption>01 / Landing & canvas logistics</figcaption>
+        </figure>
+        <figure class="screen">
+          <a href="03-overview-desktop.png" target="_blank"
+            ><img
+              src="03-overview-desktop.png"
+              alt="Tổng quan vận hành StockPilot"
+              loading="lazy"
+          /></a>
+          <figcaption>02 / Tổng quan vận hành</figcaption>
+        </figure>
+        <figure class="screen">
+          <a href="04-orders-desktop.png" target="_blank"
+            ><img
+              src="04-orders-desktop.png"
+              alt="Danh sách đơn hàng"
+              loading="lazy"
+          /></a>
+          <figcaption>03 / Danh sách đơn hàng</figcaption>
+        </figure>
+        <figure class="screen">
+          <a href="05-order-detail-desktop.png" target="_blank"
+            ><img
+              src="05-order-detail-desktop.png"
+              alt="Drawer chi tiết đơn hàng"
+              loading="lazy"
+          /></a>
+          <figcaption>04 / Chi tiết đơn & khả năng đáp ứng</figcaption>
+        </figure>
+        <figure class="screen">
+          <a href="06-stock-impact-desktop.png" target="_blank"
+            ><img
+              src="06-stock-impact-desktop.png"
+              alt="Xem trước tác động của xác nhận đơn lên tồn kho"
+              loading="lazy"
+          /></a>
+          <figcaption>05 / Preview tác động tồn kho</figcaption>
+        </figure>
+        <figure class="screen">
+          <a href="07-global-search-desktop.png" target="_blank"
+            ><img
+              src="07-global-search-desktop.png"
+              alt="Tìm kiếm nhanh theo SKU"
+              loading="lazy"
+          /></a>
+          <figcaption>06 / Tìm kiếm nhanh theo SKU</figcaption>
+        </figure>
+        <figure class="screen">
+          <a href="08-stock-trace-desktop.png" target="_blank"
+            ><img
+              src="08-stock-trace-desktop.png"
+              alt="Drawer truy vết tồn kho"
+              loading="lazy"
+          /></a>
+          <figcaption>07 / Truy vết tồn kho</figcaption>
+        </figure>
+        <figure class="screen">
+          <a href="09-inventory-desktop.png" target="_blank"
+            ><img
+              src="09-inventory-desktop.png"
+              alt="Danh sách tồn kho và cảnh báo"
+              loading="lazy"
+          /></a>
+          <figcaption>08 / Tồn kho & cảnh báo</figcaption>
+        </figure>
+        <figure class="screen">
+          <a href="10-receipts-desktop.png" target="_blank"
+            ><img
+              src="10-receipts-desktop.png"
+              alt="Danh sách phiếu nhập hàng"
+              loading="lazy"
+          /></a>
+          <figcaption>09 / Danh sách phiếu nhập</figcaption>
+        </figure>
+        <figure class="screen">
+          <a href="11-receipt-detail-desktop.png" target="_blank"
+            ><img
+              src="11-receipt-detail-desktop.png"
+              alt="Chi tiết phiếu nhập và số dư trước sau"
+              loading="lazy"
+          /></a>
+          <figcaption>10 / Chứng từ & số dư trước–sau</figcaption>
+        </figure>
+      </section>
+      <div class="section-head">
+        <h2>Mobile</h2>
+        <p>Thẻ dữ liệu, nội dung ưu tiên và thao tác cuối màn hình</p>
+      </div>
+      <section id="mobile-board" aria-label="Bốn màn hình mobile">
+        <h2>Atlas, trên màn hình nhỏ.</h2>
+        <p>Từ danh sách đến chi tiết và preview trước khi xác nhận.</p>
+        <div class="mobile-grid">
+          <figure class="screen phone">
+            <a href="13-overview-mobile.png" target="_blank"
+              ><img
+                src="13-overview-mobile.png"
+                alt="Tổng quan trên mobile"
+                loading="lazy"
+            /></a>
+            <figcaption>Tổng quan vận hành</figcaption>
+          </figure>
+          <figure class="screen phone">
+            <a href="14-orders-mobile.png" target="_blank"
+              ><img
+                src="14-orders-mobile.png"
+                alt="Thẻ đơn hàng trên mobile"
+                loading="lazy"
+            /></a>
+            <figcaption>Danh sách đơn hàng</figcaption>
+          </figure>
+          <figure class="screen phone">
+            <a href="15-order-detail-mobile.png" target="_blank"
+              ><img
+                src="15-order-detail-mobile.png"
+                alt="Chi tiết đơn hàng trên mobile"
+                loading="lazy"
+            /></a>
+            <figcaption>Chi tiết đơn hàng</figcaption>
+          </figure>
+          <figure class="screen phone">
+            <a href="16-stock-impact-mobile.png" target="_blank"
+              ><img
+                src="16-stock-impact-mobile.png"
+                alt="Preview tồn kho trên mobile"
+                loading="lazy"
+            /></a>
+            <figcaption>Preview tác động tồn kho</figcaption>
+          </figure>
+        </div>
+      </section>
+      <section
+        class="mobile-grid"
+        aria-label="Các màn hình mobile khác"
+        style="margin-top: 26px"
+      >
+        <figure class="screen phone">
+          <a href="12-landing-mobile.png" target="_blank"
+            ><img
+              src="12-landing-mobile.png"
+              alt="Landing trên mobile"
+              loading="lazy"
+          /></a>
+          <figcaption>Landing</figcaption>
+        </figure>
+        <figure class="screen phone">
+          <a href="17-stock-trace-mobile.png" target="_blank"
+            ><img
+              src="17-stock-trace-mobile.png"
+              alt="Truy vết tồn kho trên mobile"
+              loading="lazy"
+          /></a>
+          <figcaption>Truy vết tồn kho</figcaption>
+        </figure>
+        <figure class="screen phone">
+          <a href="18-receipt-detail-mobile.png" target="_blank"
+            ><img
+              src="18-receipt-detail-mobile.png"
+              alt="Chứng từ nhập hàng trên mobile"
+              loading="lazy"
+          /></a>
+          <figcaption>Phiếu nhập hàng</figcaption>
+        </figure>
+        <figure class="screen">
+          <a href="02-landing-full.png" target="_blank"
+            ><img
+              src="02-landing-full.png"
+              alt="Toàn bộ trang landing"
+              loading="lazy"
+          /></a>
+          <figcaption>Toàn bộ landing · ảnh dài</figcaption>
+        </figure>
+      </section>
+      <p class="footnote">
+        Dữ liệu demo hiện có trong môi trường local. Danh sách sử dụng bộ lọc
+        của ứng dụng. Luồng xác nhận dừng ở preview; clip giữ nguyên đơn và số
+        dư tồn kho.
+      </p>
+    </main>
+    <script>
+      const video = document.querySelector('#demo');
+      const nav = document.querySelector('#chapters');
+      const clock = (value) =>
+        `${Math.floor(value / 60)}:${String(Math.floor(value % 60)).padStart(2, '0')}`;
+      fetch('capture-report.json')
+        .then((response) => response.json())
+        .then((report) => {
+          const chapters = report.chapters;
+          chapters.forEach((chapter) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            const time = document.createElement('span');
+            time.className = 'chapter-time';
+            time.textContent = clock(chapter.time);
+            button.append(time, chapter.title);
+            button.setAttribute('aria-pressed', 'false');
+            button.addEventListener('click', () => {
+              video.currentTime = chapter.time;
+              video.play().catch(() => {});
+            });
+            nav.append(button);
+          });
+          video.addEventListener('timeupdate', () => {
+            [...nav.children].forEach((button, index) =>
+              button.setAttribute(
+                'aria-pressed',
+                String(
+                  video.currentTime >= chapters[index].time &&
+                    (index === chapters.length - 1 ||
+                      video.currentTime < chapters[index + 1].time),
+                ),
+              ),
+            );
+          });
+        });
+    </script>
+  </body>
+</html>

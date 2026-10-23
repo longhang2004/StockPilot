@@ -3,42 +3,45 @@
 > Source of truth for StockPilot's visual design and interaction rules. Page-specific notes may add context but must retain this contract.
 
 **Project:** StockPilot
-**Updated:** 2026-10-18
-**Direction:** enterprise-clear, SAP Fiori-informed operations workspace
-**Design dials:** Decoration 1/10 · Motion 1/10 · Density 7/10
+**Updated:** 2026-10-23
+**Direction:** Atlas v2 — approved for the official application after prototype and implementation review.
+**Design dials:** Decoration 2/10 · Workspace motion 1/10 · Density 6/10
+
+Atlas replaces the 18 October navy/blue direction. The implementation and evidence are recorded in [Atlas v2](../../docs/design-v2/IMPLEMENTATION.md); earlier prototypes remain historical references.
 
 ## Design intent
 
 StockPilot helps wholesale operators find the next exception, process receipts and orders, and explain inventory from reservations and source documents. The interface should feel direct, precise, and dependable:
 
-- Cool light canvas and white data surfaces, with a full-width navy top shell bar. Keep desktop grouped navigation on a light, narrow side rail with a blue active indicator; the operational workspace remains white/light beneath it.
+- Warm neutral canvas, white data surfaces and evergreen actions. Use a labeled desktop sidebar and a quiet header, keeping the primary task visually dominant.
 - Tables, readable labels, explicit state, and contextual actions carry the interface. Use few containers and no decorative chrome.
-- Adopt SAP Fiori's worklist, list-report, and object-page patterns as workflow references. Implement with StockPilot's existing React components and native HTML controls; this is not a SAPUI5 migration.
+- Use worklists, searchable registers and contextual detail drawers with StockPilot's existing React components and native HTML controls. Keep the visible workflow connected to API records and source documents.
 - Preserve tenant, role, ledger, and command semantics. Visual state never implies a permission or a successful mutation that the server has not confirmed.
 
 ## Color tokens
 
-| Role           | Token                      |     Value | Use                                                                     |
-| -------------- | -------------------------- | --------: | ----------------------------------------------------------------------- |
-| Canvas         | `--color-background`       | `#F3F6F8` | Main workspace background                                               |
-| Surface        | `--color-surface`          | `#FFFFFF` | Tables, forms, drawers, dialogs                                         |
-| Subtle surface | `--surface-subtle`         | `#E8EEF4` | Selected navigation, table header, quiet grouping                       |
-| Navy           | `--color-foreground`       | `#102A43` | Primary text, headings, desktop shell                                   |
-| Action         | `--color-accent`           | `#1769AA` | Primary actions, links, selected navigation, focus ring                 |
-| Secondary text | `--color-muted-foreground` | `#526272` | Supporting labels and metadata                                          |
-| Control border | `--color-border-strong`    | `#7D8C9B` | Input/control boundaries and essential dividers                         |
-| Row rule       | `--line-subtle`            | `#CDD6DF` | Table row separators and nonessential rules                             |
-| Disabled text  | `--color-disabled`         | `#647789` | Disabled labels on `#E8EEF4`; disabled controls remain visibly inactive |
-| Success        | `--color-success`          | `#20734A` | Confirmed/received/succeeded states                                     |
-| Success tint   | `--surface-success`        | `#E7F4EC` | Low-emphasis success background                                         |
-| Warning        | `--color-warning`          | `#8C5C00` | Draft/pending/attention states                                          |
-| Warning tint   | `--surface-warning`        | `#FFF7E0` | Low-emphasis warning background                                         |
-| Danger         | `--color-danger`           | `#B42318` | Failed/cancelled/low-stock error states                                 |
-| Danger tint    | `--surface-danger`         | `#FDECEA` | Low-emphasis error background                                           |
+| Role           | Token                      |     Value | Use                                                        |
+| -------------- | -------------------------- | --------: | ---------------------------------------------------------- |
+| Canvas         | `--color-background`       | `#F6F7F5` | Main workspace background                                  |
+| Surface        | `--color-surface`          | `#FFFFFF` | Tables, forms, drawers, dialogs                            |
+| Subtle surface | `--surface-subtle`         | `#F0F3EF` | Table header and quiet grouping                            |
+| Primary text   | `--color-foreground`       | `#1E2923` | Primary text and headings                                  |
+| Action         | `--color-accent`           | `#225D43` | Primary actions, links and focus ring                      |
+| Selected tint  | `--color-accent-subtle`    | `#E6EEE7` | Selected navigation                                        |
+| Secondary text | `--color-muted-foreground` | `#5F6D64` | Supporting labels and metadata                             |
+| Control border | `--color-border-strong`    | `#8A978E` | Input/control boundaries and essential dividers            |
+| Row rule       | `--line-subtle`            | `#DCE2DC` | Table row separators and nonessential rules                |
+| Disabled text  | `--color-disabled`         | `#647789` | Disabled labels; disabled controls remain visibly inactive |
+| Success        | `--color-success`          | `#20734A` | Confirmed/received/succeeded states                        |
+| Success tint   | `--surface-success`        | `#E7F4EC` | Low-emphasis success background                            |
+| Warning        | `--color-warning`          | `#8C5C00` | Draft/pending/attention states                             |
+| Warning tint   | `--surface-warning`        | `#FFF7E0` | Low-emphasis warning background                            |
+| Danger         | `--color-danger`           | `#B42318` | Failed/cancelled/low-stock error states                    |
+| Danger tint    | `--surface-danger`         | `#FDECEA` | Low-emphasis error background                              |
 
-Contrast ratios calculated with the WCAG relative-luminance formula for these text pairs: navy on white **14.64:1**; secondary text on white **6.27:1**; action blue on white **5.77:1** and on canvas **5.32:1**; white on navy **14.64:1**; success on white **5.81:1** and success on success tint **5.13:1**; warning on white **5.76:1** and warning on warning tint **5.38:1**; danger on white **6.57:1** and danger on danger tint **5.75:1**; disabled text on subtle surface **3.96:1**. These meet 4.5:1 for normal text, except disabled text is intentionally inactive and still exceeds 3:1. Action blue is the focus indicator; its listed contrast exceeds 3:1 against both white and canvas. The strong control border `#7D8C9B` on white is **3.44:1**. Ratios are pair-specific: check any new color/background combination before using it.
+Check contrast for the actual text/background pair whenever adding a color. Normal text requires at least 4.5:1, large text and focus/control boundaries at least 3:1 where WCAG applies. Recorded Atlas axe checks cover desktop/mobile pages and key overlays; they do not establish complete accessibility conformance.
 
-Status color must always be paired with a word, icon, or both; never rely on color alone. Keep the listed business semantics distinct: order lifecycle (Draft, Confirmed, Fulfilled, Cancelled), integration delivery (Received, Processing, Succeeded, Failed), inventory alert (Open, Resolved), and product/partner lifecycle (Active, Inactive). Do not use red/green as general brand colors.
+Status color must always be paired with a word, icon, or both; never rely on color alone. Keep the listed business semantics distinct: order lifecycle (Draft, Confirmed, Fulfilled, Cancelled), integration delivery (Received, Processing, Succeeded, Failed), inventory alert (Open, Resolved), and product/partner lifecycle (Active, Inactive). Evergreen is also the brand action color, so a green action never implies that a command has already succeeded.
 
 ## Typography
 
@@ -51,18 +54,19 @@ Status color must always be paired with a word, icon, or both; never rely on col
 ## Layout, density, shape, and motion
 
 - Use a 4px base spacing grid, with 8px as the common control/gap increment and 16/24/32px section rhythm.
-- Controls use 2–4px corners. Data workspace surfaces are square or nearly square; reserve modest rounding for dialogs and overlays. Avoid pill-shaped controls except short status markers where they remain compact.
+- Use the existing 4/6/8/12px radius tokens. Keep data rows structured and controls compact; reserve pills for short status markers.
 - Target desktop table rows around 44px, with clear horizontal rules. Align quantities and currency to the right; align names, references, and statuses to the left. Keep one logical table toolbar with title/count and related actions.
 - Use hairlines, spacing, and type scale for page hierarchy. Shadows are limited to menus, dialogs, drawers, and other overlays. No card grid as the default container for operational data.
-- Motion is functional only: 120–200ms color/opacity feedback, no page entrance choreography or layout movement. Respect `prefers-reduced-motion` and keep feedback clear with motion disabled.
+- Workspace motion is functional: 120–200ms color/opacity feedback. The public hero may use the approved logistics canvas beneath its content, with pause/play, reduced-motion support and suspension while hidden/offscreen. Keep marketing motion outside operational tables and task forms.
 - Keep content operable at 200% zoom and at narrow widths. Do not hide core operations behind hover; all actions work by keyboard and touch.
 
 ## App shell and page patterns
 
 ### Global shell
 
-- **Desktop:** use a full-width navy top bar for brand, organization, and session controls. Place grouped functional navigation in a light narrow left rail beneath the bar; keep the main list-report/object workspace white/light. Show current location with a restrained blue active indicator, text, and accessible selected state.
-- **Mobile:** show four labeled primary destinations—Overview, Orders, Inventory, and More—with at least 44×44px touch targets and safe-area padding. Put secondary routes under More. Prioritize identity, status, and next action in record views; no page-level horizontal overflow.
+- **Desktop:** use a 224px labeled sidebar grouped into Operations and Workspace, with a quiet 70px header for organization, search and session controls. Show current location with an evergreen active tint and accessible selected state. Settings is available to Owners.
+- **Mobile:** show five labeled destinations—Overview, Orders, Inventory, Receipts and More—with at least 44×44px touch targets and safe-area padding. Put secondary routes under More. Prioritize identity, status, line items and next action; no page-level horizontal overflow.
+- Global search opens with Ctrl/Command + K, searches server records and supports Enter/Escape. Do not replace real results with a decorative command menu.
 - Navigation labels and icons stay consistent across routes. Use one icon family and visibly label icon-only actions for assistive technology.
 
 ### Worklist and list report
@@ -75,9 +79,10 @@ Status color must always be paired with a word, icon, or both; never rely on col
 
 ### Object page and task forms
 
-- A selected order, receipt, product/SKU, or partner uses a contextual object header with name/reference, lifecycle state, key values, breadcrumbs when useful, and global actions.
+- Orders and SKU traces use contextual drawers over their register. Receipts use a linked document page. Preserve URL/deep-link state and a clear return path to the underlying list.
 - Organize details into concise labeled sections: core facts, line items, movement/reservation history, source documents, and audit context as applicable. Add anchor navigation only when several substantial sections need direct access; simple objects use a flat page.
-- Display-mode global actions belong with the object header. Create/edit dialogs or pages use a clear form hierarchy, persistent field labels, inline errors, and explicit Save/Cancel placement. Preserve focus on open, constrain focus in a modal, and restore focus on close.
+- Drawer headers and action footers remain outside the scrolling body. Put order lines before secondary contact/technical facts; use readable line cards on mobile. Create/edit forms retain multiple lines, persistent labels, validation and Save/Cancel placement. Preserve focus on open, constrain focus in a modal, and restore focus on close.
+- Confirm/fulfill actions first show on-hand, reserved and available quantities before/after. Insufficient stock blocks confirmation; the server rechecks balances atomically when the command is submitted. `available = onHand - reserved` remains authoritative.
 - Receipt documents and stock movements are different objects. A receipt page summarizes its supplier/reference and all lines; movement history records ledger events. Reservations are a separate derived view of confirmed order quantities, never a fabricated movement.
 - After a command, show confirmed success only after the server confirms it. On unknown outcome, preserve the command reference and offer safe status recovery/retry behavior; do not tell users to repeat a non-idempotent action blindly.
 
@@ -85,16 +90,16 @@ Status color must always be paired with a word, icon, or both; never rely on col
 
 - Landing page uses a concise product introduction, concrete task descriptions, current product evidence, and immediate Manager/Staff/Owner demo entry. Avoid oversized hero claims or decorative landing-page sections that obscure the application.
 - Login, signup, workspace creation, and invitation acceptance are focused forms with clear labels, validation, and recovery links. Keep visual tokens consistent with the app while allowing more whitespace than the dense operations workspace.
-- Refresh favicon, app icons, social previews, and browser theme metadata to match the new cool-light/navy system; do not feature obsolete screenshots as proof of the redesigned UI.
+- Favicon, app icons, social previews and browser theme metadata use Atlas. Product tour screenshots come from the implemented application and use Next's image assets; historical prototype imagery is not current product evidence.
 
 ## Interaction states and accessibility
 
 - Define distinct default, hover, active, focus-visible, selected, disabled, pending/loading, success, warning, and error states for controls, rows, navigation, and dialogs.
-- Focus is always visible: use a 2px action-blue outline with 2px offset on white/canvas controls. Do not remove browser focus without an equally visible replacement.
+- Focus is always visible: use a 2px evergreen outline with 2px offset on white/canvas controls. Do not remove browser focus without an equally visible replacement.
 - Use semantic buttons, links, forms, table headers, and dialog roles. Tab order follows visible reading order. Icon-only controls have accessible names and keyboard operation.
 - Keep loading and unknown outcomes distinguishable from failure and confirmed success. Give inline validation beside its field and a summary when the form has multiple errors.
 - Support reduced motion, text zoom, keyboard-only use, screen readers, and touch. Color is never the sole carrier of status or selection.
 
 ## Anti-patterns
 
-Do not reintroduce warm bone surfaces, terracotta brand accents, IBM Plex, or the previous soft dashboard aesthetic. Avoid repeated rounded-card compositions, card grids for table data, oversized metric tiles, gradients, glass effects, ornamental animation, heavy shadows, excessive pills, decorative labels/eyebrows, low-contrast gray text, hover-only actions, color-only status, or mobile horizontal overflow. Do not mix SAP and Fluent visual components; use the selected SAP-inspired workflow structure with the project's native components.
+Avoid oversized metric walls, repeated decorative cards, gradients, glass effects, heavy shadows, excessive pills, low-contrast gray text, hover-only actions, color-only status and mobile horizontal overflow. Do not reintroduce the retired navy/blue or Keyly dark layout as a parallel theme. Keep one Atlas system across landing, authentication and the workspace; the approved logistics backdrop belongs on the public hero.

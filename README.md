@@ -12,6 +12,7 @@ receiving stock, preventing overselling, and fulfilling customer orders.
 [API docs](https://stockpilot-api-y1aw.onrender.com/docs) ·
 [Walkthrough](docs/walkthrough.md) ·
 [Architecture](docs/architecture.md) ·
+[Atlas v2 design and verification](docs/design-v2/IMPLEMENTATION.md) ·
 [Current implementation status](docs/implementation-status-2026-10-17.md)
 
 > **Portfolio demo:** the current deployment uses a temporary Vercel origin,
@@ -33,16 +34,18 @@ receiving stock, preventing overselling, and fulfilling customer orders.
 
 ## Screenshots
 
-These images were captured from the current seeded demo deployment on 18 October 2026. They are cropped to the application viewport so the UI, rather than
-browser chrome, is the focus.
+Atlas v2 was approved on 23 October 2026. These screenshots show the implemented
+application connected to the local API/database, using existing demo records.
+The [demo album and 60-second clip](docs/design-v2/demo-media-20261023/README.md)
+include desktop, mobile, order stock previews and source-document navigation.
 
-| Overview · desktop                                                  | Orders · mobile                                                  |
-| ------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| ![StockPilot Overview work queue](docs/assets/overview-desktop.png) | ![StockPilot Orders mobile cards](docs/assets/orders-mobile.png) |
+| Overview · desktop                                                                            | Orders · mobile                                                                            |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| ![StockPilot Overview work queue](docs/design-v2/demo-media-20261023/03-overview-desktop.png) | ![StockPilot Orders mobile cards](docs/design-v2/demo-media-20261023/14-orders-mobile.png) |
 
-| Inventory · desktop                                                 | Receive stock · mobile drawer                                              |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| ![StockPilot inventory balances](docs/assets/inventory-desktop.png) | ![StockPilot mobile receipt drawer](docs/assets/receipt-drawer-mobile.png) |
+| Inventory · desktop                                                                           | Order detail · mobile drawer                                                                     |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| ![StockPilot inventory balances](docs/design-v2/demo-media-20261023/09-inventory-desktop.png) | ![StockPilot mobile order drawer](docs/design-v2/demo-media-20261023/15-order-detail-mobile.png) |
 
 ## Core workflows
 

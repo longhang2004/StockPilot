@@ -40,7 +40,7 @@ export function ReceiptDrawer({
   open: boolean;
   initialProductId?: string;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (receiptId: string) => void;
   push: (message: string, tone?: ToastMessage['tone']) => void;
 }) {
   const products = useCatalogSearch<ProductRecord>('/products');
@@ -76,9 +76,9 @@ export function ReceiptDrawer({
         error instanceof Error ? error.message : 'Could not apply the receipt.',
         'error',
       ),
-    onSuccess: () => {
+    onSuccess: (receipt) => {
       resetForm();
-      onSaved();
+      onSaved(receipt.id);
     },
   });
   useEffect(() => {
@@ -104,7 +104,7 @@ export function ReceiptDrawer({
   };
   return (
     <Drawer
-      description="Receipt, ledger movement, balance update, and alert reconciliation commit together."
+      description="Record supplier goods as they arrive. Review each product and quantity before applying the receipt."
       onClose={close}
       open={open}
       size="wide"

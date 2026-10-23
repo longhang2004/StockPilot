@@ -3,6 +3,7 @@
 import { ArrowRight, WarningCircle, X } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { useEffect, useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 const focusableSelector =
   'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [contenteditable="true"], [tabindex]:not([tabindex="-1"])';
@@ -18,7 +19,7 @@ export function Drawer({
 }: {
   open: boolean;
   title: string;
-  description?: string;
+  description?: string | undefined;
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
@@ -40,6 +41,8 @@ export function Drawer({
     document.body.style.overflow = 'hidden';
     const timer = window.setTimeout(() => {
       const firstFocusable =
+        panelRef.current?.querySelector<HTMLElement>('[data-autofocus]') ??
+        panelRef.current?.querySelector<HTMLElement>('[data-drawer-title]') ??
         panelRef.current?.querySelector<HTMLElement>(focusableSelector);
       (firstFocusable ?? panelRef.current)?.focus();
     }, 0);
@@ -54,8 +57,8 @@ export function Drawer({
     };
   }, [open]);
 
-  if (!open) return null;
-  return (
+  if (!open || typeof document === 'undefined') return null;
+  return createPortal(
     <div className="drawer-layer" role="presentation">
       <button
         aria-label="Close drawer"
@@ -93,6 +96,11 @@ export function Drawer({
           }
           const first = focusable[0];
           const last = focusable[focusable.length - 1];
+          if (!focusable.includes(document.activeElement as HTMLElement)) {
+            event.preventDefault();
+            (event.shiftKey ? last : first)?.focus();
+            return;
+          }
           if (event.shiftKey && document.activeElement === first) {
             event.preventDefault();
             last?.focus();
@@ -107,7 +115,9 @@ export function Drawer({
       >
         <div className="drawer-header">
           <div>
-            <h2 id={titleId}>{title}</h2>
+            <h2 id={titleId} data-drawer-title tabIndex={-1}>
+              {title}
+            </h2>
             {description ? <p id={descriptionId}>{description}</p> : null}
           </div>
           <button
@@ -122,7 +132,8 @@ export function Drawer({
         <div className="drawer-body">{children}</div>
         {footer ? <div className="drawer-footer">{footer}</div> : null}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

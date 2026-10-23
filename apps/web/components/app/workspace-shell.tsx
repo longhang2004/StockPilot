@@ -78,21 +78,33 @@ export function WorkspaceShell({
     <QueryProvider>
       <CommandIntentScope.Provider key={commandScope} value={commandScope}>
         <div className="workspace">
-          <WorkspaceHeader session={workspaceSession} />
+          <a className="skip-link" href="#workspace-main">
+            Skip to workspace
+          </a>
           <div className="workspace-layout">
             <WorkspaceSidebar
               role={workspaceSession.membership.role}
               section={section}
             />
-            <main className="workspace-main">
-              {organization.isDemo ? (
-                <div className="demo-banner">
-                  <span>Demo workspace</span>Data resets every six hours.
-                  Changes are safe to explore.
-                </div>
-              ) : null}
-              <WorkspaceContent section={section} session={workspaceSession} />
-            </main>
+            <div className="workspace-body">
+              <WorkspaceHeader session={workspaceSession} />
+              <main
+                className="workspace-main"
+                id="workspace-main"
+                tabIndex={-1}
+              >
+                {organization.isDemo ? (
+                  <div className="demo-banner">
+                    <span>Demo workspace</span>Data resets every six hours.
+                    Changes are safe to explore.
+                  </div>
+                ) : null}
+                <WorkspaceContent
+                  section={section}
+                  session={workspaceSession}
+                />
+              </main>
+            </div>
           </div>
           <MobileWorkspaceNavigation section={section} />
         </div>

@@ -1,0 +1,329 @@
+{
+  "viewports": [
+    {
+      "screen": "product",
+      "width": 1440,
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "screen": "workspace/overview",
+      "width": 1440,
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "screen": "workspace/orders",
+      "width": 1440,
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "screen": "workspace/inventory",
+      "width": 1440,
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "screen": "workspace/order/1002",
+      "width": 1440,
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "screen": "workspace/stock/1",
+      "width": 1440,
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "screen": "product",
+      "width": 1280,
+      "client": 1280,
+      "scroll": 1280
+    },
+    {
+      "screen": "workspace/overview",
+      "width": 1280,
+      "client": 1280,
+      "scroll": 1280
+    },
+    {
+      "screen": "workspace/orders",
+      "width": 1280,
+      "client": 1280,
+      "scroll": 1280
+    },
+    {
+      "screen": "workspace/inventory",
+      "width": 1280,
+      "client": 1280,
+      "scroll": 1280
+    },
+    {
+      "screen": "workspace/order/1002",
+      "width": 1280,
+      "client": 1280,
+      "scroll": 1280
+    },
+    {
+      "screen": "workspace/stock/1",
+      "width": 1280,
+      "client": 1280,
+      "scroll": 1280
+    },
+    {
+      "screen": "product",
+      "width": 1024,
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "screen": "workspace/overview",
+      "width": 1024,
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "screen": "workspace/orders",
+      "width": 1024,
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "screen": "workspace/inventory",
+      "width": 1024,
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "screen": "workspace/order/1002",
+      "width": 1024,
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "screen": "workspace/stock/1",
+      "width": 1024,
+      "client": 1024,
+      "scroll": 1024
+    },
+    {
+      "screen": "product",
+      "width": 768,
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "screen": "workspace/overview",
+      "width": 768,
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "screen": "workspace/orders",
+      "width": 768,
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "screen": "workspace/inventory",
+      "width": 768,
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "screen": "workspace/order/1002",
+      "width": 768,
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "screen": "workspace/stock/1",
+      "width": 768,
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "screen": "product",
+      "width": 390,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "screen": "workspace/overview",
+      "width": 390,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "screen": "workspace/orders",
+      "width": 390,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "screen": "workspace/inventory",
+      "width": 390,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "screen": "workspace/order/1002",
+      "width": 390,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "screen": "workspace/stock/1",
+      "width": 390,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "screen": "product",
+      "width": 320,
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "screen": "workspace/overview",
+      "width": 320,
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "screen": "workspace/orders",
+      "width": 320,
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "screen": "workspace/inventory",
+      "width": 320,
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "screen": "workspace/order/1002",
+      "width": 320,
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "screen": "workspace/stock/1",
+      "width": 320,
+      "client": 320,
+      "scroll": 320
+    }
+  ],
+  "accessibility": [
+    {
+      "screen": "product",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "workspace/overview",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "workspace/orders",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "workspace/inventory",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "workspace/order/1002",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "workspace/stock/1",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "product",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "workspace/overview",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "workspace/orders",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "workspace/inventory",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "workspace/order/1002",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "workspace/stock/1",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "receipt dialog",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "receipt dialog",
+      "width": 390,
+      "violations": []
+    }
+  ],
+  "workflows": [
+    {
+      "width": 1440,
+      "passed": [
+        "search and status filters",
+        "empty state",
+        "full order page",
+        "confirm/reserve",
+        "fulfill/deduct",
+        "receive stock",
+        "create draft / N",
+        "Ctrl+K / keyboard search",
+        "Escape closes command menu",
+        "retry creates exactly one draft"
+      ]
+    },
+    {
+      "width": 390,
+      "passed": [
+        "search and status filters",
+        "empty state",
+        "full order page",
+        "confirm/reserve",
+        "fulfill/deduct",
+        "receive stock",
+        "create draft / N",
+        "Ctrl+K / keyboard search",
+        "Escape closes command menu",
+        "retry creates exactly one draft"
+      ]
+    }
+  ],
+  "runtimeErrors": [],
+  "httpErrors": [],
+  "anchorNavigation": "Landing workflow anchor scrolls to the correct section",
+  "skipLink": "Skip focuses the workspace main without changing its route",
+  "reducedMotion": "Smooth scrolling disabled"
+}

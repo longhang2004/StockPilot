@@ -300,7 +300,7 @@
   .mobile-workspace-nav {
     bottom: 0;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     left: 0;
     min-height: 4rem;
     padding-bottom: env(safe-area-inset-bottom);
@@ -354,6 +354,49 @@
 
   .drawer-panel {
     width: 100%;
+  }
+}
+
+/* Mobile keeps workspace context on the first row and session controls below. */
+@media (max-width: 768px) {
+  .workspace-brand {
+    display: inline-flex;
+  }
+  .workspace-search-trigger {
+    margin-left: auto;
+    min-height: 44px;
+    padding-inline: 10px;
+  }
+  .workspace-search-trigger > span,
+  .workspace-search-trigger kbd {
+    display: none;
+  }
+  .workspace-main {
+    padding-top: 20px;
+  }
+  .workspace-user {
+    display: none;
+  }
+  .workspace-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .stat-card {
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+    padding: 12px;
+  }
+  .stat-card:last-child {
+    border-right: 0;
+  }
+  .stat-card strong {
+    font-size: 25px;
+  }
+  .stat-card small {
+    font-size: 11px;
+  }
+  .demo-banner {
+    align-items: start;
+    font-size: 11px;
   }
 }
 
