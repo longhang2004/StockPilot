@@ -1,0 +1,96 @@
+{
+  "passed": true,
+  "accessibility": [
+    {
+      "screen": "order details",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "stock impact confirmation",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "global search",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "insufficient stock",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "receipt form",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "recorded receipts",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "receipt document",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "screen": "order details",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "stock impact confirmation",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "global search",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "insufficient stock",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "receipt form",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "recorded receipts",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "screen": "receipt document",
+      "width": 390,
+      "violations": []
+    }
+  ],
+  "workflows": [
+    {
+      "width": 1440,
+      "stickyAction": true,
+      "searchEnter": true,
+      "shortageBlocked": true,
+      "supplierReferenceValidated": true,
+      "receiptLinkedToCurrentStock": true,
+      "relatedRecordFocus": true
+    },
+    {
+      "width": 390,
+      "stickyAction": true,
+      "searchEnter": true,
+      "shortageBlocked": true,
+      "supplierReferenceValidated": true,
+      "receiptLinkedToCurrentStock": true,
+      "relatedRecordFocus": true
+    }
+  ],
+  "errors": []
+}

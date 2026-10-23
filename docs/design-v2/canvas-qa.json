@@ -1,0 +1,231 @@
+{
+  "viewports": [
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440,
+      "canvasWidth": 1440,
+      "heroWidth": 1440,
+      "painted": 362370
+    },
+    {
+      "concept": "atlas",
+      "width": 1024,
+      "scroll": 1024,
+      "client": 1024,
+      "canvasWidth": 1024,
+      "heroWidth": 1024,
+      "painted": 248670
+    },
+    {
+      "concept": "atlas",
+      "width": 768,
+      "scroll": 768,
+      "client": 768,
+      "canvasWidth": 768,
+      "heroWidth": 768,
+      "painted": 194126
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "scroll": 390,
+      "client": 390,
+      "canvasWidth": 390,
+      "heroWidth": 390,
+      "painted": 106512
+    },
+    {
+      "concept": "atlas",
+      "width": 375,
+      "scroll": 375,
+      "client": 375,
+      "canvasWidth": 375,
+      "heroWidth": 375,
+      "painted": 86820
+    },
+    {
+      "concept": "atlas",
+      "width": 320,
+      "scroll": 320,
+      "client": 320,
+      "canvasWidth": 320,
+      "heroWidth": 320,
+      "painted": 84495
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440,
+      "canvasWidth": 1440,
+      "heroWidth": 1440,
+      "painted": 359965
+    },
+    {
+      "concept": "relay",
+      "width": 1024,
+      "scroll": 1024,
+      "client": 1024,
+      "canvasWidth": 1024,
+      "heroWidth": 1024,
+      "painted": 248719
+    },
+    {
+      "concept": "relay",
+      "width": 768,
+      "scroll": 768,
+      "client": 768,
+      "canvasWidth": 768,
+      "heroWidth": 768,
+      "painted": 194211
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "scroll": 390,
+      "client": 390,
+      "canvasWidth": 390,
+      "heroWidth": 390,
+      "painted": 106512
+    },
+    {
+      "concept": "relay",
+      "width": 375,
+      "scroll": 375,
+      "client": 375,
+      "canvasWidth": 375,
+      "heroWidth": 375,
+      "painted": 86820
+    },
+    {
+      "concept": "relay",
+      "width": 320,
+      "scroll": 320,
+      "client": 320,
+      "canvasWidth": 320,
+      "heroWidth": 320,
+      "painted": 84401
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440,
+      "canvasWidth": 1440,
+      "heroWidth": 1440,
+      "painted": 364879
+    },
+    {
+      "concept": "folio",
+      "width": 1024,
+      "scroll": 1024,
+      "client": 1024,
+      "canvasWidth": 1024,
+      "heroWidth": 1024,
+      "painted": 249826
+    },
+    {
+      "concept": "folio",
+      "width": 768,
+      "scroll": 768,
+      "client": 768,
+      "canvasWidth": 768,
+      "heroWidth": 768,
+      "painted": 194361
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "scroll": 390,
+      "client": 390,
+      "canvasWidth": 390,
+      "heroWidth": 390,
+      "painted": 116038
+    },
+    {
+      "concept": "folio",
+      "width": 375,
+      "scroll": 375,
+      "client": 375,
+      "canvasWidth": 375,
+      "heroWidth": 375,
+      "painted": 94297
+    },
+    {
+      "concept": "folio",
+      "width": 320,
+      "scroll": 320,
+      "client": 320,
+      "canvasWidth": 320,
+      "heroWidth": 320,
+      "painted": 90915
+    }
+  ],
+  "motion": [
+    {
+      "concept": "atlas",
+      "animated": true,
+      "keyboardPauseResume": true,
+      "pointerPaused": true,
+      "offscreenPauseResume": true,
+      "reducedMotion": true,
+      "livePreferenceChange": true
+    },
+    {
+      "concept": "relay",
+      "animated": true,
+      "keyboardPauseResume": true,
+      "pointerPaused": true,
+      "offscreenPauseResume": true,
+      "reducedMotion": true,
+      "livePreferenceChange": true
+    },
+    {
+      "concept": "folio",
+      "animated": true,
+      "keyboardPauseResume": true,
+      "pointerPaused": true,
+      "offscreenPauseResume": true,
+      "reducedMotion": true,
+      "livePreferenceChange": true
+    }
+  ],
+  "accessibility": [
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "initialReducedMotion": true,
+  "dprCap": 2,
+  "noCanvasFallback": true
+}

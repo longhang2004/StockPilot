@@ -7,9 +7,12 @@ import Link from 'next/link';
 import { StatusBadge } from '../../../components/ui/operations-ui';
 import { formatDateTime, formatMoney } from '../../../lib/formatters';
 import { type OrderDetail } from '../../shared/types';
+import { OrderStockAvailability } from './order-transition-preview';
 
 export function OrderDetailView({
   detail,
+  hideActions = false,
+  checkStock = false,
   canManage,
   canEditDraft,
   onAction,
@@ -20,6 +23,8 @@ export function OrderDetailView({
   role,
 }: {
   detail: OrderDetail;
+  hideActions?: boolean;
+  checkStock?: boolean;
   canManage: boolean;
   canEditDraft: boolean;
   onAction: (to: 'CONFIRMED' | 'FULFILLED' | 'CANCELLED') => void;
@@ -50,113 +55,57 @@ export function OrderDetailView({
       )}
       <header className="order-object-header">
         <div className="order-object-title-block">
-          <h1>{detail.orderNumber}</h1>
+          {!hideActions ? <h1>{detail.orderNumber}</h1> : null}
           <div className="order-object-status-line">
             <StatusBadge value={detail.status} />
             <span>Updated {formatDateTime(detail.updatedAt)}</span>
           </div>
         </div>
-        <div className="order-object-actions">
-          {canEditDraft && detail.status === 'DRAFT' ? (
-            <button
-              className="button button-secondary"
-              onClick={onEdit}
-              type="button"
-            >
-              <PencilSimple size={16} aria-hidden="true" /> Edit draft
-            </button>
-          ) : null}
-          {detail.status === 'DRAFT' && canManage ? (
-            <button
-              className="button button-primary"
-              disabled={pending}
-              onClick={() => onAction('CONFIRMED')}
-              type="button"
-            >
-              Confirm order
-            </button>
-          ) : null}
-          {detail.status === 'CONFIRMED' ? (
-            <button
-              className="button button-primary"
-              disabled={pending}
-              onClick={() => onAction('FULFILLED')}
-              type="button"
-            >
-              Fulfill order
-            </button>
-          ) : null}
-          {(detail.status === 'DRAFT' || detail.status === 'CONFIRMED') &&
-          canManage ? (
-            <button
-              className="button button-danger"
-              disabled={pending}
-              onClick={() => onAction('CANCELLED')}
-              type="button"
-            >
-              Cancel order
-            </button>
-          ) : null}
-        </div>
+        {!hideActions ? (
+          <OrderDetailActions
+            detail={detail}
+            canManage={canManage}
+            canEditDraft={canEditDraft}
+            onEdit={onEdit}
+            onAction={onAction}
+            pending={pending}
+          />
+        ) : null}
       </header>
 
+      <ol className="order-progress" aria-label="Order progress">
+        {['DRAFT', 'CONFIRMED', 'FULFILLED'].map((step, index) => (
+          <li
+            key={step}
+            aria-current={detail.status === step ? 'step' : undefined}
+            className={
+              detail.status !== 'CANCELLED' &&
+              ['DRAFT', 'CONFIRMED', 'FULFILLED'].indexOf(detail.status) >=
+                index
+                ? 'is-complete'
+                : ''
+            }
+          >
+            <span>{index + 1}</span>
+            {step === 'DRAFT'
+              ? 'Draft'
+              : step === 'CONFIRMED'
+                ? 'Confirmed'
+                : 'Fulfilled'}
+          </li>
+        ))}
+      </ol>
+      {detail.status === 'CANCELLED' ? (
+        <p className="muted-note">
+          This order is cancelled. No stock is held for this order.
+        </p>
+      ) : null}
       {role === 'STAFF' && detail.status === 'CONFIRMED' ? (
         <p className="order-object-permission-note">
           Staff can fulfill confirmed work. Manager approval is required before
           a Draft can be confirmed.
         </p>
       ) : null}
-
-      <section
-        aria-labelledby="order-facts-title"
-        className="order-object-section"
-      >
-        <h2 id="order-facts-title">Order information</h2>
-        <dl className="order-facts-grid">
-          <div>
-            <dt>Customer</dt>
-            <dd>{detail.customerCompanyName}</dd>
-          </div>
-          <div>
-            <dt>Contact</dt>
-            <dd>{detail.customerContactName ?? 'No contact provided'}</dd>
-          </div>
-          <div>
-            <dt>Email</dt>
-            <dd>{detail.customerEmail ?? 'No email provided'}</dd>
-          </div>
-          <div>
-            <dt>Created</dt>
-            <dd>{formatDateTime(detail.createdAt)}</dd>
-          </div>
-          <div>
-            <dt>Warehouse</dt>
-            <dd>
-              {detail.warehouseName ?? 'Unknown warehouse'}
-              <small className="order-fact-id mono">{detail.warehouseId}</small>
-            </dd>
-          </div>
-          <div>
-            <dt>Created by</dt>
-            <dd>
-              {detail.createdByName ?? 'Unknown user'}
-              <small className="order-fact-id mono">
-                {detail.createdByUserId}
-              </small>
-            </dd>
-          </div>
-          <div>
-            <dt>Order total</dt>
-            <dd className="mono">{formatMoney(detail.subtotal)}</dd>
-          </div>
-        </dl>
-        {detail.note ? (
-          <div className="order-object-note">
-            <h3>Order note</h3>
-            <p>{detail.note}</p>
-          </div>
-        ) : null}
-      </section>
 
       <section
         aria-labelledby="order-lines-title"
@@ -238,6 +187,60 @@ export function OrderDetailView({
         </div>
       </section>
 
+      {checkStock && ['DRAFT', 'CONFIRMED'].includes(detail.status) ? (
+        <OrderStockAvailability detail={detail} />
+      ) : null}
+      <section
+        aria-labelledby="order-facts-title"
+        className="order-object-section"
+      >
+        <h2 id="order-facts-title">Order information</h2>
+        <dl className="order-facts-grid">
+          <div>
+            <dt>Customer</dt>
+            <dd>{detail.customerCompanyName}</dd>
+          </div>
+          <div>
+            <dt>Contact</dt>
+            <dd>{detail.customerContactName ?? 'No contact provided'}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{detail.customerEmail ?? 'No email provided'}</dd>
+          </div>
+          <div>
+            <dt>Created</dt>
+            <dd>{formatDateTime(detail.createdAt)}</dd>
+          </div>
+          <div>
+            <dt>Warehouse</dt>
+            <dd>
+              {detail.warehouseName ?? 'Unknown warehouse'}
+              <small className="order-fact-id mono">{detail.warehouseId}</small>
+            </dd>
+          </div>
+          <div>
+            <dt>Created by</dt>
+            <dd>
+              {detail.createdByName ?? 'Unknown user'}
+              <small className="order-fact-id mono">
+                {detail.createdByUserId}
+              </small>
+            </dd>
+          </div>
+          <div>
+            <dt>Order total</dt>
+            <dd className="mono">{formatMoney(detail.subtotal)}</dd>
+          </div>
+        </dl>
+        {detail.note ? (
+          <div className="order-object-note">
+            <h3>Order note</h3>
+            <p>{detail.note}</p>
+          </div>
+        ) : null}
+      </section>
+
       <section
         aria-labelledby="order-activity-title"
         className="order-object-section"
@@ -286,4 +289,65 @@ function safeDeliveryReturnPath(value?: string): string | undefined {
     target.searchParams.has('delivery')
     ? `${target.pathname}${target.search}`
     : undefined;
+}
+
+export function OrderDetailActions({
+  detail,
+  canManage,
+  canEditDraft,
+  onEdit,
+  onAction,
+  pending,
+}: {
+  detail: OrderDetail;
+  canManage: boolean;
+  canEditDraft: boolean;
+  onEdit: () => void;
+  onAction: (to: 'CONFIRMED' | 'FULFILLED' | 'CANCELLED') => void;
+  pending: boolean;
+}) {
+  return (
+    <div className="order-object-actions">
+      {canEditDraft && detail.status === 'DRAFT' ? (
+        <button
+          className="button button-secondary"
+          onClick={onEdit}
+          type="button"
+        >
+          <PencilSimple size={16} aria-hidden="true" /> Edit draft
+        </button>
+      ) : null}
+      {detail.status === 'DRAFT' && canManage ? (
+        <button
+          className="button button-primary"
+          disabled={pending}
+          onClick={() => onAction('CONFIRMED')}
+          type="button"
+        >
+          Confirm order
+        </button>
+      ) : null}
+      {detail.status === 'CONFIRMED' ? (
+        <button
+          className="button button-primary"
+          disabled={pending}
+          onClick={() => onAction('FULFILLED')}
+          type="button"
+        >
+          Fulfill order
+        </button>
+      ) : null}
+      {(detail.status === 'DRAFT' || detail.status === 'CONFIRMED') &&
+      canManage ? (
+        <button
+          className="button button-danger"
+          disabled={pending}
+          onClick={() => onAction('CANCELLED')}
+          type="button"
+        >
+          Cancel order
+        </button>
+      ) : null}
+    </div>
+  );
 }

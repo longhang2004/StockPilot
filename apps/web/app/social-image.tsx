@@ -7,8 +7,8 @@ export async function createSocialImage(): Promise<Response> {
   socialImagePng ??= new ImageResponse(
     <div
       style={{
-        background: '#F3F6F8',
-        color: '#102A43',
+        background: '#F6F7F5',
+        color: '#1E2923',
         display: 'flex',
         flexDirection: 'column',
         fontFamily: 'Arial',
@@ -21,7 +21,7 @@ export async function createSocialImage(): Promise<Response> {
         <div
           style={{
             alignItems: 'center',
-            background: '#102A43',
+            background: '#225D43',
             borderRadius: 4,
             color: '#FFFFFF',
             display: 'flex',

@@ -1,0 +1,306 @@
+{
+  "viewports": [
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440,
+      "canvasWidth": 1440,
+      "sceneWidth": 1440,
+      "painted": 508310,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "atlas",
+      "width": 1024,
+      "scroll": 1024,
+      "client": 1024,
+      "canvasWidth": 1024,
+      "sceneWidth": 1024,
+      "painted": 353357,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "atlas",
+      "width": 768,
+      "scroll": 768,
+      "client": 768,
+      "canvasWidth": 768,
+      "sceneWidth": 768,
+      "painted": 253663,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "scroll": 390,
+      "client": 390,
+      "canvasWidth": 390,
+      "sceneWidth": 390,
+      "painted": 138736,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "atlas",
+      "width": 375,
+      "scroll": 375,
+      "client": 375,
+      "canvasWidth": 375,
+      "sceneWidth": 375,
+      "painted": 116963,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "atlas",
+      "width": 320,
+      "scroll": 320,
+      "client": 320,
+      "canvasWidth": 320,
+      "sceneWidth": 320,
+      "painted": 113871,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440,
+      "canvasWidth": 1440,
+      "sceneWidth": 1440,
+      "painted": 504644,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "relay",
+      "width": 1024,
+      "scroll": 1024,
+      "client": 1024,
+      "canvasWidth": 1024,
+      "sceneWidth": 1024,
+      "painted": 353337,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "relay",
+      "width": 768,
+      "scroll": 768,
+      "client": 768,
+      "canvasWidth": 768,
+      "sceneWidth": 768,
+      "painted": 253659,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "scroll": 390,
+      "client": 390,
+      "canvasWidth": 390,
+      "sceneWidth": 390,
+      "painted": 138736,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "relay",
+      "width": 375,
+      "scroll": 375,
+      "client": 375,
+      "canvasWidth": 375,
+      "sceneWidth": 375,
+      "painted": 117006,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "relay",
+      "width": 320,
+      "scroll": 320,
+      "client": 320,
+      "canvasWidth": 320,
+      "sceneWidth": 320,
+      "painted": 113872,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440,
+      "canvasWidth": 1440,
+      "sceneWidth": 1440,
+      "painted": 511772,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "folio",
+      "width": 1024,
+      "scroll": 1024,
+      "client": 1024,
+      "canvasWidth": 1024,
+      "sceneWidth": 1024,
+      "painted": 353379,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "folio",
+      "width": 768,
+      "scroll": 768,
+      "client": 768,
+      "canvasWidth": 768,
+      "sceneWidth": 768,
+      "painted": 254275,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "scroll": 390,
+      "client": 390,
+      "canvasWidth": 390,
+      "sceneWidth": 390,
+      "painted": 151095,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "folio",
+      "width": 375,
+      "scroll": 375,
+      "client": 375,
+      "canvasWidth": 375,
+      "sceneWidth": 375,
+      "painted": 126757,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    },
+    {
+      "concept": "folio",
+      "width": 320,
+      "scroll": 320,
+      "client": 320,
+      "canvasWidth": 320,
+      "sceneWidth": 320,
+      "painted": 121688,
+      "background": true,
+      "mapPosition": "absolute",
+      "mapLayer": "-1",
+      "contentLayer": "1"
+    }
+  ],
+  "motion": [
+    {
+      "concept": "atlas",
+      "animated": true,
+      "visibleBackgroundMotion": true,
+      "keyboardPauseResume": true,
+      "pointerPaused": true,
+      "offscreenPauseResume": true,
+      "reducedMotion": true,
+      "emulatedPreferenceChangeEvent": true
+    },
+    {
+      "concept": "relay",
+      "animated": true,
+      "visibleBackgroundMotion": true,
+      "keyboardPauseResume": true,
+      "pointerPaused": true,
+      "offscreenPauseResume": true,
+      "reducedMotion": true,
+      "emulatedPreferenceChangeEvent": true
+    },
+    {
+      "concept": "folio",
+      "animated": true,
+      "visibleBackgroundMotion": true,
+      "keyboardPauseResume": true,
+      "pointerPaused": true,
+      "offscreenPauseResume": true,
+      "reducedMotion": true,
+      "emulatedPreferenceChangeEvent": true
+    }
+  ],
+  "accessibility": [
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "initialReducedMotion": true,
+  "dprCap": 2,
+  "noCanvasFallback": true
+}

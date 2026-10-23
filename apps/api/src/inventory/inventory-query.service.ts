@@ -164,6 +164,19 @@ export async function findReceiptDetail(
     where: { id, organizationId },
   });
   if (!receipt) throw new NotFoundException('Goods receipt not found.');
+  const movements = await transaction.stockMovement.findMany({
+    where: {
+      organizationId,
+      warehouseId: receipt.warehouseId,
+      referenceId: receipt.id,
+      referenceType: 'GOODS_RECEIPT',
+      type: 'RECEIPT',
+    },
+    select: { productId: true, quantityDelta: true, onHandAfter: true },
+  });
+  const movementByProduct = new Map(
+    movements.map((movement) => [movement.productId, movement]),
+  );
   return {
     actorUserId: receipt.actorUserId,
     createdAt: receipt.createdAt.toISOString(),
@@ -176,6 +189,11 @@ export async function findReceiptDetail(
       productId: line.productId,
       quantity: line.quantity,
       unitCost: line.unitCost?.toFixed(2) ?? null,
+      onHandBefore: movementByProduct.has(line.productId)
+        ? movementByProduct.get(line.productId)!.onHandAfter -
+          movementByProduct.get(line.productId)!.quantityDelta
+        : null,
+      onHandAfter: movementByProduct.get(line.productId)?.onHandAfter ?? null,
     })),
     note: receipt.note,
     organizationId: receipt.organizationId,

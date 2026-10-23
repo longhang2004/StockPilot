@@ -1,0 +1,1159 @@
+{
+  "started": "2026-10-19T18:15:23.714Z",
+  "displayTimezone": "Asia/Saigon",
+  "expectedRevision": "800d1204e4493d860266c4d19f941b4c4921fbdb",
+  "origin": "https://stock-pilot-web-five.vercel.app",
+  "serverBusinessWrites": false,
+  "release": {
+    "ci": {
+      "run": 39286993965,
+      "conclusion": "success",
+      "jobs": ["audit", "verify", "docker-build"]
+    },
+    "codeql": {
+      "run": 39286994236,
+      "conclusion": "success"
+    },
+    "render": {
+      "run": 39288468962,
+      "conclusion": "success"
+    }
+  },
+  "checks": [
+    {
+      "device": "preflight",
+      "name": "exact web, proxy API and direct API revisions",
+      "status": "PASS",
+      "details": [
+        {
+          "url": "https://stock-pilot-web-five.vercel.app/version",
+          "status": 200,
+          "body": {
+            "revision": "800d1204e4493d860266c4d19f941b4c4921fbdb",
+            "service": "stockpilot-web"
+          }
+        },
+        {
+          "url": "https://stock-pilot-web-five.vercel.app/api/v1/health/ready",
+          "status": 200,
+          "body": {
+            "checks": {
+              "database": "ok",
+              "queue": "not_configured"
+            },
+            "rateLimit": {
+              "buckets": 0,
+              "rejected": {
+                "public": 0,
+                "auth": 0,
+                "user": 0
+              },
+              "limits": {
+                "publicWritesPerMinute": 60,
+                "authWritesPerMinute": 60,
+                "userWritesPerMinute": 240
+              }
+            },
+            "revision": "800d1204e4493d860266c4d19f941b4c4921fbdb",
+            "status": "ready"
+          }
+        },
+        {
+          "url": "https://stockpilot-api-y1aw.onrender.com/v1/health/ready",
+          "status": 200,
+          "body": {
+            "checks": {
+              "database": "ok",
+              "queue": "not_configured"
+            },
+            "rateLimit": {
+              "buckets": 0,
+              "rejected": {
+                "public": 0,
+                "auth": 0,
+                "user": 0
+              },
+              "limits": {
+                "publicWritesPerMinute": 60,
+                "authWritesPerMinute": 60,
+                "userWritesPerMinute": 240
+              }
+            },
+            "revision": "800d1204e4493d860266c4d19f941b4c4921fbdb",
+            "status": "ready"
+          }
+        }
+      ]
+    },
+    {
+      "device": "desktop",
+      "name": "Manager demo login and read-only fixtures",
+      "status": "PASS",
+      "details": {
+        "session": {
+          "userId": "02d350a0-d16c-4f45-919e-fea20fe5b807",
+          "displayName": "Morgan Manager",
+          "role": "MANAGER"
+        },
+        "counts": {
+          "orders": 6,
+          "products": 8,
+          "deliveries": 1
+        }
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "UX-02 actual loaded Source Sans body and heading",
+      "status": "PASS",
+      "details": {
+        "body": "sourceSans, \"sourceSans Fallback\", \"Source Sans 3\", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "heading": "sourceSans, \"sourceSans Fallback\", \"Source Sans 3\", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "token": "\"sourceSans\",\"sourceSans Fallback\",\"Source Sans 3\",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif",
+        "faceLoaded": true,
+        "faces": [
+          {
+            "family": "sourceSans",
+            "status": "loaded"
+          },
+          {
+            "family": "sourceSans Fallback",
+            "status": "unloaded"
+          }
+        ],
+        "axe": {
+          "violations": [],
+          "passes": 29,
+          "incomplete": ["color-contrast"]
+        }
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "live route /app/orders",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+        "clientWidth": 1440
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "live route /app/inventory",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+        "clientWidth": 1440
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "live route /app/products",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/products",
+        "clientWidth": 1440
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "live route /app/partners",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/partners",
+        "clientWidth": 1440
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "live route /app/receipts",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/receipts",
+        "clientWidth": 1440
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "live route /app/imports",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+        "clientWidth": 1440
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "live route /app/integrations",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/integrations",
+        "clientWidth": 1440
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "live route /app/audit",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/audit",
+        "clientWidth": 1440
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "UX-01 More contrast",
+      "status": "PASS",
+      "details": {
+        "style": {
+          "color": "rgb(82, 98, 114)",
+          "fontSize": "12px"
+        },
+        "axe": {
+          "violations": [],
+          "passes": 21,
+          "incomplete": []
+        }
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "UX-04 real header reflow 320, 390 and 550 CSS px",
+      "status": "PASS",
+      "details": [
+        {
+          "width": 320,
+          "client": 320,
+          "scroll": 320,
+          "inner": 320,
+          "identityWidth": 146
+        },
+        {
+          "width": 390,
+          "client": 390,
+          "scroll": 390,
+          "inner": 390,
+          "identityWidth": 146
+        },
+        {
+          "width": 550,
+          "client": 550,
+          "scroll": 550,
+          "inner": 550,
+          "identityWidth": 104
+        }
+      ]
+    },
+    {
+      "device": "desktop",
+      "name": "UX-05 actual API names, detail reload and list context",
+      "status": "PASS",
+      "details": {
+        "orderId": "476fd69b-f2ab-5432-b91c-ee1e43b2276d",
+        "warehouseName": "Main Warehouse",
+        "createdByName": "Sam Staff",
+        "createdByUserId": "5cb62922-7ec9-46dd-bbd5-f36ce982dfe8",
+        "axe": {
+          "violations": [],
+          "passes": 28,
+          "incomplete": []
+        }
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "UX-06 deployed delivery-to-order return, browser-only succeeded fixture",
+      "status": "PASS",
+      "details": {
+        "browserFixture": true,
+        "orderId": "476fd69b-f2ab-5432-b91c-ee1e43b2276d",
+        "preservedContext": "/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761&search=storefront-demo-failure-001&status=SUCCEEDED&page=1",
+        "serverDeliveryUnchanged": true
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "UX-04 long-SKU 390px form, browser-only product fixture",
+      "status": "PASS",
+      "details": {
+        "browserFixture": true,
+        "client": 390,
+        "scroll": 390,
+        "dialogRight": 390,
+        "bodyClient": 389,
+        "bodyScroll": 389,
+        "controls": [
+          {
+            "tag": "INPUT",
+            "left": 21,
+            "right": 370
+          },
+          {
+            "tag": "SELECT",
+            "left": 21,
+            "right": 370
+          },
+          {
+            "tag": "SELECT",
+            "left": 21,
+            "right": 370
+          },
+          {
+            "tag": "INPUT",
+            "left": 21,
+            "right": 370
+          },
+          {
+            "tag": "TEXTAREA",
+            "left": 21,
+            "right": 370
+          }
+        ],
+        "axe": {
+          "violations": [],
+          "passes": 26,
+          "incomplete": ["aria-prohibited-attr", "color-contrast"]
+        }
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "inventory unchanged and logout revokes session",
+      "status": "PASS",
+      "details": {
+        "balances": 8,
+        "stockUnchanged": true,
+        "logout": 204,
+        "revokedSession": 401
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "UX-03 Owner settings discovery and active state",
+      "status": "PASS",
+      "details": {
+        "session": {
+          "userId": "59d722fc-be32-4036-a1d1-76bda2ba0a80",
+          "displayName": "Olivia Owner",
+          "role": "OWNER"
+        },
+        "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+        "axe": {
+          "violations": [],
+          "passes": 25,
+          "incomplete": []
+        }
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "Owner logout",
+      "status": "PASS",
+      "details": {
+        "logout": 204,
+        "revokedSession": 401
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "Staff boundary and actual creator distinct from viewer",
+      "status": "PASS",
+      "details": {
+        "viewer": "Sam Staff",
+        "creator": "Morgan Manager",
+        "deliveryApiStatus": 403,
+        "logout": 204,
+        "revokedSession": 401
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "Staff logout",
+      "status": "PASS",
+      "details": {
+        "logout": 204,
+        "revokedSession": 401
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "Manager demo login and read-only fixtures",
+      "status": "PASS",
+      "details": {
+        "session": {
+          "userId": "02d350a0-d16c-4f45-919e-fea20fe5b807",
+          "displayName": "Morgan Manager",
+          "role": "MANAGER"
+        },
+        "counts": {
+          "orders": 6,
+          "products": 8,
+          "deliveries": 1
+        }
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "UX-02 actual loaded Source Sans body and heading",
+      "status": "PASS",
+      "details": {
+        "body": "sourceSans, \"sourceSans Fallback\", \"Source Sans 3\", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "heading": "sourceSans, \"sourceSans Fallback\", \"Source Sans 3\", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "token": "\"sourceSans\",\"sourceSans Fallback\",\"Source Sans 3\",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif",
+        "faceLoaded": true,
+        "faces": [
+          {
+            "family": "sourceSans",
+            "status": "loaded"
+          },
+          {
+            "family": "sourceSans Fallback",
+            "status": "unloaded"
+          }
+        ],
+        "axe": {
+          "violations": [],
+          "passes": 28,
+          "incomplete": ["color-contrast"]
+        }
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "live route /app/orders",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+        "clientWidth": 390
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "live route /app/inventory",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+        "clientWidth": 390
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "live route /app/products",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/products",
+        "clientWidth": 390
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "live route /app/partners",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/partners",
+        "clientWidth": 390
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "live route /app/receipts",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/receipts",
+        "clientWidth": 390
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "live route /app/imports",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/imports",
+        "clientWidth": 390
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "live route /app/integrations",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/integrations",
+        "clientWidth": 390
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "live route /app/audit",
+      "status": "PASS",
+      "details": {
+        "url": "https://stock-pilot-web-five.vercel.app/app/audit",
+        "clientWidth": 390
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "UX-01 More contrast",
+      "status": "PASS",
+      "details": {
+        "style": {
+          "color": "rgb(82, 98, 114)",
+          "fontSize": "12px"
+        },
+        "axe": {
+          "violations": [],
+          "passes": 21,
+          "incomplete": []
+        }
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "UX-04 real header reflow 320, 390 and 550 CSS px",
+      "status": "PASS",
+      "details": [
+        {
+          "width": 320,
+          "client": 320,
+          "scroll": 320,
+          "inner": 320,
+          "identityWidth": 146
+        },
+        {
+          "width": 390,
+          "client": 390,
+          "scroll": 390,
+          "inner": 390,
+          "identityWidth": 146
+        },
+        {
+          "width": 550,
+          "client": 550,
+          "scroll": 550,
+          "inner": 550,
+          "identityWidth": 104
+        }
+      ]
+    },
+    {
+      "device": "mobile",
+      "name": "UX-05 actual API names, detail reload and list context",
+      "status": "PASS",
+      "details": {
+        "orderId": "476fd69b-f2ab-5432-b91c-ee1e43b2276d",
+        "warehouseName": "Main Warehouse",
+        "createdByName": "Sam Staff",
+        "createdByUserId": "5cb62922-7ec9-46dd-bbd5-f36ce982dfe8",
+        "axe": {
+          "violations": [],
+          "passes": 26,
+          "incomplete": []
+        }
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "UX-06 deployed delivery-to-order return, browser-only succeeded fixture",
+      "status": "PASS",
+      "details": {
+        "browserFixture": true,
+        "orderId": "476fd69b-f2ab-5432-b91c-ee1e43b2276d",
+        "preservedContext": "/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761&search=storefront-demo-failure-001&status=SUCCEEDED&page=1",
+        "serverDeliveryUnchanged": true
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "UX-04 long-SKU 390px form, browser-only product fixture",
+      "status": "PASS",
+      "details": {
+        "browserFixture": true,
+        "client": 390,
+        "scroll": 390,
+        "dialogRight": 390,
+        "bodyClient": 389,
+        "bodyScroll": 389,
+        "controls": [
+          {
+            "tag": "INPUT",
+            "left": 21,
+            "right": 370
+          },
+          {
+            "tag": "SELECT",
+            "left": 21,
+            "right": 370
+          },
+          {
+            "tag": "SELECT",
+            "left": 21,
+            "right": 370
+          },
+          {
+            "tag": "INPUT",
+            "left": 21,
+            "right": 370
+          },
+          {
+            "tag": "TEXTAREA",
+            "left": 21,
+            "right": 370
+          }
+        ],
+        "axe": {
+          "violations": [],
+          "passes": 26,
+          "incomplete": ["aria-prohibited-attr", "color-contrast"]
+        }
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "inventory unchanged and logout revokes session",
+      "status": "PASS",
+      "details": {
+        "balances": 8,
+        "stockUnchanged": true,
+        "logout": 204,
+        "revokedSession": 401
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "UX-03 Owner settings discovery and active state",
+      "status": "PASS",
+      "details": {
+        "session": {
+          "userId": "59d722fc-be32-4036-a1d1-76bda2ba0a80",
+          "displayName": "Olivia Owner",
+          "role": "OWNER"
+        },
+        "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+        "axe": {
+          "violations": [],
+          "passes": 25,
+          "incomplete": []
+        }
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "Owner logout",
+      "status": "PASS",
+      "details": {
+        "logout": 204,
+        "revokedSession": 401
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "Staff boundary and actual creator distinct from viewer",
+      "status": "PASS",
+      "details": {
+        "viewer": "Sam Staff",
+        "creator": "Morgan Manager",
+        "deliveryApiStatus": 403,
+        "logout": 204,
+        "revokedSession": 401
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "Staff logout",
+      "status": "PASS",
+      "details": {
+        "logout": 204,
+        "revokedSession": 401
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "no uncaught page errors or business write attempts",
+      "status": "PASS",
+      "details": {
+        "pageErrors": 0,
+        "attemptedBusinessWrites": 0
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "public route, typography, reflow and axe /",
+      "status": "PASS",
+      "details": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "fontFamily": "sourceSans, \"sourceSans Fallback\", \"Source Sans 3\", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "axe": {
+          "violations": [],
+          "passes": 22,
+          "incomplete": []
+        }
+      }
+    },
+    {
+      "device": "desktop",
+      "name": "public route, typography, reflow and axe /login",
+      "status": "PASS",
+      "details": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "fontFamily": "sourceSans, \"sourceSans Fallback\", \"Source Sans 3\", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "axe": {
+          "violations": [],
+          "passes": 24,
+          "incomplete": []
+        },
+        "accountDemoEntryRoundTrip": true
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "public route, typography, reflow and axe /",
+      "status": "PASS",
+      "details": {
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "fontFamily": "sourceSans, \"sourceSans Fallback\", \"Source Sans 3\", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "axe": {
+          "violations": [],
+          "passes": 23,
+          "incomplete": ["color-contrast"]
+        }
+      }
+    },
+    {
+      "device": "mobile",
+      "name": "public route, typography, reflow and axe /login",
+      "status": "PASS",
+      "details": {
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "fontFamily": "sourceSans, \"sourceSans Fallback\", \"Source Sans 3\", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "axe": {
+          "violations": [],
+          "passes": 24,
+          "incomplete": []
+        },
+        "accountDemoEntryRoundTrip": true
+      }
+    }
+  ],
+  "screenshots": [
+    {
+      "device": "desktop",
+      "name": "overview-font",
+      "file": "images/desktop-overview-font.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "at": "2026-10-19T18:15:30.018Z"
+    },
+    {
+      "device": "desktop",
+      "name": "more-contrast",
+      "file": "images/desktop-more-contrast.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/more",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "at": "2026-10-19T18:15:48.279Z"
+    },
+    {
+      "device": "desktop",
+      "name": "orders-reflow-320",
+      "file": "images/desktop-orders-reflow-320.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "at": "2026-10-19T18:15:50.707Z"
+    },
+    {
+      "device": "desktop",
+      "name": "orders-reflow-390",
+      "file": "images/desktop-orders-reflow-390.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:15:52.175Z"
+    },
+    {
+      "device": "desktop",
+      "name": "order-business-names",
+      "file": "images/desktop-order-business-names.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?search=SO-2026-1006&status=CANCELLED&order=476fd69b-f2ab-5432-b91c-ee1e43b2276d",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "at": "2026-10-19T18:15:57.986Z"
+    },
+    {
+      "device": "desktop",
+      "name": "delivery-link-browser-fixture",
+      "file": "images/desktop-delivery-link-browser-fixture.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761&search=storefront-demo-failure-001&status=SUCCEEDED&page=1",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "at": "2026-10-19T18:16:01.734Z"
+    },
+    {
+      "device": "desktop",
+      "name": "order-return-browser-fixture",
+      "file": "images/desktop-order-return-browser-fixture.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?order=476fd69b-f2ab-5432-b91c-ee1e43b2276d&returnTo=%2Fapp%2Fintegrations%3Fdelivery%3Da301eaa2-4837-51ae-86b9-1cd1a3fb6761%26search%3Dstorefront-demo-failure-001%26status%3DSUCCEEDED%26page%3D1",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "at": "2026-10-19T18:16:05.529Z"
+    },
+    {
+      "device": "desktop",
+      "name": "long-sku-browser-fixture",
+      "file": "images/desktop-long-sku-browser-fixture.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:16:08.399Z"
+    },
+    {
+      "device": "desktop",
+      "name": "owner-settings",
+      "file": "images/desktop-owner-settings.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "at": "2026-10-19T18:16:15.574Z"
+    },
+    {
+      "device": "mobile",
+      "name": "overview-font",
+      "file": "images/mobile-overview-font.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:16:34.282Z"
+    },
+    {
+      "device": "mobile",
+      "name": "more-contrast",
+      "file": "images/mobile-more-contrast.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/more",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:16:51.969Z"
+    },
+    {
+      "device": "mobile",
+      "name": "orders-reflow-320",
+      "file": "images/mobile-orders-reflow-320.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "at": "2026-10-19T18:16:54.656Z"
+    },
+    {
+      "device": "mobile",
+      "name": "orders-reflow-390",
+      "file": "images/mobile-orders-reflow-390.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:16:56.206Z"
+    },
+    {
+      "device": "mobile",
+      "name": "order-business-names",
+      "file": "images/mobile-order-business-names.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?search=SO-2026-1006&status=CANCELLED&order=476fd69b-f2ab-5432-b91c-ee1e43b2276d",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:17:01.133Z"
+    },
+    {
+      "device": "mobile",
+      "name": "delivery-link-browser-fixture",
+      "file": "images/mobile-delivery-link-browser-fixture.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations?delivery=a301eaa2-4837-51ae-86b9-1cd1a3fb6761&search=storefront-demo-failure-001&status=SUCCEEDED&page=1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:17:04.180Z"
+    },
+    {
+      "device": "mobile",
+      "name": "order-return-browser-fixture",
+      "file": "images/mobile-order-return-browser-fixture.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/orders?order=476fd69b-f2ab-5432-b91c-ee1e43b2276d&returnTo=%2Fapp%2Fintegrations%3Fdelivery%3Da301eaa2-4837-51ae-86b9-1cd1a3fb6761%26search%3Dstorefront-demo-failure-001%26status%3DSUCCEEDED%26page%3D1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:17:07.070Z"
+    },
+    {
+      "device": "mobile",
+      "name": "long-sku-browser-fixture",
+      "file": "images/mobile-long-sku-browser-fixture.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/inventory",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:17:10.135Z"
+    },
+    {
+      "device": "mobile",
+      "name": "owner-settings",
+      "file": "images/mobile-owner-settings.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/settings",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:17:18.770Z"
+    },
+    {
+      "device": "desktop",
+      "name": "staff-role-boundary",
+      "file": "images/desktop-staff-role-boundary.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "at": "2026-10-19T18:17:48.862Z"
+    },
+    {
+      "device": "mobile",
+      "name": "staff-role-boundary",
+      "file": "images/mobile-staff-role-boundary.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/app/integrations",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:17:54.175Z"
+    },
+    {
+      "device": "desktop",
+      "name": "public-landing",
+      "file": "images/desktop-public-landing.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "at": "2026-10-19T18:18:15.538Z"
+    },
+    {
+      "device": "desktop",
+      "name": "public-login",
+      "file": "images/desktop-public-login.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/login",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "at": "2026-10-19T18:18:17.695Z"
+    },
+    {
+      "device": "mobile",
+      "name": "public-landing",
+      "file": "images/mobile-public-landing.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:18:21.728Z"
+    },
+    {
+      "device": "mobile",
+      "name": "public-login",
+      "file": "images/mobile-public-login.jpg",
+      "url": "https://stock-pilot-web-five.vercel.app/login",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "at": "2026-10-19T18:18:23.773Z"
+    }
+  ],
+  "fixtures": [
+    {
+      "device": "desktop",
+      "kind": "browser-only GET response overlay",
+      "finding": "UX-06",
+      "deliveryId": "a301eaa2-4837-51ae-86b9-1cd1a3fb6761",
+      "serverStatus": "FAILED",
+      "serverSalesOrderId": null,
+      "displayedStatus": "SUCCEEDED",
+      "displayedOrderId": "476fd69b-f2ab-5432-b91c-ee1e43b2276d",
+      "persisted": false
+    },
+    {
+      "device": "desktop",
+      "kind": "browser-only GET product search overlay",
+      "finding": "UX-04",
+      "productId": "a3c987b8-bb90-5670-9e61-b9fe2e07df23",
+      "sku": "QA-LONG-SKU-RELEASE-99999999999999999999999999999999999999999999",
+      "skuLength": 64,
+      "persisted": false
+    },
+    {
+      "device": "mobile",
+      "kind": "browser-only GET response overlay",
+      "finding": "UX-06",
+      "deliveryId": "a301eaa2-4837-51ae-86b9-1cd1a3fb6761",
+      "serverStatus": "FAILED",
+      "serverSalesOrderId": null,
+      "displayedStatus": "SUCCEEDED",
+      "displayedOrderId": "476fd69b-f2ab-5432-b91c-ee1e43b2276d",
+      "persisted": false
+    },
+    {
+      "device": "mobile",
+      "kind": "browser-only GET product search overlay",
+      "finding": "UX-04",
+      "productId": "a3c987b8-bb90-5670-9e61-b9fe2e07df23",
+      "sku": "QA-LONG-SKU-RELEASE-99999999999999999999999999999999999999999999",
+      "skuLength": 64,
+      "persisted": false
+    }
+  ],
+  "pageErrors": [],
+  "blockedWrites": [],
+  "authWrites": [
+    {
+      "device": "desktop",
+      "method": "POST",
+      "pathname": "/api/v1/auth/demo-login"
+    },
+    {
+      "device": "desktop",
+      "method": "POST",
+      "pathname": "/api/v1/auth/demo-login"
+    },
+    {
+      "device": "desktop",
+      "method": "POST",
+      "pathname": "/api/v1/auth/demo-login"
+    },
+    {
+      "device": "mobile",
+      "method": "POST",
+      "pathname": "/api/v1/auth/demo-login"
+    },
+    {
+      "device": "mobile",
+      "method": "POST",
+      "pathname": "/api/v1/auth/demo-login"
+    },
+    {
+      "device": "mobile",
+      "method": "POST",
+      "pathname": "/api/v1/auth/demo-login"
+    },
+    {
+      "device": "desktop",
+      "method": "POST",
+      "pathname": "/api/v1/auth/demo-login"
+    },
+    {
+      "device": "mobile",
+      "method": "POST",
+      "pathname": "/api/v1/auth/demo-login"
+    }
+  ],
+  "provenance": [
+    {
+      "url": "https://stock-pilot-web-five.vercel.app/version",
+      "status": 200,
+      "body": {
+        "revision": "800d1204e4493d860266c4d19f941b4c4921fbdb",
+        "service": "stockpilot-web"
+      }
+    },
+    {
+      "url": "https://stock-pilot-web-five.vercel.app/api/v1/health/ready",
+      "status": 200,
+      "body": {
+        "checks": {
+          "database": "ok",
+          "queue": "not_configured"
+        },
+        "rateLimit": {
+          "buckets": 0,
+          "rejected": {
+            "public": 0,
+            "auth": 0,
+            "user": 0
+          },
+          "limits": {
+            "publicWritesPerMinute": 60,
+            "authWritesPerMinute": 60,
+            "userWritesPerMinute": 240
+          }
+        },
+        "revision": "800d1204e4493d860266c4d19f941b4c4921fbdb",
+        "status": "ready"
+      }
+    },
+    {
+      "url": "https://stockpilot-api-y1aw.onrender.com/v1/health/ready",
+      "status": 200,
+      "body": {
+        "checks": {
+          "database": "ok",
+          "queue": "not_configured"
+        },
+        "rateLimit": {
+          "buckets": 0,
+          "rejected": {
+            "public": 0,
+            "auth": 0,
+            "user": 0
+          },
+          "limits": {
+            "publicWritesPerMinute": 60,
+            "authWritesPerMinute": 60,
+            "userWritesPerMinute": 240
+          }
+        },
+        "revision": "800d1204e4493d860266c4d19f941b4c4921fbdb",
+        "status": "ready"
+      }
+    }
+  ],
+  "browser": "156.0.8078.4",
+  "finished": "2026-10-19T18:18:24.742Z",
+  "status": "PASS",
+  "harnessCorrections": [
+    "Name facts include a secondary UUID; compare direct visible name text with the actual API field.",
+    "The access message is an EmptyState title, not a heading; assert its visible exact text and the server 403. Only the affected Staff checks were rerun after this selector correction."
+  ]
+}

@@ -296,6 +296,8 @@ describe('inventory receipts and adjustments API', () => {
           goodsReceiptId: receipt.body.id,
           productId: product.body.id,
           product: { name: 'Shelf Stable Oat Milk', sku: product.body.sku },
+          onHandBefore: 0,
+          onHandAfter: 12,
           quantity: 12,
           unitCost: '18.50',
         },
@@ -420,6 +422,13 @@ describe('inventory receipts and adjustments API', () => {
       });
     expect(adjustmentIn.status).toBe(201);
     expect(adjustmentIn.body.balance.available).toBe(8);
+    const historicalReceipt = await manager.get(
+      `/v1/receipts/${receipt.body.id}`,
+    );
+    expect(historicalReceipt.body.lines[0]).toMatchObject({
+      onHandBefore: 0,
+      onHandAfter: 12,
+    });
 
     alerts = await manager.get('/v1/alerts?status=OPEN');
     const resolvedAlerts = await manager.get('/v1/alerts?status=RESOLVED');

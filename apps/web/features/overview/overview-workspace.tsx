@@ -10,6 +10,7 @@ import {
   ResponsiveDataTable,
   Skeleton,
   StatusBadge,
+  StatCard,
   type TableColumn,
 } from '../../components/ui/operations-ui';
 import { formatDate, formatDateTime } from '../../lib/formatters';
@@ -53,6 +54,30 @@ export function OverviewWorkspace({
         }
       />
 
+      {data && !overview.isError ? (
+        <div
+          className="workspace-grid overview-metrics"
+          aria-label="Operations summary"
+        >
+          <StatCard
+            label="Awaiting review"
+            value={data.exceptions.ordersAwaitingApproval}
+            hint="Draft orders ready for review"
+          />
+          <StatCard
+            label="Stock needs attention"
+            value={data.exceptions.openLowStockAlerts}
+            hint="Open low-stock alerts"
+            tone="attention"
+          />
+          <StatCard
+            label="Open order value"
+            value={`$${data.openOrderValue}`}
+            hint="Current unfulfilled demand"
+          />
+        </div>
+      ) : null}
+
       <ExceptionsWorklist role={session.membership.role} />
 
       {session.membership.organization.isDemo ? (
@@ -68,12 +93,6 @@ export function OverviewWorkspace({
             <h2 id="overview-support-title">Recent activity and performance</h2>
             <p>Supporting context for the active worklist.</p>
           </div>
-          {data && !overview.isRefetching && !overview.isError ? (
-            <p className="overview-open-value">
-              <span>Open order value</span>
-              <strong className="mono">${data.openOrderValue}</strong>
-            </p>
-          ) : null}
         </header>
 
         {overview.isLoading || overview.isRefetching ? (

@@ -10,6 +10,7 @@ import {
   PlugsConnected,
   Receipt,
   SlidersHorizontal,
+  Stack,
   UsersThree,
 } from '@phosphor-icons/react';
 import type { Role } from '@stockpilot/contracts';
@@ -18,6 +19,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import type { WorkspaceSessionView } from '../../features/shared/types';
+import { WorkspaceSearch } from './workspace-search';
 import {
   workspaceSectionHref,
   WORKSPACE_SECTION_LABELS,
@@ -85,9 +87,14 @@ const navigation: Array<{
 ];
 
 const navigationGroups = [
-  { label: 'Operations', sections: ['overview', 'orders', 'inventory'] },
-  { label: 'Records', sections: ['products', 'partners', 'receipts'] },
-  { label: 'Review', sections: ['imports', 'integrations', 'audit'] },
+  {
+    label: 'Operations',
+    sections: ['overview', 'orders', 'inventory', 'receipts'],
+  },
+  {
+    label: 'Workspace',
+    sections: ['products', 'partners', 'imports', 'integrations', 'audit'],
+  },
 ] as const;
 
 /**
@@ -236,6 +243,12 @@ export function WorkspaceSidebar({
       : [...navigationGroups];
   return (
     <aside className="workspace-sidebar">
+      <Link className="brand sidebar-brand" href="/app">
+        <span className="brand-mark" aria-hidden="true">
+          <Stack size={21} />
+        </span>
+        StockPilot
+      </Link>
       <nav aria-label="Workspace navigation">
         {groups.map((group) => (
           <div className="workspace-nav-group" key={group.label}>
@@ -262,6 +275,10 @@ export function WorkspaceSidebar({
           </div>
         ))}
       </nav>
+      <div className="sidebar-footnote">
+        <span className="sidebar-status-dot" aria-hidden="true" />
+        Inventory &amp; B2B operations
+      </div>
     </aside>
   );
 }
@@ -278,7 +295,7 @@ export function WorkspaceHeader({ session }: { session: SessionView }) {
     <header className="workspace-topbar">
       <Link className="brand workspace-brand" href="/app">
         <span className="brand-mark" aria-hidden="true">
-          SP
+          <Stack size={20} />
         </span>
         <span>StockPilot</span>
       </Link>
@@ -286,8 +303,9 @@ export function WorkspaceHeader({ session }: { session: SessionView }) {
         <span>Workspace</span>
         <WorkspaceSwitcher currentOrganizationId={organization.id} />
         <strong>{organization.name}</strong>
-        <small>{organization.currency} · Main Warehouse</small>
+        <small>{organization.currency}</small>
       </div>
+      <WorkspaceSearch />
       <div className="topbar-session">
         {organization.isDemo ? (
           <DemoRoleSwitcher currentRole={session.membership.role} compact />
@@ -358,7 +376,9 @@ export function MobileWorkspaceNavigation({
       aria-label="Mobile workspace navigation"
     >
       {navigation
-        .slice(0, 3)
+        .filter(({ section: item }) =>
+          ['overview', 'orders', 'inventory', 'receipts'].includes(item),
+        )
         .map(({ section: navSection, icon: Icon, label }) => {
           const href = workspaceSectionHref(navSection);
           return (

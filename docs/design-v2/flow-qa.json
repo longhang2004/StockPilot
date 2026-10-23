@@ -1,0 +1,257 @@
+{
+  "viewports": [
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440,
+      "canvasWidth": 523,
+      "sceneWidth": 523,
+      "painted": 86722
+    },
+    {
+      "concept": "atlas",
+      "width": 1024,
+      "scroll": 1024,
+      "client": 1024,
+      "canvasWidth": 430,
+      "sceneWidth": 430,
+      "painted": 58667
+    },
+    {
+      "concept": "atlas",
+      "width": 768,
+      "scroll": 768,
+      "client": 768,
+      "canvasWidth": 538,
+      "sceneWidth": 538,
+      "painted": 91432
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "scroll": 390,
+      "client": 390,
+      "canvasWidth": 316,
+      "sceneWidth": 316,
+      "painted": 31898
+    },
+    {
+      "concept": "atlas",
+      "width": 375,
+      "scroll": 375,
+      "client": 375,
+      "canvasWidth": 311,
+      "sceneWidth": 311,
+      "painted": 31299
+    },
+    {
+      "concept": "atlas",
+      "width": 320,
+      "scroll": 320,
+      "client": 320,
+      "canvasWidth": 256,
+      "sceneWidth": 256,
+      "painted": 21549
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440,
+      "canvasWidth": 523,
+      "sceneWidth": 523,
+      "painted": 86722
+    },
+    {
+      "concept": "relay",
+      "width": 1024,
+      "scroll": 1024,
+      "client": 1024,
+      "canvasWidth": 430,
+      "sceneWidth": 430,
+      "painted": 58667
+    },
+    {
+      "concept": "relay",
+      "width": 768,
+      "scroll": 768,
+      "client": 768,
+      "canvasWidth": 538,
+      "sceneWidth": 538,
+      "painted": 91432
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "scroll": 390,
+      "client": 390,
+      "canvasWidth": 316,
+      "sceneWidth": 316,
+      "painted": 31898
+    },
+    {
+      "concept": "relay",
+      "width": 375,
+      "scroll": 375,
+      "client": 375,
+      "canvasWidth": 311,
+      "sceneWidth": 311,
+      "painted": 31299
+    },
+    {
+      "concept": "relay",
+      "width": 320,
+      "scroll": 320,
+      "client": 320,
+      "canvasWidth": 256,
+      "sceneWidth": 256,
+      "painted": 21549
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440,
+      "canvasWidth": 523,
+      "sceneWidth": 523,
+      "painted": 86722
+    },
+    {
+      "concept": "folio",
+      "width": 1024,
+      "scroll": 1024,
+      "client": 1024,
+      "canvasWidth": 430,
+      "sceneWidth": 430,
+      "painted": 58667
+    },
+    {
+      "concept": "folio",
+      "width": 768,
+      "scroll": 768,
+      "client": 768,
+      "canvasWidth": 538,
+      "sceneWidth": 538,
+      "painted": 91432
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "scroll": 390,
+      "client": 390,
+      "canvasWidth": 316,
+      "sceneWidth": 316,
+      "painted": 31898
+    },
+    {
+      "concept": "folio",
+      "width": 375,
+      "scroll": 375,
+      "client": 375,
+      "canvasWidth": 311,
+      "sceneWidth": 311,
+      "painted": 31299
+    },
+    {
+      "concept": "folio",
+      "width": 320,
+      "scroll": 320,
+      "client": 320,
+      "canvasWidth": 256,
+      "sceneWidth": 256,
+      "painted": 21549
+    }
+  ],
+  "motion": [
+    {
+      "concept": "atlas",
+      "animated": true,
+      "keyboardPauseResume": true,
+      "pointerPaused": true,
+      "offscreenPauseResume": true,
+      "reducedMotion": true,
+      "livePreferenceChange": true
+    },
+    {
+      "concept": "relay",
+      "animated": true,
+      "keyboardPauseResume": true,
+      "pointerPaused": true,
+      "offscreenPauseResume": true,
+      "reducedMotion": true,
+      "livePreferenceChange": true
+    },
+    {
+      "concept": "folio",
+      "animated": true,
+      "keyboardPauseResume": true,
+      "pointerPaused": true,
+      "offscreenPauseResume": true,
+      "reducedMotion": true,
+      "livePreferenceChange": true
+    }
+  ],
+  "accessibility": [
+    {
+      "concept": "atlas",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "concept": "atlas",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "concept": "relay",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "concept": "folio",
+      "width": 390,
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "initialReducedMotion": true,
+  "sequence": [
+    {
+      "stage": 0,
+      "hand": 12,
+      "reserved": 0,
+      "available": 12
+    },
+    {
+      "stage": 1,
+      "hand": 18,
+      "reserved": 0,
+      "available": 18
+    },
+    {
+      "stage": 2,
+      "hand": 18,
+      "reserved": 4,
+      "available": 14
+    },
+    {
+      "stage": 3,
+      "hand": 14,
+      "reserved": 0,
+      "available": 14
+    }
+  ],
+  "dprCap": 2,
+  "noCanvasFallback": true
+}

@@ -111,7 +111,7 @@ test.describe('public SEO surface', () => {
     await expect(page.locator('.skip-link')).toBeFocused();
 
     const primaryCta = page.getByRole('link', {
-      name: 'Start with the Manager demo',
+      name: /Explore the workspace/,
     });
     await primaryCta.first().focus();
     await expect(primaryCta.first()).toBeFocused();

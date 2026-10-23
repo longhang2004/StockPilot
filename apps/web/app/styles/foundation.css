@@ -1,19 +1,19 @@
 :root {
   color-scheme: light;
 
-  /* Cool, restrained palette for a data-first wholesale workspace. */
+  /* Atlas: warm neutrals, evergreen actions, and explicit stock states. */
   --color-white: #fff;
-  --color-slate-950: #102a43;
-  --color-slate-900: #163a59;
-  --color-slate-800: #244867;
-  --color-slate-700: #526272;
-  --color-slate-600: #526272;
-  --color-slate-500: #647789;
-  --color-slate-400: #7d8c9b;
-  --color-slate-300: #9eacb9;
-  --color-slate-200: #cdd6df;
-  --color-slate-100: #e8eef4;
-  --color-slate-50: #f3f6f8;
+  --color-slate-950: #1e2923;
+  --color-slate-900: #293c30;
+  --color-slate-800: #3b4d41;
+  --color-slate-700: #5f6d64;
+  --color-slate-600: #5f6d64;
+  --color-slate-500: #738177;
+  --color-slate-400: #8a978e;
+  --color-slate-300: #abb7ad;
+  --color-slate-200: #dce2dc;
+  --color-slate-100: #f0f3ef;
+  --color-slate-50: #f6f7f5;
 
   --color-emerald-800: #175b39;
   --color-emerald-700: #20734a;
@@ -43,23 +43,23 @@
   --color-blue-100: #e7f1f9;
 
   /* Semantic palette. Components should consume these aliases. */
-  --color-background: #f3f6f8;
+  --color-background: #f6f7f5;
   --color-surface: #fff;
-  --color-surface-subtle: #e8eef4;
-  --color-surface-hover: #f5f8fa;
-  --color-foreground: #102a43;
-  --color-muted-foreground: #526272;
-  --color-border: #7d8c9b;
-  --color-border-strong: #7d8c9b;
-  --color-border-subtle: #cdd6df;
-  --color-primary: #102a43;
-  --color-primary-hover: #163a59;
+  --color-surface-subtle: #f0f3ef;
+  --color-surface-hover: #f6f8f5;
+  --color-foreground: #1e2923;
+  --color-muted-foreground: #5f6d64;
+  --color-border: #8a978e;
+  --color-border-strong: #8a978e;
+  --color-border-subtle: #dce2dc;
+  --color-primary: #225d43;
+  --color-primary-hover: #194a34;
   --color-on-primary: #fff;
   --color-secondary: #526272;
-  --color-accent: #1769aa;
-  --color-accent-hover: #12558c;
-  --color-accent-subtle: #e7f1f9;
-  --color-accent-border: #8fb9d9;
+  --color-accent: #225d43;
+  --color-accent-hover: #194a34;
+  --color-accent-subtle: #e6eee7;
+  --color-accent-border: #8aab97;
   --color-success: #20734a;
   --color-success-surface: #e7f4ec;
   --surface-success: var(--color-success-surface);
@@ -80,8 +80,8 @@
   --color-info: #1769aa;
   --color-info-surface: #e7f1f9;
   --color-info-foreground: #123d63;
-  --color-ring: #1769aa;
-  --color-overlay: rgb(16 42 67 / 46%);
+  --color-ring: #225d43;
+  --color-overlay: rgb(30 41 35 / 28%);
   --color-surface-translucent: rgb(255 255 255 / 96%);
   --color-disabled: #647789;
 
@@ -113,10 +113,10 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
 
-  --radius-xs: 2px;
-  --radius-sm: 3px;
-  --radius-md: 4px;
-  --radius-lg: 6px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-pill: 999px;
 
   --shadow-sm: none;
@@ -147,7 +147,7 @@
   --text-3xl: 40px;
 
   --button-radius: var(--radius-sm);
-  --button-min-height: 2.5rem;
+  --button-min-height: 2.75rem;
   --button-height-md: 2.75rem;
   --input-radius: var(--radius-sm);
   --input-min-height: 2.5rem;
